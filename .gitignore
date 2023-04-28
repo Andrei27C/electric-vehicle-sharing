@@ -1,0 +1,59 @@
+# Node.js related
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+yarn.lock
+
+# macOS related
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode related
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+DerivedData/
+*.moved-aside
+*.xccheckout
+*.xccurrentversion
+*.ipa
+*.xcuserstate
+
+# Android related
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+bin/
+gen/
+out/
+release/
+.gradle/
+.gradle
+local.properties
+.proguard/
+
+# Truffle related
+build/
+
+# Backend related (depends on your backend technology)
+.env
+*.log
+*.sqlite
+*.pyc
+
+# JetBrains IDEs
+.idea/
+*.iml
+
+# Visual Studio Code
+.vscode/
