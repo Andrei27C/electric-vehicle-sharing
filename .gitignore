@@ -57,3 +57,6 @@ build/
 
 # Visual Studio Code
 .vscode/
+
+#Large files
+app/ios/Pods/
