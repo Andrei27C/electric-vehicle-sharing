@@ -1,6 +1,0 @@
-module Pods_ElectricVehicleSharingApp {
-  umbrella header "Pods-ElectricVehicleSharingApp-umbrella.h"
-
-  export *
-  module * { export * }
-}

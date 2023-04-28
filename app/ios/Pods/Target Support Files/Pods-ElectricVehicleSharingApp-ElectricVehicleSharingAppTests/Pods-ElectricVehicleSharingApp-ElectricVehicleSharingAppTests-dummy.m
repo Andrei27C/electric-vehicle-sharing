@@ -1,5 +1,0 @@
-#import <Foundation/Foundation.h>
-@interface PodsDummy_Pods_ElectricVehicleSharingApp_ElectricVehicleSharingAppTests : NSObject
-@end
-@implementation PodsDummy_Pods_ElectricVehicleSharingApp_ElectricVehicleSharingAppTests
-@end
