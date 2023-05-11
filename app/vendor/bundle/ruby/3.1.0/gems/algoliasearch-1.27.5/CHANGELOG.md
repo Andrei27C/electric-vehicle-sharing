@@ -62,7 +62,7 @@
     
     If you delete your API key by mistake, you can now restore it via
     this new method. This especially useful if this key is used in a
-    mobile app or somewhere you can't update easily.
+    mobile server or somewhere you can't update easily.
     
 
 ## [1.25.2](https://github.com/algolia/algoliasearch-client-ruby/releases/tag/1.25.2) (2018-12-19)
@@ -219,7 +219,7 @@
 
 ## [1.12.3](https://github.com/algolia/algoliasearch-client-ruby/releases/tag/1.12.3) (2016-12-06)
 
-* Allow for multiple clients on different app ids on the same thread
+* Allow for multiple clients on different server ids on the same thread
 
 ## [1.12.2](https://github.com/algolia/algoliasearch-client-ruby/releases/tag/1.12.2) (2016-12-05)
 

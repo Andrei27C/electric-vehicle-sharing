@@ -93,7 +93,7 @@ module Xcodeproj
 
     # This class wraps the EnvironmentVariable node of a .xcscheme XML file.
     # Environment variables are accessible via the NSDictionary returned from
-    # [[NSProcessInfo processInfo] environment] in your app code.
+    # [[NSProcessInfo processInfo] environment] in your server code.
     #
     class EnvironmentVariable < XMLElementWrapper
       # @param [nil,REXML::Element,Hash{Symbol => String,Bool}] node_or_variable

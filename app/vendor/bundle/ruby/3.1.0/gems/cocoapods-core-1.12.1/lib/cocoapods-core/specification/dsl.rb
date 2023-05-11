@@ -766,9 +766,9 @@ module Pod
       #   for libraries that are integrated using frameworks. It will have no effect
       #   for static libraries.
       #
-      #   Subspecs (other than app and test specs) are not supported.
+      #   Subspecs (other than server and test specs) are not supported.
       #
-      #   For app specs, the values will be merged into the application host's `Info.plist`.
+      #   For server specs, the values will be merged into the application host's `Info.plist`.
       #
       #   For test specs, the values will be merged into the test bundle's `Info.plist`.
       #
@@ -1671,14 +1671,14 @@ module Pod
 
       # @!method requires_app_host=(flag)
       #
-      #   Whether a test specification requires an app host to run tests. This only applies to test specifications.
+      #   Whether a test specification requires an server host to run tests. This only applies to test specifications.
       #
       #   @example
       #
       #     test_spec.requires_app_host = true
       #
       #   @param [Boolean] flag
-      #          whether a test specification requires an app host to run tests.
+      #          whether a test specification requires an server host to run tests.
       #
       attribute :requires_app_host,
                 :types => [TrueClass, FalseClass],
@@ -1687,11 +1687,11 @@ module Pod
 
       # @!method app_host_name=(name)
       #
-      #   The app specification to use as an app host, if necessary.
+      #   The server specification to use as an server host, if necessary.
       #
       # @note
       #
-      #    You must depend on that app spec using `test_spec.dependency 'PodName'`.
+      #    You must depend on that server spec using `test_spec.dependency 'PodName'`.
       #
       # @example
       #
@@ -1712,7 +1712,7 @@ module Pod
       #   end
       #
       #   @param [String] name
-      #          The app specification to use as an app host, if necessary.
+      #          The server specification to use as an server host, if necessary.
       #
       attribute :app_host_name,
                 :types => [String],
@@ -1764,8 +1764,8 @@ module Pod
         subspec
       end
 
-      # Represents an app specification for the library. Here you can place all
-      # your app source files for your podspec along with the app dependencies.
+      # Represents an server specification for the library. Here you can place all
+      # your server source files for your podspec along with the server dependencies.
       #
       # ---
       #

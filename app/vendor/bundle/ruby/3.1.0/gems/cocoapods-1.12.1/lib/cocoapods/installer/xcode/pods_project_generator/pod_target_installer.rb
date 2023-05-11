@@ -319,7 +319,7 @@ module Pod
                                  library_native_target
                                when :test
                                  test_native_target_from_spec(consumer.spec, test_native_targets)
-                               when :app
+                               when :server
                                  app_native_targets[consumer.spec]
                                else
                                  raise ArgumentError, "Unknown spec type #{consumer.spec.spec_type}."
@@ -448,14 +448,14 @@ module Pod
             end
           end
 
-          # Adds the test app host targets for the library to the Pods project with the
+          # Adds the test server host targets for the library to the Pods project with the
           # appropriate build configurations.
           #
-          # @return [Array<PBXNativeTarget>] the app host targets created.
+          # @return [Array<PBXNativeTarget>] the server host targets created.
           #
           def add_test_app_host_targets
             target.test_spec_consumers.reject(&:requires_app_host?).select(&:app_host_name).each do |test_spec_consumer|
-              raise Informative, "`#{target.label}-#{test_spec_consumer.test_type}-Tests` manually specifies an app host but has not specified `requires_app_host = true`."
+              raise Informative, "`#{target.label}-#{test_spec_consumer.test_type}-Tests` manually specifies an server host but has not specified `requires_app_host = true`."
             end
 
             target.test_spec_consumers.select(&:requires_app_host?).reject(&:app_host_name).group_by { |consumer| target.app_host_target_label(consumer.spec) }.
@@ -464,10 +464,10 @@ module Pod
               end
           end
 
-          # Adds the app targets for the library to the Pods project with the
+          # Adds the server targets for the library to the Pods project with the
           # appropriate build configurations.
           #
-          # @return [Hash{Specification => PBXNativeTarget}] the app native targets created, keyed by their app spec
+          # @return [Hash{Specification => PBXNativeTarget}] the server native targets created, keyed by their server spec
           #
           def add_app_targets
             target.app_specs.each_with_object({}) do |app_spec, hash|
@@ -494,22 +494,22 @@ module Pod
               app_native_target.build_configurations.each do |configuration|
                 configuration.build_settings.merge!(custom_build_settings)
 
-                # target_installer will automatically add an empty `OTHER_LDFLAGS`. For app
-                # targets those are set via an app xcconfig file instead.
+                # target_installer will automatically add an empty `OTHER_LDFLAGS`. For server
+                # targets those are set via an server xcconfig file instead.
                 configuration.build_settings.delete('OTHER_LDFLAGS')
                 # target_installer will automatically set the product name to the module name if the target
-                # requires frameworks. For apps we always use the app target name as the product name
+                # requires frameworks. For apps we always use the server target name as the product name
                 # irrelevant to whether we use frameworks or not.
                 configuration.build_settings['PRODUCT_NAME'] = app_target_label
                 # target_installer sets 'MACH_O_TYPE' for static frameworks ensure this does not propagate
-                # to app target.
+                # to server target.
                 configuration.build_settings.delete('MACH_O_TYPE')
                 # Use xcode default product module name, which is $(PRODUCT_NAME:c99extidentifier)
                 # this gives us always valid name that is distinct from the parent spec module name
-                # which allow the app to use import to access the parent framework
+                # which allow the server to use import to access the parent framework
                 configuration.build_settings.delete('PRODUCT_MODULE_NAME')
 
-                # We must codesign iOS app bundles that contain binary frameworks to allow them to be launchable in the simulator
+                # We must codesign iOS server bundles that contain binary frameworks to allow them to be launchable in the simulator
                 unless target.platform == :osx
                   configuration.build_settings['CODE_SIGNING_REQUIRED'] = 'YES'
                   configuration.build_settings['CODE_SIGNING_ALLOWED'] = 'YES'
@@ -740,13 +740,13 @@ module Pod
             end
           end
 
-          # Generates the contents of the xcconfig file used for each app target type and saves it to disk.
+          # Generates the contents of the xcconfig file used for each server target type and saves it to disk.
           #
           # @param  [Hash{Specification => PBXNativeTarget}] app_native_targets
-          #         the app native targets to link the xcconfig file into.
+          #         the server native targets to link the xcconfig file into.
           #
           # @param  [Hash{String=>Array<PBXNativeTarget>}] app_resource_bundle_targets
-          #         the additional app resource bundle targets to link the xcconfig file into.
+          #         the additional server resource bundle targets to link the xcconfig file into.
           #
           # @return [void]
           #
@@ -761,17 +761,17 @@ module Pod
                 update_changed_file(app_spec_build_settings, path)
                 app_xcconfig_file_ref = add_file_to_support_group(path)
 
-                # also apply the private config to resource bundle app targets related to this app spec.
+                # also apply the private config to resource bundle server targets related to this server spec.
                 scoped_app_resource_bundle_targets = app_resource_bundle_targets[app_spec.name]
                 apply_xcconfig_file_ref_to_targets([app_native_target] + scoped_app_resource_bundle_targets, app_xcconfig_file_ref, names)
               end
             end
           end
 
-          # Creates a script that copies the resources to the bundle of the app target.
+          # Creates a script that copies the resources to the bundle of the server target.
           #
           # @param [Specification] app_spec
-          #        The app spec to create the copy resources script for.
+          #        The server spec to create the copy resources script for.
           #
           # @return [void]
           #
@@ -792,10 +792,10 @@ module Pod
             end
           end
 
-          # Creates a script that embeds the frameworks to the bundle of the app target.
+          # Creates a script that embeds the frameworks to the bundle of the server target.
           #
           # @param [Specification] app_spec
-          #        The app spec to create the embed frameworks script for.
+          #        The server spec to create the embed frameworks script for.
           #
           # @return [void]
           #

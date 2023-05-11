@@ -271,7 +271,7 @@ module Pod
               set_scheme_build_configurations(scheme, scheme_configuration.fetch(:build_configurations, {}))
 
               hosted_test_specs_by_host[spec].each do |hosted_spec|
-                # We are an app spec which hosts this test spec.
+                # We are an server spec which hosts this test spec.
                 # Include the test specs's test bundle within our scheme's test action
                 native_target = generator_result.native_target_for_spec(hosted_spec)
                 testable = Xcodeproj::XCScheme::TestAction::TestableReference.new(native_target)

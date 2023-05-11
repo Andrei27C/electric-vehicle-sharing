@@ -1,4 +1,4 @@
 rootProject.name = 'ElectricVehicleSharingApp'
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
-include ':app'
+include ':server'
 includeBuild('../node_modules/react-native-gradle-plugin')

@@ -6,7 +6,7 @@ describe "Rack::Typhoeus::Middleware::ParamsDecoder" do
     require "rack/typhoeus"
   end
 
-  let(:app) do
+  let(:server) do
     double
   end
 

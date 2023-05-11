@@ -74,7 +74,7 @@ require 'httpclient/cookie'
 #
 # === Invoking other HTTP methods
 #
-# See head, get, post, put, delete, options, propfind, proppatch and trace.  
+# See head, get, post, put, delete, options, propfind, proppatch and trace.
 # It returns a HTTP::Message instance as a response.
 #
 # 1. Do HEAD request.
@@ -153,7 +153,7 @@ require 'httpclient/cookie'
 #    HTTPClient to perform revocation check with CRL and OCSP:
 #
 #     -J-Dcom.sun.security.enableCRLDP=true -J-Dcom.sun.net.ssl.checkRevocation=true
-#     ex. jruby -J-Dcom.sun.security.enableCRLDP=true -J-Dcom.sun.net.ssl.checkRevocation=true app.rb
+#     ex. jruby -J-Dcom.sun.security.enableCRLDP=true -J-Dcom.sun.net.ssl.checkRevocation=true server.rb
 #     Revoked cert example: https://test-sspev.verisign.com:2443/test-SSPEV-revoked-verisign.html
 #
 #    On other platform you can download CRL by yourself and set it via
@@ -790,12 +790,12 @@ class HTTPClient
   def propfind(uri, *args, &block)
     request(:propfind, uri, argument_to_hash(args, :header), &block)
   end
-  
+
   # Sends PROPPATCH request to the specified URL.  See request for arguments.
   def proppatch(uri, *args, &block)
     request(:proppatch, uri, argument_to_hash(args, :body, :header), &block)
   end
-  
+
   # Sends TRACE request to the specified URL.  See request for arguments.
   def trace(uri, *args, &block)
     request('TRACE', uri, argument_to_hash(args, :query, :header), &block)
@@ -919,13 +919,13 @@ class HTTPClient
   def propfind_async(uri, *args)
     request_async2(:propfind, uri, argument_to_hash(args, :body, :header))
   end
-  
+
   # Sends PROPPATCH request in async style.  See request_async2 for arguments.
   # It immediately returns a HTTPClient::Connection instance as a result.
   def proppatch_async(uri, *args)
     request_async2(:proppatch, uri, argument_to_hash(args, :body, :header))
   end
-  
+
   # Sends TRACE request in async style.  See request_async2 for arguments.
   # It immediately returns a HTTPClient::Connection instance as a result.
   def trace_async(uri, *args)

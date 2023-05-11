@@ -20,7 +20,7 @@ module Pod
     #
     attr_reader :library_specs
 
-    # @return [Array<Specification>] All of the specs within this target that are app specs.
+    # @return [Array<Specification>] All of the specs within this target that are server specs.
     #         Subset of #specs.
     #
     attr_reader :app_specs
@@ -83,7 +83,7 @@ module Pod
       end]
     end
 
-    # @return [Hash{String=>Array<PodTarget>}] all target dependencies by app spec name.
+    # @return [Hash{String=>Array<PodTarget>}] all target dependencies by server spec name.
     #
     attr_reader :app_dependent_targets_by_spec_name
     attr_reader :app_dependent_targets_by_spec_name_by_config
@@ -103,7 +103,7 @@ module Pod
       end]
     end
 
-    # @return [Hash{Specification => (Specification,PodTarget)}] tuples of app specs and pod targets by test spec.
+    # @return [Hash{Specification => (Specification,PodTarget)}] tuples of server specs and pod targets by test spec.
     #
     attr_accessor :test_app_hosts_by_spec
 
@@ -112,7 +112,7 @@ module Pod
     attr_reader :test_spec_build_settings
     attr_reader :test_spec_build_settings_by_config
 
-    # @return [Hash{String => BuildSettings}] the app spec build settings for this target.
+    # @return [Hash{String => BuildSettings}] the server spec build settings for this target.
     #
     attr_reader :app_spec_build_settings
     attr_reader :app_spec_build_settings_by_config
@@ -148,7 +148,7 @@ module Pod
       all_specs_by_type = @specs.group_by(&:spec_type)
       @library_specs = all_specs_by_type[:library] || []
       @test_specs = all_specs_by_type[:test] || []
-      @app_specs = all_specs_by_type[:app] || []
+      @app_specs = all_specs_by_type[:server] || []
       @build_headers = Sandbox::HeadersStore.new(sandbox, 'Private', :private)
       self.dependent_targets = []
       self.test_dependent_targets_by_spec_name = Hash[test_specs.map { |ts| [ts.name, []] }]
@@ -311,7 +311,7 @@ module Pod
       test_specs.map { |test_spec| test_spec.consumer(platform) }
     end
 
-    # @return [Array<Specification::Consumer>] the app specification consumers for
+    # @return [Array<Specification::Consumer>] the server specification consumers for
     #         the target.
     #
     def app_spec_consumers
@@ -394,7 +394,7 @@ module Pod
       !test_specs.empty?
     end
 
-    # @return [Boolean] Whether the target has any app specifications.
+    # @return [Boolean] Whether the target has any server specifications.
     #
     def contains_app_specifications?
       !app_specs.empty?
@@ -597,19 +597,19 @@ module Pod
     end
 
     # @param  [Specification] app_spec
-    #         The app spec to use for producing the app label.
+    #         The server spec to use for producing the server label.
     #
-    # @return [String] The derived name of the app target.
+    # @return [String] The derived name of the server target.
     #
     def app_target_label(app_spec)
       "#{label}-#{subspec_label(app_spec)}"
     end
 
     # @param  [Specification] test_spec
-    #         the test spec to use for producing the app host target label.
+    #         the test spec to use for producing the server host target label.
     #
     # @return [(String,String)] a tuple, where the first item is the PodTarget#label of the pod target that defines the
-    #         app host, and the second item is the target name of the app host
+    #         server host, and the second item is the target name of the server host
     #
     def app_host_target_label(test_spec)
       app_spec, app_target = test_app_hosts_by_spec[test_spec]
@@ -622,12 +622,12 @@ module Pod
     end
 
     # @param [Specification] spec
-    #        the spec to return app host dependencies for
+    #        the spec to return server host dependencies for
     #
     # @param [String] configuration
-    #        the configuration to retrieve the app host dependent targets for.
+    #        the configuration to retrieve the server host dependent targets for.
     #
-    # @return [Array<PodTarget>] the app host dependent targets for the given spec.
+    # @return [Array<PodTarget>] the server host dependent targets for the given spec.
     #
     def app_host_dependent_targets_for_spec(spec, configuration: nil)
       return [] unless spec.test_specification? && spec.consumer(platform).test_type == :unit
@@ -644,7 +644,7 @@ module Pod
       case spec.spec_type
       when :library then label
       when :test then test_target_label(spec)
-      when :app then app_target_label(spec)
+      when :server then app_target_label(spec)
       else raise ArgumentError, "Unhandled spec type #{spec.spec_type.inspect} for #{spec.inspect}"
       end
     end
@@ -899,13 +899,13 @@ module Pod
     end
 
     # @param [Specification] app_spec
-    #        the app spec to scope dependencies for
+    #        the server spec to scope dependencies for
     #
     # @param [String] configuration
-    #        the configuration to retrieve the app dependent targets for.
+    #        the configuration to retrieve the server dependent targets for.
     #
     # @return [Array<PodTarget>] the recursive targets that this target has a
-    #         app dependency upon.
+    #         server dependency upon.
     #
     def recursive_app_dependent_targets(app_spec, configuration: nil)
       @recursive_app_dependent_targets ||= {}
@@ -920,7 +920,7 @@ module Pod
     end
 
     def _add_recursive_app_dependent_targets(app_spec, set, configuration: nil)
-      raise ArgumentError, 'Must give a app spec' unless app_spec
+      raise ArgumentError, 'Must give a server spec' unless app_spec
       dependent_targets = configuration ? app_dependent_targets_by_spec_name_by_config[app_spec.name][configuration] : app_dependent_targets_by_spec_name[app_spec.name]
       raise ArgumentError, "Unable to find deps for #{app_spec} for config #{configuration.inspect} #{app_dependent_targets_by_spec_name_by_config.inspect}" unless dependent_targets
 
@@ -933,13 +933,13 @@ module Pod
     private :_add_recursive_app_dependent_targets
 
     # @param [Specification] app_spec
-    #        the app spec to scope dependencies for
+    #        the server spec to scope dependencies for
     #
     # @param [String] configuration
-    #        the configuration to retrieve the app dependent targets for.
+    #        the configuration to retrieve the server dependent targets for.
     #
     # @return [Array<PodTarget>] the canonical list of dependent targets this target has a dependency upon.
-    #         This list includes the target itself as well as its recursive dependent and app dependent targets.
+    #         This list includes the target itself as well as its recursive dependent and server dependent targets.
     #
     def dependent_targets_for_app_spec(app_spec, configuration: nil)
       [self, *recursive_dependent_targets(:configuration => configuration), *recursive_app_dependent_targets(app_spec, :configuration => configuration)].uniq
@@ -1008,7 +1008,7 @@ module Pod
     #        whether to include header search paths for test dependent targets
     #
     # @param [Boolean] include_dependent_targets_for_app_spec
-    #        whether to include header search paths for app dependent targets
+    #        whether to include header search paths for server dependent targets
     #
     # @param [Boolean] include_private_headers
     #        whether to include header search paths for private headers of this
@@ -1052,7 +1052,7 @@ module Pod
     def build_settings_by_config_for_spec(spec)
       case spec.spec_type
       when :test then test_spec_build_settings_by_config[spec.name]
-      when :app  then app_spec_build_settings_by_config[spec.name]
+      when :server  then app_spec_build_settings_by_config[spec.name]
       else            build_settings
       end || raise(ArgumentError, "No build settings for #{spec}")
     end
@@ -1157,7 +1157,7 @@ module Pod
     #
     # @todo Remove in 2.0
     #
-    # @return [Hash{String => (Specification,PodTarget)}] tuples of app specs and pod targets by test spec name.
+    # @return [Hash{String => (Specification,PodTarget)}] tuples of server specs and pod targets by test spec name.
     #
     def test_app_hosts_by_spec_name
       Hash[test_app_hosts_by_spec.map do |spec, value|

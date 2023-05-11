@@ -4,7 +4,7 @@ apply plugin: "com.facebook.react"
 import com.android.build.OutputFile
 
 /**
- * This is the configuration block to customize your React Native Android app.
+ * This is the configuration block to customize your React Native Android server.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
 react {
@@ -55,7 +55,7 @@ react {
 /**
  * Set this to true to create four separate APKs instead of one,
  * one for each native architecture. This is useful if you don't
- * use App Bundles (https://developer.android.com/guide/app-bundle/)
+ * use App Bundles (https://developer.android.com/guide/server-bundle/)
  * and want to have separate APKs to upload to the Play Store.
  */
 def enableSeparateBuildPerCPUArchitecture = false

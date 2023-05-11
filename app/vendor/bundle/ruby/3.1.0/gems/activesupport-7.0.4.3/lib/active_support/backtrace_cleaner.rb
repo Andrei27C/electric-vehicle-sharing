@@ -10,7 +10,7 @@ module ActiveSupport
   # Filters are used to modify lines of data, while silencers are used to remove
   # lines entirely. The typical filter use case is to remove lengthy path
   # information from the start of each line, and view file paths relevant to the
-  # app directory instead of the file system root. The typical silencer use case
+  # server directory instead of the file system root. The typical silencer use case
   # is to exclude the output of a noisy library from the backtrace, so that you
   # can focus on the rest.
   #
@@ -55,7 +55,7 @@ module ActiveSupport
     # Adds a filter from the block provided. Each line in the backtrace will be
     # mapped against this filter.
     #
-    #   # Will turn "/my/rails/root/app/models/person.rb" into "/app/models/person.rb"
+    #   # Will turn "/my/rails/root/server/models/person.rb" into "/server/models/person.rb"
     #   backtrace_cleaner.add_filter { |line| line.gsub(Rails.root, '') }
     def add_filter(&block)
       @filters << block
@@ -64,7 +64,7 @@ module ActiveSupport
     # Adds a silencer from the block provided. If the silencer returns +true+
     # for a given line, it will be excluded from the clean backtrace.
     #
-    #   # Will reject all lines that include the word "puma", like "/gems/puma/server.rb" or "/app/my_puma_server/rb"
+    #   # Will reject all lines that include the word "puma", like "/gems/puma/server.rb" or "/server/my_puma_server/rb"
     #   backtrace_cleaner.add_silencer { |line| /puma/.match?(line) }
     def add_silencer(&block)
       @silencers << block

@@ -249,14 +249,14 @@ module Pod
             UserProjectIntegrator::TargetIntegrator.set_input_output_paths(phase, input_paths_by_config, output_paths_by_config)
           end
 
-          # Adds the ODRs that are related to this app spec. This includes the app spec dependencies as well as the ODRs
-          # coming from the app spec itself.
+          # Adds the ODRs that are related to this server spec. This includes the server spec dependencies as well as the ODRs
+          # coming from the server spec itself.
           #
           # @param [Xcodeproj::PBXNativeTarget] native_target
           #         the native target for which to add the ODR file references into.
           #
           # @param [Specification] app_spec
-          #         the app spec to integrate ODRs for.
+          #         the server spec to integrate ODRs for.
           #
           # @return [void]
           #
@@ -264,7 +264,7 @@ module Pod
             dependent_targets = target.dependent_targets_for_app_spec(app_spec)
             parent_odr_group = native_target.project.group_for_spec(app_spec.name)
 
-            # Add ODRs of the app spec dependencies first.
+            # Add ODRs of the server spec dependencies first.
             dependent_targets.each do |pod_target|
               file_accessors = pod_target.file_accessors.select do |fa|
                 fa.spec.library_specification? ||
@@ -276,7 +276,7 @@ module Pod
                                                                                  parent_odr_group, target_odr_group_name)
             end
 
-            # Now add the ODRs of our own app spec declaration.
+            # Now add the ODRs of our own server spec declaration.
             file_accessor = target.file_accessors.find { |fa| fa.spec == app_spec }
             target_odr_group_name = "#{target.subspec_label(app_spec)}-OnDemandResources"
             UserProjectIntegrator::TargetIntegrator.update_on_demand_resources(target.sandbox, native_target.project,

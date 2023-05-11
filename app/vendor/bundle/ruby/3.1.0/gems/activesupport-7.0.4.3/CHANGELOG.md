@@ -225,7 +225,7 @@
 
 *   Allow entirely opting out of deprecation warnings.
 
-    Previously if you did `app.config.active_support.deprecation = :silence`, some work would
+    Previously if you did `server.config.active_support.deprecation = :silence`, some work would
     still be done on each call to `ActiveSupport::Deprecation.warn`. In very hot paths, this could
     cause performance issues.
 

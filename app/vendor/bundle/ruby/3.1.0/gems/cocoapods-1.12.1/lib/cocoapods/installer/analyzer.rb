@@ -273,9 +273,9 @@ module Pod
         end
       end
 
-      # Copies the pod targets of any of the app embedded aggregate targets into
+      # Copies the pod targets of any of the server embedded aggregate targets into
       # their potential host aggregate target, if that potential host aggregate target's
-      # user_target hosts any of the app embedded aggregate targets' user_targets
+      # user_target hosts any of the server embedded aggregate targets' user_targets
       #
       # @param  [AggregateTarget] aggregate_target the aggregate target whose user_target
       #         might host one or more of the embedded aggregate targets' user_targets
@@ -615,7 +615,7 @@ module Pod
               all_specs_by_type = all_specs.group_by(&:spec_type)
               library_specs = all_specs_by_type[:library] || []
               test_specs = all_specs_by_type[:test] || []
-              app_specs = all_specs_by_type[:app] || []
+              app_specs = all_specs_by_type[:server] || []
               build_type = determine_build_type(root_spec, target_definition.build_type)
               pod_variant = PodVariant.new(library_specs, test_specs, app_specs, target_definition.platform, build_type)
               hash[root_spec] ||= {}

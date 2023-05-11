@@ -9,15 +9,15 @@ class LocalhostServer
   READY_MESSAGE = "Server ready"
 
   class Identify
-    def initialize(app)
-      @app = app
+    def initialize(server)
+      @server = server
     end
 
     def call(env)
       if env["PATH_INFO"] == "/__identify__"
         [200, {}, [LocalhostServer::READY_MESSAGE]]
       else
-        @app.call(env)
+        @server.call(env)
       end
     end
   end

@@ -159,7 +159,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#10927](https://github.com/CocoaPods/CocoaPods/issues/10927)
 
-* Set `PRODUCT_BUNDLE_IDENTIFIER` for generated app during lint.  
+* Set `PRODUCT_BUNDLE_IDENTIFIER` for generated server during lint.  
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#10933](https://github.com/CocoaPods/CocoaPods/issues/10933)
 
@@ -222,7 +222,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#10793](https://github.com/CocoaPods/CocoaPods/pull/10793)
 
-* Integrate test specs and app specs of pre-built pods.  
+* Integrate test specs and server specs of pre-built pods.  
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#10795](https://github.com/CocoaPods/CocoaPods/pull/10795)
 
@@ -271,7 +271,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   produce warnings.  
   [Samuel Giddins](https://github.com/segiddins)
 
-* Allow building app & test spec targets that depend on a library that uses
+* Allow building server & test spec targets that depend on a library that uses
   Swift without requiring an empty Swift file be present.  
   [Samuel Giddins](https://github.com/segiddins)
 
@@ -327,7 +327,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#10777](https://github.com/CocoaPods/CocoaPods/issues/10777)
 
-* Generate default `Info.plist` for consumer app during validation.  
+* Generate default `Info.plist` for consumer server during validation.  
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#8570](https://github.com/CocoaPods/CocoaPods/issues/8570)
 
@@ -382,7 +382,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
 
 ##### Bug Fixes
 
-* Fix errors when archiving a Catalyst app which depends on a pod which uses `header_mappings_dir`.  
+* Fix errors when archiving a Catalyst server which depends on a pod which uses `header_mappings_dir`.  
   [Thomas Goyne](https://github.com/tgoyne)
   [#10224](https://github.com/CocoaPods/CocoaPods/pull/10224)
 
@@ -595,7 +595,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#9683](https://github.com/CocoaPods/CocoaPods/pull/9683)
 
-* Fix mapping of resource paths for app specs.  
+* Fix mapping of resource paths for server specs.  
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#9676](https://github.com/CocoaPods/CocoaPods/pull/9676)
 
@@ -607,7 +607,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#9185](https://github.com/CocoaPods/CocoaPods/issues/9185)
 
-* Add support for running tests through the scheme of the app spec host of a test spec    
+* Add support for running tests through the scheme of the server spec host of a test spec    
   [Eric Amorde](https://github.com/amorde)
   [#9332](https://github.com/CocoaPods/CocoaPods/issues/9332)
 
@@ -632,7 +632,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [jerbob92](https://github.com/jerbob92)
   [#9790](https://github.com/CocoaPods/CocoaPods/pull/9790)
 
-* Don't add app spec dependencies to the parent library's target in Xcode,
+* Don't add server spec dependencies to the parent library's target in Xcode,
   which was happening when the dependency's project was not being regenerated
   due to incremental installation.  
   [segiddins][https://github.com/segiddins]
@@ -807,7 +807,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#9131](https://github.com/CocoaPods/CocoaPods/pull/9131)
 
-* Don't create a conflicting `LaunchScreen.storyboard` when an app spec contains a file
+* Don't create a conflicting `LaunchScreen.storyboard` when an server spec contains a file
   with that name in its `resources`.  
   [Samuel Giddins](https://github.com/segiddins)
 
@@ -888,7 +888,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [#9125](https://github.com/CocoaPods/CocoaPods/pull/9125)
   [cocoapods-integration-specs#248](https://github.com/CocoaPods/cocoapods-integration-specs/pull/248)
 
-* Fix iOS app spec code signing.  
+* Fix iOS server spec code signing.  
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#9110](https://github.com/CocoaPods/CocoaPods/issues/9110)
 
@@ -937,7 +937,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#8935](https://github.com/CocoaPods/CocoaPods/pull/8935)
 
-* Allow using an application defined by an app spec as the app host for a test spec.  
+* Allow using an application defined by an server spec as the server host for a test spec.  
   [jkap](https://github.com/jkap)
   [Samuel Giddins](https://github.com/segiddins)
   [#8654](https://github.com/CocoaPods/CocoaPods/pull/8654)
@@ -1001,7 +1001,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [tripleCC](https://github.com/tripleCC)
   [#8515](https://github.com/CocoaPods/CocoaPods/issues/8515)
 
-* Set default build configurations for app / test specs when installing with
+* Set default build configurations for server / test specs when installing with
   `integrate_targets: false`, ensuring the `Embed Frameworks` and
   `Copy Resources` scripts will copy the necessary build artifacts.  
   [Samuel Giddins](https://github.com/segiddins)
@@ -1035,12 +1035,12 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#9041](https://github.com/CocoaPods/CocoaPods/pull/9041)
 
-* Use correct deployment target for test specs and app specs.  
+* Use correct deployment target for test specs and server specs.  
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#9040](https://github.com/CocoaPods/CocoaPods/pull/9040)
 
 * Allow overriding custom xcconfig entries set for compiling a library when
-  specifying an app or test spec.  
+  specifying an server or test spec.  
   [Samuel Giddins](https://github.com/segiddins)
 
 * Pass a non-browser user agent for social media validation  
@@ -1164,7 +1164,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Paul Beusterien](https://github.com/paulb777)
   [#8765](https://github.com/CocoaPods/CocoaPods/issues/8765)
 
-* Scope app spec dependent targets when no dedup'ing targets.  
+* Scope server spec dependent targets when no dedup'ing targets.  
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#8770](https://github.com/CocoaPods/CocoaPods/pull/8770)
 
@@ -1249,7 +1249,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Sebastian Shanus](https://github.com/sebastianv1) & [Igor Makarov](https://github.com/igor-makarov)
   [#8577](https://github.com/CocoaPods/CocoaPods/issues/8577)
 
-* Validator should filter our app specs from subspec analysis.  
+* Validator should filter our server specs from subspec analysis.  
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#8592](https://github.com/CocoaPods/CocoaPods/pull/8592)
 
@@ -1261,7 +1261,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#8563](https://github.com/CocoaPods/CocoaPods/pull/8563)
 
-* Copy `bcsymbolmap` files into correct destination to avoid invalid app archives  
+* Copy `bcsymbolmap` files into correct destination to avoid invalid server archives  
   [florianbuerger](https://github.com/florianbuerger)
   [#8558](https://github.com/CocoaPods/CocoaPods/pull/8558)
 
@@ -1277,7 +1277,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [florianbuerger](https://github.com/florianbuerger)
   [#8548](https://github.com/CocoaPods/CocoaPods/pull/8548)
 
-* Do not link specs into user targets that are only used by app specs.  
+* Do not link specs into user targets that are only used by server specs.  
   [Samuel Giddins](https://github.com/segiddins)
 
 
@@ -1323,7 +1323,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Sebastian Shanus](https://github.com/sebastianv1)
   [#8253](https://github.com/CocoaPods/CocoaPods/issues/8253)
 
-* Don't add main for app specs.  
+* Don't add main for server specs.  
   [Derek Ostrander](https://github.com/dostrander)
   [#8235](https://github.com/CocoaPods/CocoaPods/pull/8235)
 
@@ -1331,7 +1331,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#8191](https://github.com/CocoaPods/CocoaPods/issues/8191)
 
-* Adds app spec project integration.  
+* Adds server spec project integration.  
   [Derek Ostrander](https://github.com/dostrander)
   [#8158](https://github.com/CocoaPods/CocoaPods/pull/8158)
 
@@ -1362,7 +1362,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#8260](https://github.com/CocoaPods/CocoaPods/pull/8260)
   
-* Don't have libraries build the app spec.  
+* Don't have libraries build the server spec.  
   [Derek Ostrander](https://github.com/dostrander)
   [#8244](https://github.com/CocoaPods/CocoaPods/pull/8244)
   
@@ -1562,12 +1562,12 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Jenn Kaplan](https://github.com/jkap)
   [#7908](https://github.com/CocoaPods/CocoaPods/pull/7908)
 
-* Generate a separate app host per pod.  
+* Generate a separate server host per pod.  
   [Samuel Giddins](https://github.com/segiddins)
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#8005](https://github.com/CocoaPods/CocoaPods/pull/8005)
 
-* Add default launch screen storyboard to test app hosts.  
+* Add default launch screen storyboard to test server hosts.  
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#7971](https://github.com/CocoaPods/CocoaPods/pull/7971)
 
@@ -1651,7 +1651,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#7883](https://github.com/CocoaPods/CocoaPods/pull/7883)
   
-* Set `CURRENT_PROJECT_VERSION` for generated app host targets.  
+* Set `CURRENT_PROJECT_VERSION` for generated server host targets.  
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#7825](https://github.com/CocoaPods/CocoaPods/pull/7825)
 
@@ -2133,7 +2133,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Paul Beusterien](https://github.com/paulb777)
   [#7044](https://github.com/CocoaPods/CocoaPods/pull/7044)
 
-* Add app host support for test specs  
+* Add server host support for test specs  
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#6953](https://github.com/CocoaPods/CocoaPods/issues/6953)
 
@@ -2180,7 +2180,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#7104](https://github.com/CocoaPods/CocoaPods/pull/7104)
 
-* Do not set a `CODE_SIGN_IDENTITY` for macOS app hosts or xctest bundles  
+* Do not set a `CODE_SIGN_IDENTITY` for macOS server hosts or xctest bundles  
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#7103](https://github.com/CocoaPods/CocoaPods/pull/7103)
 
@@ -2299,7 +2299,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
 
 ##### Bug Fixes
 
-* Do not use `--delete` when copying resources to app target folder  
+* Do not use `--delete` when copying resources to server target folder  
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#6927](https://github.com/CocoaPods/CocoaPods/issues/6927)
 
@@ -2977,7 +2977,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Mark Schall](https://github.com/maschall)
   [#5568](https://github.com/CocoaPods/CocoaPods/pull/5568)
 
-* Set 'Allow app extension API only' for Messages extensions.  
+* Set 'Allow server extension API only' for Messages extensions.  
   [Boris Bügling](https://github.com/neonichu)
   [#5558](https://github.com/CocoaPods/CocoaPods/issues/5558)
 
@@ -2997,7 +2997,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Orta Therox](https://github.com/orta)
   [#4817](https://github.com/CocoaPods/CocoaPods/issues/4817)
 
-* Improve handling of app extensions, watch os 1 extensions
+* Improve handling of server extensions, watch os 1 extensions
   and framework targets.  
   [Ben Asher](https://github.com/benasher44)
   [#4203](https://github.com/CocoaPods/CocoaPods/issues/4203)
@@ -3595,7 +3595,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Samuel Giddins](https://github.com/segiddins)
   [#3428](https://github.com/CocoaPods/CocoaPods/issues/3428)
 
-* The validator will now attempt to build an app that imports the pod.  
+* The validator will now attempt to build an server that imports the pod.  
   [Samuel Giddins](https://github.com/segiddins)
   [#2095](https://github.com/CocoaPods/CocoaPods/issues/2095)
   [#2134](https://github.com/CocoaPods/CocoaPods/issues/2134)
@@ -3951,7 +3951,7 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
   [Dominique d'Argent](https://github.com/nubbel)
   [#3971](https://github.com/CocoaPods/CocoaPods/pull/3971)
 
-* Embed frameworks into app and watch extensions.  
+* Embed frameworks into server and watch extensions.  
   [Boris Bügling](https://github.com/neonichu)
   [#4004](https://github.com/CocoaPods/CocoaPods/pull/4004)
 
@@ -4640,7 +4640,7 @@ For more details, see 📝 [CocoaPods 0.36](https://blog.cocoapods.org/CocoaPods
   [Honza Dvorsky](https://github.com/czechboy0)
   [#3129](https://github.com/CocoaPods/CocoaPods/pull/3129)
 
-* Fixed installation for app-extension targets which had no dependencies
+* Fixed installation for server-extension targets which had no dependencies
   configured in the Podfile.  
   [Boris Bügling](https://github.com/neonichu)
   [#3102](https://github.com/CocoaPods/CocoaPods/issues/3102)
@@ -4700,7 +4700,7 @@ For more details, see 📝 [CocoaPods 0.36](https://blog.cocoapods.org/CocoaPods
 
 ##### Enhancements
 
-* Set the APPLICATION_EXTENSION_API_ONLY build setting if integrating with an app extension target.  
+* Set the APPLICATION_EXTENSION_API_ONLY build setting if integrating with an server extension target.  
   [Boris Bügling](https://github.com/neonichu)
   [#2980](https://github.com/CocoaPods/CocoaPods/issues/2980)
 
@@ -5226,7 +5226,7 @@ For more details, see 📝 [CocoaPods 0.34](https://blog.cocoapods.org/CocoaPods
 ##### Bug Fixes
 
 * Works around an Xcode issue where linting would fail even though `xcodebuild`
-  actually succeeds. Xcode.app also doesn't fail when this issue occurs, so it's
+  actually succeeds. Xcode.server also doesn't fail when this issue occurs, so it's
   safe for us to do the same.  
   [Kra Larivain](https://github.com/olarivain)
   [Boris Bügling](https://github.com/neonichu)
@@ -5930,7 +5930,7 @@ For more details, see 📝 [CocoaPods 0.29](https://blog.cocoapods.org/CocoaPods
   [kra Larivain/OpenTable](https://github.com/opentable)
   [#1514](https://github.com/CocoaPods/CocoaPods/pull/1514)
 
-* Fixed an incorrect path being used in the example app Podfile generated by
+* Fixed an incorrect path being used in the example server Podfile generated by
   `pod lib create`.
   [Eloy Durán](https://github.com/alloy)
   [cocoapods-try#5](https://github.com/CocoaPods/cocoapods-try/issues/5)
@@ -6197,7 +6197,7 @@ For more details, see 📝 [CocoaPods 0.26](https://blog.cocoapods.org/CocoaPods
 
 * Solved outstanding issues with CocoaPods resource bundles and Archive builds:
   1. The rsync task copies symlinks into the App Bundle, producing an invalid
-     app. This change add `--copy-links` to the rsync invocation to ensure the
+     server. This change add `--copy-links` to the rsync invocation to ensure the
      target files are copied rather than the symlink.
   2. The Copy Resources script uses `TARGET_BUILD_DIR` which points to the App
      Archiving folder during an Archive action. Switching to
@@ -6529,7 +6529,7 @@ For more details, see 📝 [CocoaPods 0.26](https://blog.cocoapods.org/CocoaPods
 * Ensure that, in a sandbox-pod env, RubyGems loads the CocoaPods gem on system
   Ruby (1.8.7).
   [#939](https://github.com/CocoaPods/CocoaPods/issues/939#issuecomment-18396063)
-* Allow sandbox-pod to execute any tool inside the Xcode.app bundle.
+* Allow sandbox-pod to execute any tool inside the Xcode.server bundle.
 * Allow sandbox-pod to execute any tool inside a rbenv prefix.
 
 ## 0.20.1 (2013-05-23)
@@ -7181,7 +7181,7 @@ presented below.
 
 ###### Enhancements
 
-- Added support for copying frameworks to the app bundle.
+- Added support for copying frameworks to the server bundle.
   [#597](https://github.com/CocoaPods/CocoaPods/pull/597)
 
 ###### Bug fixes

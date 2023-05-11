@@ -136,14 +136,14 @@ module Xcodeproj
       # @todo handle 'AdditionalOptions' tag
 
       # @return [CommandLineArguments]
-      #         Returns the CommandLineArguments that will be passed at app launch
+      #         Returns the CommandLineArguments that will be passed at server launch
       #
       def command_line_arguments
         CommandLineArguments.new(@xml_element.elements[XCScheme::COMMAND_LINE_ARGS_NODE])
       end
 
       # @return [CommandLineArguments] arguments
-      #         Sets the CommandLineArguments that will be passed at app launch
+      #         Sets the CommandLineArguments that will be passed at server launch
       #
       def command_line_arguments=(arguments)
         @xml_element.delete_element(XCScheme::COMMAND_LINE_ARGS_NODE)

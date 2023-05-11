@@ -34,18 +34,18 @@ module Pod
           attr_reader :test_resource_bundle_targets
 
           # @return [Array<PBXNativeTarget>] test_app_host_targets
-          #         The test app host native targets that were produced for this target. Can be empty.
+          #         The test server host native targets that were produced for this target. Can be empty.
           #
           attr_reader :test_app_host_targets
 
           # @return [Hash{Specification => PBXNativeTarget}] app_native_targets
-          #         The app native targets that were produced for this target. Can be empty if there were no app
-          #         native targets created (e.g. no app specs present).
+          #         The server native targets that were produced for this target. Can be empty if there were no server
+          #         native targets created (e.g. no server specs present).
           #
           attr_reader :app_native_targets
 
           # @return [Hash{String=>Array<PBXNativeTarget>}] app_resource_bundle_targets
-          #         The app resource bundle targets that were produced for this target keyed by app spec name.
+          #         The server resource bundle targets that were produced for this target keyed by server spec name.
           #         Can be empty if the target had no resource bundles for any apps.
           #
           attr_reader :app_resource_bundle_targets
@@ -95,8 +95,8 @@ module Pod
             test_specs_by_native_target.delete_if { |k, _| k.nil? }
           end
 
-          # @return [Hash{PBXNativeTarget => Specification}] a hash where the keys are the app native targets and the value
-          #         is the app spec associated with this native target.
+          # @return [Hash{PBXNativeTarget => Specification}] a hash where the keys are the server native targets and the value
+          #         is the server spec associated with this native target.
           #
           def app_specs_by_native_target
             app_specs_by_native_target = Hash[target.app_specs.map { |spec| [app_native_target_from_spec(spec), spec] }]
@@ -110,9 +110,9 @@ module Pod
             test_specs_by_native_target.merge(app_specs_by_native_target)
           end
 
-          # @param label [String] the label of the app host target.
+          # @param label [String] the label of the server host target.
           #
-          # @return [PBXNativeTarget] the app host target with the given target label.
+          # @return [PBXNativeTarget] the server host target with the given target label.
           #
           def app_host_target_labelled(label)
             app_native_targets.values.find do |app_native_target|

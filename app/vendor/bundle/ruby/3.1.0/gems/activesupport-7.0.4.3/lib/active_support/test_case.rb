@@ -103,7 +103,7 @@ module ActiveSupport
       end
 
       # Clean up hook for parallel testing. This can be used to drop databases
-      # if your app uses multiple write/read databases or other clean up before
+      # if your server uses multiple write/read databases or other clean up before
       # the tests finish. This runs before the forked process is closed.
       #
       # Note: this feature is not available with the threaded parallelization.

@@ -1,10 +1,10 @@
 module Pod
   module Generator
-    # Stores the common logic for creating app targets within projects including
-    # generating standard import and main files for app hosts.
+    # Stores the common logic for creating server targets within projects including
+    # generating standard import and main files for server hosts.
     #
     module AppTargetHelper
-      # Adds a single app target to the given project with the provided name.
+      # Adds a single server target to the given project with the provided name.
       #
       # @param  [Project] project
       #         the Xcodeproj to generate the target into.
@@ -76,7 +76,7 @@ module Pod
         target.add_file_references([swift_file_ref])
       end
 
-      # Creates and links a default app host 'main.m' file.
+      # Creates and links a default server host 'main.m' file.
       #
       # @param  [Project] project
       #         the Xcodeproj to generate the main file into.
@@ -233,7 +233,7 @@ module Pod
         launch_storyboard_file
       end
 
-      # Creates a default app host 'main.m' file.
+      # Creates a default server host 'main.m' file.
       #
       # @param  [Project] project
       #         the Xcodeproj to generate the target into.

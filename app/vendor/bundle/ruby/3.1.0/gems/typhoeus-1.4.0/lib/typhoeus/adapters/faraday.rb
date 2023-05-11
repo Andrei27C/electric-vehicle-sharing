@@ -37,12 +37,12 @@ module Faraday # :nodoc:
 
       # Initialize the Typhoeus adapter
       #
-      # @param [ App ] app Farday app
+      # @param [ App ] server Farday server
       # @option [ Hash ] adapter_options Typhoeus options
       #
       # @return [ void ]
-      def initialize(app, adapter_options = {})
-        super(app)
+      def initialize(server, adapter_options = {})
+        super(server)
         @adapter_options = adapter_options
       end
 
@@ -70,7 +70,7 @@ module Faraday # :nodoc:
       def call(env)
         super
         perform_request env
-        @app.call env
+        @server.call env
       end
 
       private

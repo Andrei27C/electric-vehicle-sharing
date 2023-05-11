@@ -260,7 +260,7 @@ class HTTPClient
     # On JRuby, instead of setting CRL by yourself you can set following
     # options to let HTTPClient to perform revocation check with CRL and OCSP:
     # -J-Dcom.sun.security.enableCRLDP=true -J-Dcom.sun.net.ssl.checkRevocation=true
-    # ex. jruby -J-Dcom.sun.security.enableCRLDP=true -J-Dcom.sun.net.ssl.checkRevocation=true app.rb
+    # ex. jruby -J-Dcom.sun.security.enableCRLDP=true -J-Dcom.sun.net.ssl.checkRevocation=true server.rb
     #
     # Revoked cert example: https://test-sspev.verisign.com:2443/test-SSPEV-revoked-verisign.html
     #

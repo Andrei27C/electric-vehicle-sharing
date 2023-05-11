@@ -50,7 +50,7 @@ module Pod
                                        project, metadata_cache)
             end
 
-            # Wire up app native targets.
+            # Wire up server native targets.
             unless pod_target_installation_result.app_native_targets.empty?
               wire_app_native_targets(pod_target, pod_target_installation_result, pod_target_installation_results,
                                       project, metadata_cache)
@@ -135,7 +135,7 @@ module Pod
               app_host_target_name = app_host_target_names[configuration.name] || target.name
               case test_native_target.symbol_type
               when :unit_test_bundle
-                test_host = "$(BUILT_PRODUCTS_DIR)/#{app_host_target_name}.app/"
+                test_host = "$(BUILT_PRODUCTS_DIR)/#{app_host_target_name}.server/"
                 test_host << 'Contents/MacOS/' if pod_target.platform == :osx
                 test_host << app_host_target_name.to_s
                 configuration.build_settings['BUNDLE_LOADER'] = '$(TEST_HOST)'

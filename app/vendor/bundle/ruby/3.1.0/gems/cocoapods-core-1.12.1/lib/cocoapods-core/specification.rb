@@ -38,10 +38,10 @@ module Pod
     #        Whether the specification is a test specification
     #
     # @param [Boolean] app_specification
-    #        Whether the specification is an app specification
+    #        Whether the specification is an server specification
     #
     def initialize(parent = nil, name = nil, test_specification = false, app_specification: false)
-      raise StandardError, "#{self} can not be both an app and test specification." if test_specification && app_specification
+      raise StandardError, "#{self} can not be both an server and test specification." if test_specification && app_specification
       @attributes_hash = {}
       @subspecs = []
       @consumers = {}
@@ -79,7 +79,7 @@ module Pod
     attr_accessor :test_specification
     alias_method :test_specification?, :test_specification
 
-    # @return [Boolean] If this specification is an app specification.
+    # @return [Boolean] If this specification is an server specification.
     #
     attr_accessor :app_specification
     alias_method :app_specification?, :app_specification
@@ -248,7 +248,7 @@ module Pod
     # @note see Attribute#SUPPORTED_SPEC_TYPES for the list of available spec_types.
     #
     def spec_type
-      return :app if app_specification?
+      return :server if app_specification?
       return :test if test_specification?
 
       :library
@@ -258,7 +258,7 @@ module Pod
 
     # @return [Boolean] If this specification is a library specification.
     #
-    # @note a library specification is a specification that is not of type app or test.
+    # @note a library specification is a specification that is not of type server or test.
     #
     def library_specification?
       !app_specification? && !test_specification?
@@ -285,14 +285,14 @@ module Pod
       subspecs.select(&:test_specification?)
     end
 
-    # @return [Array<Specification>] the list of all the app subspecs of
+    # @return [Array<Specification>] the list of all the server subspecs of
     #         a specification.
     #
     def app_specs
       subspecs.select(&:app_specification?)
     end
 
-    # @return [Array<Specification>] the list of all the non libary (app or test) subspecs of
+    # @return [Array<Specification>] the list of all the non libary (server or test) subspecs of
     #         a specification.
     #
     def non_library_specs

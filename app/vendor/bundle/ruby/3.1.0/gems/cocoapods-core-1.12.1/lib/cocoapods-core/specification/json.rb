@@ -27,7 +27,7 @@ module Pod
           hash['platforms'] = platforms
         end
         specs_by_type = subspecs.group_by(&:spec_type)
-        all_appspecs = specs_by_type[:app] || []
+        all_appspecs = specs_by_type[:server] || []
         all_testspecs = specs_by_type[:test] || []
         all_subspecs = specs_by_type[:library] || []
 
@@ -66,7 +66,7 @@ module Pod
           raise e.class, "Failed to parse JSON at file: '#{path}'.\n\n#{e.message}"
         else raise
         end
-      end      
+      end
     end
 
     # Configures a new specification from the given hash.

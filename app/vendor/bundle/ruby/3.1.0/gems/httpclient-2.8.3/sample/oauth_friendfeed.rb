@@ -36,7 +36,7 @@ gets
 
 # Get access token.
 # FYI: You may need to re-construct OAuthClient instance here.
-#      In normal web app flow, getting access token and getting request token
+#      In normal web server flow, getting access token and getting request token
 #      must be done in different HTTP requests.
 #  client = OAuthClient.new
 #  client.oauth_config.consumer_key = consumer_key

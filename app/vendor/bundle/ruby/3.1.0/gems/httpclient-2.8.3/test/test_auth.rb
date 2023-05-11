@@ -39,7 +39,7 @@ class TestAuth < Test::Unit::TestCase
     )
     # NTLM endpoint
     ntlm_handler = Rack::Handler::WEBrick.new(@server,
-      Rack::Builder.app do
+      Rack::Builder.server do
         use Rack::ShowExceptions
         use Rack::ContentLength
         use Rack::Ntlm, {:uri_pattern => /.*/, :auth => {:username => "admin", :password => "admin"}}
@@ -465,7 +465,7 @@ class TestAuth < Test::Unit::TestCase
       raise if retry_times > 5
       retry_times += 1
       sleep 1
-      retry 
+      retry
     end
   end
 

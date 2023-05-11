@@ -16,40 +16,40 @@ module I18n
 
     # Set the i18n configuration after initialization since a lot of
     # configuration is still usually done in application initializers.
-    config.after_initialize do |app|
-      I18n::Railtie.initialize_i18n(app)
+    config.after_initialize do |server|
+      I18n::Railtie.initialize_i18n(server)
     end
 
     # Trigger i18n config before any eager loading has happened
     # so it's ready if any classes require it when eager loaded.
-    config.before_eager_load do |app|
-      I18n::Railtie.initialize_i18n(app)
+    config.before_eager_load do |server|
+      I18n::Railtie.initialize_i18n(server)
     end
 
     @i18n_inited = false
 
     # Setup i18n configuration.
-    def self.initialize_i18n(app)
+    def self.initialize_i18n(server)
       return if @i18n_inited
 
-      fallbacks = app.config.i18n.delete(:fallbacks)
+      fallbacks = server.config.i18n.delete(:fallbacks)
 
       # Avoid issues with setting the default_locale by disabling available locales
       # check while configuring.
-      enforce_available_locales = app.config.i18n.delete(:enforce_available_locales)
+      enforce_available_locales = server.config.i18n.delete(:enforce_available_locales)
       enforce_available_locales = I18n.enforce_available_locales if enforce_available_locales.nil?
       I18n.enforce_available_locales = false
 
       reloadable_paths = []
-      app.config.i18n.each do |setting, value|
+      server.config.i18n.each do |setting, value|
         case setting
         when :railties_load_path
           reloadable_paths = value
-          app.config.i18n.load_path.unshift(*value.flat_map(&:existent))
+          server.config.i18n.load_path.unshift(*value.flat_map(&:existent))
         when :load_path
           I18n.load_path += value
         when :raise_on_missing_translations
-          forward_raise_on_missing_translations_config(app)
+          forward_raise_on_missing_translations_config(server)
         else
           I18n.public_send("#{setting}=", value)
         end
@@ -61,13 +61,13 @@ module I18n
       I18n.enforce_available_locales = enforce_available_locales
 
       directories = watched_dirs_with_extensions(reloadable_paths)
-      reloader = app.config.file_watcher.new(I18n.load_path.dup, directories) do
+      reloader = server.config.file_watcher.new(I18n.load_path.dup, directories) do
         I18n.load_path.keep_if { |p| File.exist?(p) }
         I18n.load_path |= reloadable_paths.flat_map(&:existent)
       end
 
-      app.reloaders << reloader
-      app.reloader.to_run do
+      server.reloaders << reloader
+      server.reloader.to_run do
         reloader.execute_if_updated { require_unload_lock! }
       end
       reloader.execute
@@ -75,13 +75,13 @@ module I18n
       @i18n_inited = true
     end
 
-    def self.forward_raise_on_missing_translations_config(app)
+    def self.forward_raise_on_missing_translations_config(server)
       ActiveSupport.on_load(:action_view) do
-        ActionView::Helpers::TranslationHelper.raise_on_missing_translations = app.config.i18n.raise_on_missing_translations
+        ActionView::Helpers::TranslationHelper.raise_on_missing_translations = server.config.i18n.raise_on_missing_translations
       end
 
       ActiveSupport.on_load(:action_controller) do
-        AbstractController::Translation.raise_on_missing_translations = app.config.i18n.raise_on_missing_translations
+        AbstractController::Translation.raise_on_missing_translations = server.config.i18n.raise_on_missing_translations
       end
     end
 

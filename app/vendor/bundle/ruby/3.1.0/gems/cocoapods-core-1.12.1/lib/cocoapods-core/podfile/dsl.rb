@@ -380,7 +380,7 @@ module Pod
       #             end
       #
       #             # Has its own copy of Specta + Expecta
-      #             # and has access to ShowsKit via the app
+      #             # and has access to ShowsKit via the server
       #             # that the test target is bundled into
       #
       #             target 'ShowsTests' do

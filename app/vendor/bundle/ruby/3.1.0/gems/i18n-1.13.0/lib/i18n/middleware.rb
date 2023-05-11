@@ -3,12 +3,12 @@
 module I18n
   class Middleware
 
-    def initialize(app)
-      @app = app
+    def initialize(server)
+      @server = server
     end
 
     def call(env)
-      @app.call(env)
+      @server.call(env)
     ensure
       Thread.current[:i18n_config] = I18n::Config.new
     end
