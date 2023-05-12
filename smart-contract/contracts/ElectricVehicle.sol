@@ -1,4 +1,4 @@
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.1;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -21,16 +21,30 @@ contract ElectricVehicle is ERC1155, Ownable {
 
     uint256 private _currentTokenId = 0;
 
+    function dummyFunction() public {
+        emit DebugEvent("Dummy function called", msg.sender);
+    }
+
+
+    function getContractOwner() public view returns (address, address) {
+        return (owner(), msg.sender);
+    }
+
+    event DebugEvent(string message, address value);
+    event VehicleMinted(uint256 tokenId, address caller);
     function mintVehicle(
         address to,
         string memory make,
         string memory model,
         uint256 price
     ) public onlyOwner {
+        emit DebugEvent("Minting vehicle", msg.sender);
         _mint(to, _currentTokenId, 1, "");
         _vehicleData[_currentTokenId] = Vehicle(make, model, price, 0, 0, msg.sender);
         _currentTokenId++;
     }
+
+
 
     function rentVehicle(uint256 tokenId, uint256 startTime, uint256 endTime) public {
         require(balanceOf(_vehicleData[tokenId].appAddress, tokenId) == 1, "The app does not own this vehicle");

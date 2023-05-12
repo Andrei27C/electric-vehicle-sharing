@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
+import { API_URL } from '../config';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -19,7 +20,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   const fetchVehicles = async () => {
     try {
-      const response = await axios.get(`${process.env.API_URL}/vehicles`);
+      const response = await axios.get(`${API_URL}/vehicles`);
       setVehicles(response.data.vehicles);
     } catch (error) {
       console.error('Failed to fetch vehicles:', error);

@@ -4,6 +4,8 @@ import axios from 'axios';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList, Vehicle } from "../types/navigation";
+import { API_URL } from '../config';
+
 
 type RentalScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Rental'>;
 type RentalScreenRouteProp = RouteProp<RootStackParamList, 'Rental'>;
@@ -23,7 +25,7 @@ const RentalScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const fetchVehicle = async () => {
     try {
-      const response = await axios.get(`${process.env.API_URL}/vehicles/${tokenId}`);
+      const response = await axios.get(`${API_URL}/vehicles/${tokenId}`);
       setVehicle(response.data);
     } catch (error) {
       console.error('Failed to fetch vehicle:', error);
@@ -32,7 +34,7 @@ const RentalScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const rentVehicle = async () => {
     try {
-      await axios.post(`${process.env.API_URL}/rentals`, { tokenId });
+      await axios.post(`${API_URL}/rentals`, { tokenId });
       navigation.goBack();
     } catch (error) {
       console.error('Failed to rent vehicle:', error);
