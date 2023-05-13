@@ -12,7 +12,7 @@ type Props = {
 };
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
-  const [vehicles, setVehicles] = useState<Array<{ tokenId: string; make: string; model: string }>>([]);
+  const [vehicles, setVehicles] = useState<Array<{ tokenId: string; make: string; model: string; price: string}>>([]);
 
   useEffect(() => {
     fetchVehicles();
@@ -35,7 +35,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           <TouchableOpacity
             onPress={() => navigation.navigate('Rental', { tokenId: item.tokenId })}
           >
-            <Text>{item.make} {item.model}</Text>
+            <Text>{item.make} {item.model} - {item.price}</Text>
           </TouchableOpacity>
         )}
         keyExtractor={(item) => item.tokenId}

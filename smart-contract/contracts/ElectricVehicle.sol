@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ElectricVehicle is ERC1155, Ownable {
     // Add a constructor with a URI parameter
-    constructor(string memory uri) ERC1155(uri) {}
-
+    constructor(string memory uri) ERC1155(uri) Ownable() {
+    }
 
     struct Vehicle {
         string make;
@@ -21,29 +21,36 @@ contract ElectricVehicle is ERC1155, Ownable {
 
     uint256 private _currentTokenId = 0;
 
+    event DebugEvent(string message, address value);
     function dummyFunction() public {
         emit DebugEvent("Dummy function called", msg.sender);
     }
 
+    event OwnerAndSender(address indexed owner, address indexed sender);
 
-    function getContractOwner() public view returns (address, address) {
+    function emitOwnerAndSender() public {
+        emit OwnerAndSender(owner(), msg.sender);
+    }
+    function ownerAddress() public view returns (address, address) {
         return (owner(), msg.sender);
     }
 
-    event DebugEvent(string message, address value);
-    event VehicleMinted(uint256 tokenId, address caller);
+//    event VehicleMinted(uint256 tokenId, address caller);
+//    event DebugMintVehicle(address indexed owner, address indexed sender);
+
     function mintVehicle(
         address to,
         string memory make,
         string memory model,
         uint256 price
     ) public onlyOwner {
-        emit DebugEvent("Minting vehicle", msg.sender);
+//        emit DebugEvent("Minting vehicle", msg.sender);
+//        emit DebugEvent("Minting vehicle", owner());
+//        emit DebugMintVehicle(owner(), owner());
         _mint(to, _currentTokenId, 1, "");
-        _vehicleData[_currentTokenId] = Vehicle(make, model, price, 0, 0, msg.sender);
+        _vehicleData[_currentTokenId] = Vehicle(make, model, price, 0, 0, owner());
         _currentTokenId++;
     }
-
 
 
     function rentVehicle(uint256 tokenId, uint256 startTime, uint256 endTime) public {
