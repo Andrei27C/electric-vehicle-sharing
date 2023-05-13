@@ -49,9 +49,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       <TouchableOpacity onPress={() => navigation.navigate('CreateVehicle')}>
         <Text>Create Vehicle</Text>
       </TouchableOpacity>
-      <br/>
-      <TouchableOpacity onPress={() => navigation.navigate('CreateVehicle')}>
-        <Text>Create Vehicle</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Owner')}>
+        <Text>See all vehicles data</Text>
       </TouchableOpacity>
     </View>
   );

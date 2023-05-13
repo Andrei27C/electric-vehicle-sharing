@@ -14,7 +14,6 @@ contract ElectricVehicle is ERC1155, Ownable {
     }
 
     constructor(string memory uri) ERC1155(uri) Ownable() {
-        appAddress = owner();
     }
 
     mapping(uint256 => Vehicle) private _vehicleData;
@@ -31,10 +30,9 @@ contract ElectricVehicle is ERC1155, Ownable {
     function emitOwnerAndSender() public {
         emit OwnerAndSender(owner(), msg.sender);
     }
-    function ownerAddress() public view returns (address, address) {
-        return (owner(), msg.sender);
+    function ownerAddress() public view returns (address) {
+        return owner();
     }
-
 
     function mintVehicle(
         address to,

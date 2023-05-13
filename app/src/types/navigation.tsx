@@ -7,6 +7,7 @@ export type RootStackParamList = {
   Rental: {
     tokenId: string;
   };
+  Owner: undefined;
 };
 
 export type Vehicle = {
@@ -14,6 +15,9 @@ export type Vehicle = {
   make: string;
   model: string;
   price: number;
+  startTime: number;
+  endTime: number;
+  appAddress: string;
 };
 
 

@@ -38,7 +38,7 @@ server.get('/', (req, res) => {
   res.send('EV Sharing API');
 });
 
-const getAllVehicles = async () => {
+const getVehiclesData = async () => {
   // console.log("electricVehicleContract:", electricVehicleContract);
 
   const totalSupply = await electricVehicleContract.methods.totalSupply().call();
@@ -62,7 +62,7 @@ const getAllVehicles = async () => {
 server.get('/get-vehicles', async (req, res) => {
   console.log("-----/get-vehicles-----");
   try {
-    const vehicles = await getAllVehicles();
+    const vehicles = await getVehiclesData();
     res.json({ success: true, vehicles });
   } catch (error) {
     console.error('Failed to fetch vehicles:', error);
@@ -70,67 +70,48 @@ server.get('/get-vehicles', async (req, res) => {
   }
 });
 
+//get all vehicles data endpoint
+const getAllVehiclesData = async () => {
+  const totalSupply = await electricVehicleContract.methods.totalSupply().call();
+  const vehicles = [];
 
-//get contract owner address
-server.get('/contract-owner', async (req, res) => {
+  for (let i = 0; i < totalSupply; i++) {
+    // const tokenId = await electricVehicleContract.methods.tokenByIndex(i).call();
+    const vehicle = await electricVehicleContract.methods.getAllVehicleData(i).call();
+
+    vehicles.push({
+      tokenId: i,
+      make: vehicle.make,
+      model: vehicle.model,
+      price: vehicle.price,
+      startTime: vehicle.startTime,
+      endTime: vehicle.endTime,
+      appAddress: vehicle.appAddress,
+    });
+  }
+  return vehicles;
+};
+server.get('/get-all-vehicles-data', async (req, res) => {
+  console.log("-----/get-all-vehicles-data-----");
   try {
-    const ownerAndSender = await electricVehicleContract.methods.ownerAddress().call();
-    const ownerAddress = ownerAndSender[0];
-    const senderAddress = ownerAndSender[1];
-
-    const contractOwner = await electricVehicleContract.methods.ownerAddress().call();
-
-
-    res.json({ success: true, ownerAddress: contractOwner[0], senderAddress: account.address });
-
+    const vehicles = await getAllVehiclesData();
+    res.json({ success: true, vehicles });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.error('Failed to fetch vehicles:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch vehicles' });
   }
 });
 
-// server.post('/emit-owner-and-sender', async (req, res) => {
-//   try {
-//     const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
-//     const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-//     const gas = await electricVehicleContract.methods.emitOwnerAndSender().estimateGas({ from: account.address });
-//     const nonce = await web3.eth.getTransactionCount(account.address);
-//
-//     const tx = {
-//       from: account.address,
-//       to: electricVehicleContract.options.address,
-//       gas,
-//       nonce,
-//       data: electricVehicleContract.methods.emitOwnerAndSender().encodeABI(),
-//     };
-//
-//     const signedTx = await account.signTransaction(tx);
-//     const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-//
-//     // Find the OwnerAndSender event in the receipt
-//     const ownerAndSenderEvent = receipt.events.find(event => event.event === 'OwnerAndSender');
-//     const ownerAddress = ownerAndSenderEvent.returnValues.owner;
-//     const senderAddress = ownerAndSenderEvent.returnValues.sender;
-//
-//     res.json({ success: true, ownerAddress, senderAddress });
-//   } catch (error) {
-//     res.status(400).json({ success: false, message: error.message });
-//   }
-// });
-
-// callDummyFunction();
-// server.post('/callDummyFunction', async (req, res) => {
-//   try {
-//     const { account } = req.body;
-//     console.log(account.address);
-//
-//     const gasEstimate = await electricVehicleContract.methods.dummyFunction().estimateGas({ from: account });
-//     const result = await electricVehicleContract.methods.dummyFunction().send({ from: account, gas: gasEstimate });
-//
-//     res.json({ success: true, message: 'Dummy function called successfully', result });
-//   } catch (error) {
-//     res.json({ success: false, message: error.message });
-//   }
-// });
+//get contract owner address
+server.get('/contract-owner', async (req, res) => {
+  console.log("-----/contract-owner-----");
+  try {
+    const owner = await electricVehicleContract.methods.ownerAddress().call();
+    res.send({ owner });
+  } catch (error) {
+    res.status(500).send({ error: 'Failed to fetch owner address' });
+  }
+});
 
 //create-vehicle endpoint
 server.post('/create-vehicle', async (req, res) => {
@@ -248,18 +229,3 @@ server.post('/end-rental/:tokenId', async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 });
-
-
-
-//
-// //dummy function
-// async function getAccount() {
-//   const accounts = await web3.eth.getAccounts();
-//   return accounts[0];
-// }
-//
-// async function callDummyFunction() {
-//   const account = await getAccount();
-//   const result = await electricVehicleContract.methods.dummyFunction().send({ from: account });
-//   console.log(result);
-// }
