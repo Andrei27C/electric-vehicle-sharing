@@ -39,7 +39,6 @@ server.get('/', (req, res) => {
 });
 
 const getAllVehicles = async () => {
-  console.log("Trying to fetch vehicles");
   // console.log("electricVehicleContract:", electricVehicleContract);
 
   const totalSupply = await electricVehicleContract.methods.totalSupply().call();
@@ -61,7 +60,7 @@ const getAllVehicles = async () => {
   return vehicles;
 };
 server.get('/get-vehicles', async (req, res) => {
-  console.log("called getAllVehicles");
+  console.log("-----/get-vehicles-----");
   try {
     const vehicles = await getAllVehicles();
     res.json({ success: true, vehicles });
@@ -133,11 +132,11 @@ server.get('/contract-owner', async (req, res) => {
 //   }
 // });
 
-//vehicles endpoint
-server.post('/vehicles', async (req, res) => {
+//create-vehicle endpoint
+server.post('/create-vehicle', async (req, res) => {
+  console.log("Calling create vehicle endpoint...");
   const { make, model, price } = req.body;
-
-  // console.log('Input parameters:', { make, model, price, accountAddress: account.address });
+  console.log('  Input parameters:', { make, model, price, accountAddress: account.address });
 
   let gas;
   try {
@@ -149,10 +148,9 @@ server.post('/vehicles', async (req, res) => {
     res.status(500).json({ success: false, message: 'Error estimating gas', error: error.message });
     return;
   }
-
   try {
     const nonce = await web3.eth.getTransactionCount(account.address);
-
+    console.log('  Nonce:', nonce);
     const tx = {
       from: account.address,
       to: electricVehicleContract.options.address,
@@ -162,10 +160,9 @@ server.post('/vehicles', async (req, res) => {
     };
 
     const signedTx = await account.signTransaction(tx);
+    console.log('  Signer address:', account.address);
 
-    console.log('Signer address:', account.address);
     // console.log('Raw transaction:', signedTx.rawTransaction);
-
     const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
 
 
@@ -183,13 +180,9 @@ server.get('/vehicles/:tokenId', async (req, res) => {
     const vehicleData = await electricVehicleContract.methods.getVehicleData(tokenId).call();
     const vehicle = {
       tokenId,
-      owner: vehicleData.owner,
       make: vehicleData.make,
       model: vehicleData.model,
       price: vehicleData.price,
-      rented: vehicleData.rented,
-      rentalStartTime: vehicleData.rentalStartTime,
-      rentalEndTime: vehicleData.rentalEndTime,
     };
 
     res.json({ success: true, vehicle });

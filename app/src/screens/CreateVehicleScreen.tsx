@@ -19,7 +19,7 @@ const CreateVehicleScreen: React.FC<Props> = ({ navigation }) => {
 
   const createVehicle = async () => {
     try {
-      await axios.post(`${API_URL}/vehicles`, { make, model, price });
+      await axios.post(`${API_URL}/create-vehicle`, { make, model, price });
       navigation.goBack();
     } catch (error) {
       console.error('Failed to create vehicle:', error);

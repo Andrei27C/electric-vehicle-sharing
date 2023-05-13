@@ -4,10 +4,6 @@ import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ElectricVehicle is ERC1155, Ownable {
-    // Add a constructor with a URI parameter
-    constructor(string memory uri) ERC1155(uri) Ownable() {
-    }
-
     struct Vehicle {
         string make;
         string model;
@@ -15,6 +11,10 @@ contract ElectricVehicle is ERC1155, Ownable {
         uint256 startTime;
         uint256 endTime;
         address appAddress;
+    }
+
+    constructor(string memory uri) ERC1155(uri) Ownable() {
+        appAddress = owner();
     }
 
     mapping(uint256 => Vehicle) private _vehicleData;
@@ -99,6 +99,22 @@ contract ElectricVehicle is ERC1155, Ownable {
     {
         Vehicle storage vehicle = _vehicleData[tokenId];
         return (vehicle.make, vehicle.model, vehicle.price);
+    }
+
+    function getAllVehicleData(uint256 tokenId)
+    public
+    view
+    returns (
+        string memory make,
+        string memory model,
+        uint256 price,
+        uint256 startTime,
+        uint256 endTime,
+        address appAddress
+    )
+    {
+        Vehicle storage vehicle = _vehicleData[tokenId];
+        return (vehicle.make, vehicle.model, vehicle.price, vehicle.startTime, vehicle.endTime, vehicle.appAddress);
     }
 
     function totalSupply() public view returns (uint256) {

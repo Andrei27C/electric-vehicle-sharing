@@ -9,11 +9,11 @@ module.exports = {
 
     development: {
       provider: () => new HDWalletProvider({
-        mnemonic: process.env.MNEMONIC,
+        mnemonic: process.env.TD_MNEMONIC,
         providerOrUrl: process.env.ETHER_RPC_URL,
       }),
-      network_id: "5777", // Match any network id
-      port: 7545, // Update the port to match your Ethereum node or Ganache instance
+      network_id: "5777",
+      port: 7545,
     },
   },
 

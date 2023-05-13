@@ -16,6 +16,7 @@ type Props = {
 };
 
 const RentalScreen: React.FC<Props> = ({ route, navigation }) => {
+
   const { tokenId } = route.params;
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
 
@@ -26,7 +27,9 @@ const RentalScreen: React.FC<Props> = ({ route, navigation }) => {
   const fetchVehicle = async () => {
     try {
       const response = await axios.get(`${API_URL}/vehicles/${tokenId}`);
-      setVehicle(response.data);
+      console.log(response.data);
+      setVehicle(response.data.vehicle);
+      console.log(vehicle);
     } catch (error) {
       console.error('Failed to fetch vehicle:', error);
     }
@@ -34,7 +37,7 @@ const RentalScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const rentVehicle = async () => {
     try {
-      await axios.post(`${API_URL}/rentals`, { tokenId });
+      await axios.post(`${API_URL}/rent-vehicle`, { tokenId });
       navigation.goBack();
     } catch (error) {
       console.error('Failed to rent vehicle:', error);
@@ -43,6 +46,7 @@ const RentalScreen: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <View>
+      <Text>{tokenId}</Text>
       {vehicle ? (
         <>
           <Text>{vehicle.make} {vehicle.model}</Text>
