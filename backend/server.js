@@ -5,30 +5,72 @@ const fs = require('fs');
 const path = require('path');
 const Web3 = require('web3');
 
-const server = express();
-
-const ElectricVehicleJSON = JSON.parse(fs.readFileSync(path.join(__dirname, '../smart-contract/build/contracts/ElectricVehicle.json'), 'utf8'));
-const ElectricVehicleABI = ElectricVehicleJSON.abi;
-const ElectricVehicleAddress = ElectricVehicleJSON.networks['5777'].address;
-
+dotenv.config();
 const web3 = new Web3(process.env.ETHER_RPC_URL);
-const electricVehicleContract = new web3.eth.Contract(ElectricVehicleABI, ElectricVehicleAddress);
-
+const server = express();
+server.use(cors());
+server.use(express.json());
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '127.0.0.1';
 
-dotenv.config();
+//contract info
+const electricVehicleJSON = JSON.parse(fs.readFileSync(path.join(__dirname, '../smart-contract/build/contracts/ElectricVehicle.json'), 'utf8'));
+const electricVehicleABI = electricVehicleJSON.abi;
+const electricVehicleAddress = electricVehicleJSON.networks['5777'].address;
+console.log("ETHER_RPC_URL:", process.env.ETHER_RPC_URL);
+console.log("ElectricVehicleAddress:", electricVehicleAddress);
+const electricVehicleContract = new web3.eth.Contract(electricVehicleABI, electricVehicleAddress);
 
-server.use(cors());
-server.use(express.json());
+//account info
+const privateKey = process.env.TD_DEPLOYER_PRIVATE_KEY;
+console.log("Private Key: ",privateKey);
+const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+console.log("Account Address: ",account.address);
 
+//start server
+server.listen(PORT, HOST, () => {
+  console.log(`Server running at ${HOST}:${PORT}`);
+});
+
+
+//server methods
 server.get('/', (req, res) => {
   res.send('EV Sharing API');
 });
 
-server.listen(PORT, HOST, () => {
-  console.log(`Server running at ${HOST}:${PORT}`);
+const getAllVehicles = async () => {
+  console.log("Trying to fetch vehicles");
+  // console.log("electricVehicleContract:", electricVehicleContract);
+
+  const totalSupply = await electricVehicleContract.methods.totalSupply().call();
+  console.log("totalSupply:", totalSupply);
+
+  const vehicles = [];
+
+  for (let i = 0; i < totalSupply; i++) {
+    // const tokenId = await electricVehicleContract.methods.tokenByIndex(i).call();
+    const vehicle = await electricVehicleContract.methods.getVehicleData(i).call();
+
+    vehicles.push({
+        tokenId: i,
+        make: vehicle.make,
+        model: vehicle.model,
+        price: web3.utils.fromWei(vehicle.price, 'ether'),
+    });
+  }
+  return vehicles;
+};
+server.get('/get-vehicles', async (req, res) => {
+  console.log("called getAllVehicles");
+  try {
+    const vehicles = await getAllVehicles();
+    res.json({ success: true, vehicles });
+  } catch (error) {
+    console.error('Failed to fetch vehicles:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch vehicles' });
+  }
 });
+
 
 //get contract owner address
 server.get('/contract-owner', async (req, res) => {
@@ -37,8 +79,6 @@ server.get('/contract-owner', async (req, res) => {
     const ownerAddress = ownerAndSender[0];
     const senderAddress = ownerAndSender[1];
 
-    const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
-    const account = web3.eth.accounts.privateKeyToAccount(privateKey);
     const contractOwner = await electricVehicleContract.methods.ownerAddress().call();
 
 
@@ -49,77 +89,59 @@ server.get('/contract-owner', async (req, res) => {
   }
 });
 
-server.post('/emit-owner-and-sender', async (req, res) => {
-  try {
-    const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
-    const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-    const gas = await electricVehicleContract.methods.emitOwnerAndSender().estimateGas({ from: account.address });
-    const nonce = await web3.eth.getTransactionCount(account.address);
-
-    const tx = {
-      from: account.address,
-      to: electricVehicleContract.options.address,
-      gas,
-      nonce,
-      data: electricVehicleContract.methods.emitOwnerAndSender().encodeABI(),
-    };
-
-    const signedTx = await account.signTransaction(tx);
-    const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-
-    // Find the OwnerAndSender event in the receipt
-    const ownerAndSenderEvent = receipt.events.find(event => event.event === 'OwnerAndSender');
-    const ownerAddress = ownerAndSenderEvent.returnValues.owner;
-    const senderAddress = ownerAndSenderEvent.returnValues.sender;
-
-    res.json({ success: true, ownerAddress, senderAddress });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-});
-
-//dummy function
-async function getAccount() {
-  const accounts = await web3.eth.getAccounts();
-  return accounts[0];
-}
-
-async function callDummyFunction() {
-  const account = await getAccount();
-  const result = await electricVehicleContract.methods.dummyFunction().send({ from: account });
-  console.log(result);
-}
+// server.post('/emit-owner-and-sender', async (req, res) => {
+//   try {
+//     const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
+//     const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+//     const gas = await electricVehicleContract.methods.emitOwnerAndSender().estimateGas({ from: account.address });
+//     const nonce = await web3.eth.getTransactionCount(account.address);
+//
+//     const tx = {
+//       from: account.address,
+//       to: electricVehicleContract.options.address,
+//       gas,
+//       nonce,
+//       data: electricVehicleContract.methods.emitOwnerAndSender().encodeABI(),
+//     };
+//
+//     const signedTx = await account.signTransaction(tx);
+//     const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+//
+//     // Find the OwnerAndSender event in the receipt
+//     const ownerAndSenderEvent = receipt.events.find(event => event.event === 'OwnerAndSender');
+//     const ownerAddress = ownerAndSenderEvent.returnValues.owner;
+//     const senderAddress = ownerAndSenderEvent.returnValues.sender;
+//
+//     res.json({ success: true, ownerAddress, senderAddress });
+//   } catch (error) {
+//     res.status(400).json({ success: false, message: error.message });
+//   }
+// });
 
 // callDummyFunction();
-server.post('/callDummyFunction', async (req, res) => {
-  try {
-    const { account } = req.body;
-    console.log(account.address);
-
-    const gasEstimate = await electricVehicleContract.methods.dummyFunction().estimateGas({ from: account });
-    const result = await electricVehicleContract.methods.dummyFunction().send({ from: account, gas: gasEstimate });
-
-    res.json({ success: true, message: 'Dummy function called successfully', result });
-  } catch (error) {
-    res.json({ success: false, message: error.message });
-  }
-});
+// server.post('/callDummyFunction', async (req, res) => {
+//   try {
+//     const { account } = req.body;
+//     console.log(account.address);
+//
+//     const gasEstimate = await electricVehicleContract.methods.dummyFunction().estimateGas({ from: account });
+//     const result = await electricVehicleContract.methods.dummyFunction().send({ from: account, gas: gasEstimate });
+//
+//     res.json({ success: true, message: 'Dummy function called successfully', result });
+//   } catch (error) {
+//     res.json({ success: false, message: error.message });
+//   }
+// });
 
 //vehicles endpoint
 server.post('/vehicles', async (req, res) => {
   const { make, model, price } = req.body;
-  const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
-  const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-  // const account = 0x0000000000000000000000000000000000000000;
-  console.log(account.address);
 
   // console.log('Input parameters:', { make, model, price, accountAddress: account.address });
 
   let gas;
   try {
     const contractMethod = electricVehicleContract.methods.mintVehicle(account.address, make, model, price);
-    // console.log('Contract method:', contractMethod);
-
     // gas = await contractMethod.estimateGas();
     gas = 500000;
   } catch (error) {
@@ -142,14 +164,10 @@ server.post('/vehicles', async (req, res) => {
     const signedTx = await account.signTransaction(tx);
 
     console.log('Signer address:', account.address);
-    console.log('Raw transaction:', signedTx.rawTransaction);
+    // console.log('Raw transaction:', signedTx.rawTransaction);
 
     const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-    // console.log('Transaction Receipt:', txReceipt);
 
-    // const debugMintVehicleEvent = txReceipt.events.DebugMintVehicle || txReceipt.events.find(event => event.event === 'DebugMintVehicle');
-
-    // console.log('DebugMintVehicle event:', debugMintVehicleEvent.returnValues);
 
     res.json({ success: true, message: 'Vehicle created', txHash: txReceipt.transactionHash });
   } catch (error) {
@@ -209,7 +227,6 @@ server.post('/rent/:tokenId', async (req, res) => {
   }
 });
 
-
 //end-rental endpoint
 server.post('/end-rental/:tokenId', async (req, res) => {
   const { tokenId } = req.params;
@@ -224,7 +241,7 @@ server.post('/end-rental/:tokenId', async (req, res) => {
 
     const tx = {
       from: renterAccount.address,
-      to: contractAddress,
+      to: electricVehicleAddress,
       gas,
       nonce,
       data: electricVehicleContract.methods.endRental(tokenId).encodeABI(),
@@ -238,3 +255,18 @@ server.post('/end-rental/:tokenId', async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 });
+
+
+
+//
+// //dummy function
+// async function getAccount() {
+//   const accounts = await web3.eth.getAccounts();
+//   return accounts[0];
+// }
+//
+// async function callDummyFunction() {
+//   const account = await getAccount();
+//   const result = await electricVehicleContract.methods.dummyFunction().send({ from: account });
+//   console.log(result);
+// }

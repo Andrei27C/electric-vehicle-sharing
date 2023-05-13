@@ -35,8 +35,6 @@ contract ElectricVehicle is ERC1155, Ownable {
         return (owner(), msg.sender);
     }
 
-//    event VehicleMinted(uint256 tokenId, address caller);
-//    event DebugMintVehicle(address indexed owner, address indexed sender);
 
     function mintVehicle(
         address to,
@@ -44,9 +42,6 @@ contract ElectricVehicle is ERC1155, Ownable {
         string memory model,
         uint256 price
     ) public onlyOwner {
-//        emit DebugEvent("Minting vehicle", msg.sender);
-//        emit DebugEvent("Minting vehicle", owner());
-//        emit DebugMintVehicle(owner(), owner());
         _mint(to, _currentTokenId, 1, "");
         _vehicleData[_currentTokenId] = Vehicle(make, model, price, 0, 0, owner());
         _currentTokenId++;
@@ -99,12 +94,14 @@ contract ElectricVehicle is ERC1155, Ownable {
     returns (
         string memory make,
         string memory model,
-        uint256 price,
-        uint256 startTime,
-        uint256 endTime
+        uint256 price
     )
     {
         Vehicle storage vehicle = _vehicleData[tokenId];
-        return (vehicle.make, vehicle.model, vehicle.price, vehicle.startTime, vehicle.endTime);
+        return (vehicle.make, vehicle.model, vehicle.price);
+    }
+
+    function totalSupply() public view returns (uint256) {
+        return _currentTokenId;
     }
 }
