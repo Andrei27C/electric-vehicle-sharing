@@ -25,7 +25,7 @@ end
 logger = Logger.new(STDERR)
 logger.level = Logger::Severity::FATAL	# avoid logging SSLError (ERROR level)
 
-server = WEBrick::HTTPServer.new(
+app = WEBrick::HTTPServer.new(
   :BindAddress => "localhost",
   :Logger => logger,
   :Port => PORT,
@@ -33,17 +33,17 @@ server = WEBrick::HTTPServer.new(
   :DocumentRoot => DIR,
   :SSLEnable => true,
   :SSLCACertificateFile => File.join(DIR, 'ca.cert'),
-  :SSLCertificate => cert('server.cert'),
-  :SSLPrivateKey => key('server.key'),
+  :SSLCertificate => cert('app.cert'),
+  :SSLPrivateKey => key('app.key'),
   :SSLVerifyClient => nil, #OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT|OpenSSL::SSL::VERIFY_PEER,
   :SSLClientCA => cert('ca.cert'),
   :SSLCertName => nil
 )
 trap(:INT) do
-  server.shutdown
+  app.shutdown
 end
 [:hello].each do |sym|
-  server.mount(
+  app.mount(
     "/#{sym}",
     WEBrick::HTTPServlet::ProcHandler.new(method("do_#{sym}").to_proc)
   )
@@ -51,9 +51,9 @@ end
 
 t = Thread.new {
   Thread.current.abort_on_exception = true
-  server.start
+  app.start
 }
-while server.status != :Running
+while app.status != :Running
   sleep 0.1
   unless t.alive?
     t.join

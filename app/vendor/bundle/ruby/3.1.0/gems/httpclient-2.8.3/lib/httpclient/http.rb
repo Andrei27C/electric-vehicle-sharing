@@ -551,7 +551,7 @@ module HTTP
       def set_content(body, boundary = nil)
         if Message.file?(body)
           # uses Transfer-Encoding: chunked if body does not respond to :size.
-          # bear in mind that server may not support it. at least ruby's CGI doesn't.
+          # bear in mind that app may not support it. at least ruby's CGI doesn't.
           @body = body
           remember_pos(@body)
           @size = body.respond_to?(:size) ? body.size - body.pos : nil
@@ -935,7 +935,7 @@ module HTTP
     # HTTP::Message::Body:: message body.
     attr_reader :http_body
 
-    # OpenSSL::X509::Certificate:: response only.  server certificate which is
+    # OpenSSL::X509::Certificate:: response only.  app certificate which is
     #                              used for retrieving the response.
     attr_accessor :peer_cert
 

@@ -39,7 +39,7 @@ module Pod
     attr_reader :build_type
     private :build_type
 
-    # @return [Boolean] whether the target can be linked to server extensions only.
+    # @return [Boolean] whether the target can be linked to app extensions only.
     #
     attr_reader :application_extension_api_only
 

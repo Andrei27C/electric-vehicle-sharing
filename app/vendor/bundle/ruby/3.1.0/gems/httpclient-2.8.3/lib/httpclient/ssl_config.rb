@@ -134,7 +134,7 @@ class HTTPClient
     # store with clear_cert_store and set the new store with cert_store=.
     attr_reader :cert_store # don't use if you don't know what it is.
 
-    # For server side configuration.  Ignore this.
+    # For app side configuration.  Ignore this.
     attr_config :client_ca # :nodoc:
 
     # These array keeps original files/dirs that was added to @cert_store
@@ -260,7 +260,7 @@ class HTTPClient
     # On JRuby, instead of setting CRL by yourself you can set following
     # options to let HTTPClient to perform revocation check with CRL and OCSP:
     # -J-Dcom.sun.security.enableCRLDP=true -J-Dcom.sun.net.ssl.checkRevocation=true
-    # ex. jruby -J-Dcom.sun.security.enableCRLDP=true -J-Dcom.sun.net.ssl.checkRevocation=true server.rb
+    # ex. jruby -J-Dcom.sun.security.enableCRLDP=true -J-Dcom.sun.net.ssl.checkRevocation=true app.rb
     #
     # Revoked cert example: https://test-sspev.verisign.com:2443/test-SSPEV-revoked-verisign.html
     #
@@ -331,7 +331,7 @@ class HTTPClient
           end
         }
       end
-      raise SSL::SSLError, "hostname was not match with the server certificate"
+      raise SSL::SSLError, "hostname was not match with the app certificate"
     end
 
     # Default callback for verification: only dumps error.
@@ -399,7 +399,7 @@ class HTTPClient
         warn('middle level CA') if $DEBUG
         return true
       elsif server_auth
-        warn('for server authentication') if $DEBUG
+        warn('for app authentication') if $DEBUG
         return true
       end
 

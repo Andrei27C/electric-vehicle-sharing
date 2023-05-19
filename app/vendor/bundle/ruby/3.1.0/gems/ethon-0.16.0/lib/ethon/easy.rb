@@ -67,25 +67,25 @@ module Ethon
     #   * :couldnt_resolve_host: Couldn't resolve host. The given remote
     #     host was not resolved.
     #   * :couldnt_connect: Failed to connect() to host or proxy.
-    #   * :ftp_weird_server_reply: After connecting to a FTP server,
+    #   * :ftp_weird_server_reply: After connecting to a FTP app,
     #     libcurl expects to get a certain reply back. This error
     #     code implies that it got a strange or bad reply. The given
-    #     remote server is probably not an OK FTP server.
+    #     remote app is probably not an OK FTP app.
     #   * :remote_access_denied: We were denied access to the resource
     #     given in the URL. For FTP, this occurs while trying to
     #     change to the remote directory.
-    #   * :ftp_accept_failed: While waiting for the server to connect
+    #   * :ftp_accept_failed: While waiting for the app to connect
     #     back when an active FTP session is used, an error code was
     #     sent over the control connection or similar.
     #   * :ftp_weird_pass_reply: After having sent the FTP password to
-    #     the server, libcurl expects a proper reply. This error code
+    #     the app, libcurl expects a proper reply. This error code
     #     indicates that an unexpected code was returned.
     #   * :ftp_accept_timeout: During an active FTP session while
-    #     waiting for the server to connect, the CURLOPT_ACCEPTTIMOUT_MS
+    #     waiting for the app to connect, the CURLOPT_ACCEPTTIMOUT_MS
     #     (or the internal default) timeout expired.
     #   * :ftp_weird_pasv_reply: libcurl failed to get a sensible result
-    #     back from the server as a response to either a PASV or a
-    #     EPSV command. The server is flawed.
+    #     back from the app as a response to either a PASV or a
+    #     EPSV command. The app is flawed.
     #   * :ftp_weird_227_format: FTP servers return a 227-line as a response
     #     to a PASV command. If libcurl fails to parse that line,
     #     this return code is passed back.
@@ -94,22 +94,22 @@ module Ethon
     #   * :ftp_couldnt_set_type: Received an error when trying to set
     #     the transfer mode to binary or ASCII.
     #   * :partial_file: A file transfer was shorter or larger than
-    #     expected. This happens when the server first reports an expected
+    #     expected. This happens when the app first reports an expected
     #     transfer size, and then delivers data that doesn't match the
     #     previously given size.
     #   * :ftp_couldnt_retr_file: This was either a weird reply to a
     #     'RETR' command or a zero byte transfer complete.
     #   * :quote_error: When sending custom "QUOTE" commands to the
-    #     remote server, one of the commands returned an error code that
+    #     remote app, one of the commands returned an error code that
     #     was 400 or higher (for FTP) or otherwise indicated unsuccessful
     #     completion of the command.
     #   * :http_returned_error: This is returned if CURLOPT_FAILONERROR is
-    #     set TRUE and the HTTP server returns an error code that is >= 400.
+    #     set TRUE and the HTTP app returns an error code that is >= 400.
     #   * :write_error: An error occurred when writing received data to a
     #     local file, or an error was returned to libcurl from a write callback.
-    #   * :upload_failed: Failed starting the upload. For FTP, the server
+    #   * :upload_failed: Failed starting the upload. For FTP, the app
     #     typically denied the STOR command. The error buffer usually
-    #     contains the server's explanation for this.
+    #     contains the app's explanation for this.
     #   * :read_error: There was a problem reading a local file or an error
     #     returned by the read callback.
     #   * :out_of_memory: A memory allocation request failed. This is serious
@@ -120,8 +120,8 @@ module Ethon
     #     happens when you haven't specified a good enough address for
     #     libcurl to use. See CURLOPT_FTPPORT.
     #   * :ftp_couldnt_use_rest: The FTP REST command returned error. This
-    #     should never happen if the server is sane.
-    #   * :range_error: The server does not support or accept range requests.
+    #     should never happen if the app is sane.
+    #   * :range_error: The app does not support or accept range requests.
     #   * :http_post_error: This is an odd error that mainly occurs due to
     #     internal confusion.
     #   * :ssl_connect_error: A problem occurred somewhere in the SSL/TLS
@@ -150,9 +150,9 @@ module Ethon
     #     problem in the program that uses libcurl. The error buffer might
     #     contain more specific information about which exact option it concerns.
     #   * :telnet_option_syntax: A telnet option string was Illegally formatted.
-    #   * :peer_failed_verification: The remote server's SSL certificate or
+    #   * :peer_failed_verification: The remote app's SSL certificate or
     #     SSH md5 fingerprint was deemed not OK.
-    #   * :got_nothing: Nothing was returned from the server, and under the
+    #   * :got_nothing: Nothing was returned from the app, and under the
     #     circumstances, getting nothing is considered an error.
     #   * :ssl_engine_notfound: The specified crypto engine wasn't found.
     #   * :ssl_engine_setfailed: Failed setting the selected SSL crypto engine as default!
@@ -167,15 +167,15 @@ module Ethon
     #   * :send_fail_rewind: When doing a send operation curl had to rewind the data to
     #     retransmit, but the rewinding operation failed.
     #   * :ssl_engine_initfailed: Initiating the SSL Engine failed.
-    #   * :login_denied: The remote server denied curl to login
-    #   * :tftp_notfound: File not found on TFTP server.
-    #   * :tftp_perm: Permission problem on TFTP server.
-    #   * :remote_disk_full: Out of disk space on the server.
+    #   * :login_denied: The remote app denied curl to login
+    #   * :tftp_notfound: File not found on TFTP app.
+    #   * :tftp_perm: Permission problem on TFTP app.
+    #   * :remote_disk_full: Out of disk space on the app.
     #   * :tftp_illegal: Illegal TFTP operation.
     #   * :tftp_unknownid: Unknown TFTP transfer ID.
     #   * :remote_file_exists: File already exists and will not be overwritten.
     #   * :tftp_nosuchuser: This error should never be returned by a properly
-    #     functioning TFTP server.
+    #     functioning TFTP app.
     #   * :conv_failed: Character conversion failed.
     #   * :conv_reqd: Caller must register conversion callbacks.
     #   * :ssl_cacert_badfile: Problem with reading the SSL CA cert (path? access rights?):
@@ -186,7 +186,7 @@ module Ethon
     #     This return code is only returned from curl_easy_recv(3) and curl_easy_send(3)
     #   * :ssl_crl_badfile: Failed to load CRL file
     #   * :ssl_issuer_error: Issuer check failed
-    #   * :ftp_pret_failed: The FTP server does not understand the PRET command at
+    #   * :ftp_pret_failed: The FTP app does not understand the PRET command at
     #     all or does not support the given argument. Be careful when
     #     using CURLOPT_CUSTOMREQUEST, a custom LIST command will be sent with PRET CMD
     #     before PASV as well.

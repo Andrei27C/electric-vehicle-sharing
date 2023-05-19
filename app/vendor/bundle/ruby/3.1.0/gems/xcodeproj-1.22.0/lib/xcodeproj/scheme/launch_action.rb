@@ -126,14 +126,14 @@ module Xcodeproj
       end
 
       # @return [EnvironmentVariables]
-      #         Returns the EnvironmentVariables that will be defined at server launch
+      #         Returns the EnvironmentVariables that will be defined at app launch
       #
       def environment_variables
         EnvironmentVariables.new(@xml_element.elements[XCScheme::VARIABLES_NODE])
       end
 
       # @param [EnvironmentVariables,nil] env_vars
-      #        Sets the EnvironmentVariables that will be defined at server launch
+      #        Sets the EnvironmentVariables that will be defined at app launch
       #
       def environment_variables=(env_vars)
         @xml_element.delete_element(XCScheme::VARIABLES_NODE)
@@ -144,14 +144,14 @@ module Xcodeproj
       # @todo handle 'AdditionalOptions' tag
 
       # @return [CommandLineArguments]
-      #         Returns the CommandLineArguments that will be passed at server launch
+      #         Returns the CommandLineArguments that will be passed at app launch
       #
       def command_line_arguments
         CommandLineArguments.new(@xml_element.elements[XCScheme::COMMAND_LINE_ARGS_NODE])
       end
 
       # @return [CommandLineArguments] arguments
-      #         Sets the CommandLineArguments that will be passed at server launch
+      #         Sets the CommandLineArguments that will be passed at app launch
       #
       def command_line_arguments=(arguments)
         @xml_element.delete_element(XCScheme::COMMAND_LINE_ARGS_NODE)

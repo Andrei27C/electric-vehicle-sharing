@@ -11,7 +11,7 @@ module Algolia
 
   #
   # A class which encapsulates the HTTPS communication with the Algolia
-  # API server. Uses the HTTPClient library for low-level HTTP communication.
+  # API app. Uses the HTTPClient library for low-level HTTP communication.
   #
   class Client
     attr_reader :ssl, :ssl_version, :hosts, :search_hosts, :application_id, :api_key, :headers, :connect_timeout, :send_timeout, :receive_timeout, :search_timeout, :batch_timeout
@@ -480,11 +480,11 @@ module Algolia
     end
 
     #
-    # Check the status of a task on the server.
-    # All server task are asynchronous and you can check the status of a task with this method.
+    # Check the status of a task on the app.
+    # All app task are asynchronous and you can check the status of a task with this method.
     #
     # @param index_name the index name owning the taskID
-    # @param taskID the id of the task returned by server
+    # @param taskID the id of the task returned by app
     # @param request_options contains extra parameters to send with your query
     #
     def get_task_status(index_name, taskID, request_options = {})
@@ -492,11 +492,11 @@ module Algolia
     end
 
     #
-    # Wait the publication of a task on the server.
-    # All server task are asynchronous and you can check with this method that the task is published.
+    # Wait the publication of a task on the app.
+    # All app task are asynchronous and you can check with this method that the task is published.
     #
     # @param index_name the index name owning the taskID
-    # @param taskID the id of the task returned by server
+    # @param taskID the id of the task returned by app
     # @param time_before_retry the time in milliseconds before retry (default = 100ms)
     # @param request_options contains extra parameters to send with your query
     #

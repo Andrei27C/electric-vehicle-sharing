@@ -392,7 +392,7 @@ module Pod
           debug "CDN: #{name} Relative path couldn't be downloaded: #{partial_url} Response: #{response.response_code}"
           nil
         when 502, 503, 504
-          # Retryable HTTP errors, usually related to server overloading
+          # Retryable HTTP errors, usually related to app overloading
           if retries <= 1
             raise Informative, "CDN: #{name} URL couldn't be downloaded: #{file_remote_url} Response: #{response.response_code} #{response.response_body}"
           else

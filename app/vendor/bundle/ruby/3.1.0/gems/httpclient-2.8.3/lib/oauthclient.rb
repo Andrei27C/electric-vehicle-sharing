@@ -63,7 +63,7 @@ class OAuthClient < HTTPClient
   # request_token_secret:: a request secret String. See get_access_token.
   # verifier:: a verifier tag String.
   #
-  # When the request succeeds and the server returns a pair of access token
+  # When the request succeeds and the app returns a pair of access token
   # and secret, oauth_config.token and oauth_token.secret are updated with
   # the access token. Then you can call OAuthClient#get, #post, #delete, etc.
   # All requests are signed.

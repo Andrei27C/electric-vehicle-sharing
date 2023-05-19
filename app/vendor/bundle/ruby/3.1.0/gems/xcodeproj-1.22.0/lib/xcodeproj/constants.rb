@@ -90,8 +90,8 @@ module Xcodeproj
     FILE_TYPES_BY_EXTENSION = {
       'a'            => 'archive.ar',
       'apns'         => 'text',
-      'server'          => 'wrapper.application',
-      'appex'        => 'wrapper.server-extension',
+      'app'          => 'wrapper.application',
+      'appex'        => 'wrapper.app-extension',
       'bundle'       => 'wrapper.plug-in',
       'cpp'          => 'sourcecode.cpp.cpp',
       'dylib'        => 'compiled.mach-o.dylib',
@@ -153,25 +153,25 @@ module Xcodeproj
       :octest_bundle                         => 'com.apple.product-type.bundle',
       :unit_test_bundle                      => 'com.apple.product-type.bundle.unit-test',
       :ui_test_bundle                        => 'com.apple.product-type.bundle.ui-testing',
-      :app_extension                         => 'com.apple.product-type.server-extension',
+      :app_extension                         => 'com.apple.product-type.app-extension',
       :command_line_tool                     => 'com.apple.product-type.tool',
       :watch_app                             => 'com.apple.product-type.application.watchapp',
       :watch2_app                            => 'com.apple.product-type.application.watchapp2',
       :watch2_app_container                  => 'com.apple.product-type.application.watchapp2-container',
       :watch_extension                       => 'com.apple.product-type.watchkit-extension',
       :watch2_extension                      => 'com.apple.product-type.watchkit2-extension',
-      :tv_extension                          => 'com.apple.product-type.tv-server-extension',
+      :tv_extension                          => 'com.apple.product-type.tv-app-extension',
       :messages_application                  => 'com.apple.product-type.application.messages',
-      :messages_extension                    => 'com.apple.product-type.server-extension.messages',
-      :sticker_pack                          => 'com.apple.product-type.server-extension.messages-sticker-pack',
+      :messages_extension                    => 'com.apple.product-type.app-extension.messages',
+      :sticker_pack                          => 'com.apple.product-type.app-extension.messages-sticker-pack',
       :xpc_service                           => 'com.apple.product-type.xpc-service',
     }.freeze
 
     # @return [Hash] The extensions or the various product UTIs.
     #
     PRODUCT_UTI_EXTENSIONS = {
-      :application                           => 'server',
-      :application_on_demand_install_capable => 'server',
+      :application                           => 'app',
+      :application_on_demand_install_capable => 'app',
       :framework                             => 'framework',
       :dynamic_library                       => 'dylib',
       :static_library                        => 'a',
@@ -180,12 +180,12 @@ module Xcodeproj
       :unit_test_bundle                      => 'xctest',
       :ui_test_bundle                        => 'xctest',
       :app_extension                         => 'appex',
-      :messages_application                  => 'server',
+      :messages_application                  => 'app',
       :messages_extension                    => 'appex',
       :sticker_pack                          => 'appex',
       :watch2_extension                      => 'appex',
-      :watch2_app                            => 'server',
-      :watch2_app_container                  => 'server',
+      :watch2_app                            => 'app',
+      :watch2_app_container                  => 'app',
     }.freeze
 
     # @return [Hash] The common build settings grouped by platform, and build

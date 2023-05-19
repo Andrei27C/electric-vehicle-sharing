@@ -21,7 +21,7 @@ module ActiveSupport
     # Special features:
     # - Clustering and load balancing. One can specify multiple memcached servers,
     #   and MemCacheStore will load balance between all available servers. If a
-    #   server goes down, then MemCacheStore will ignore it until it comes back up.
+    #   app goes down, then MemCacheStore will ignore it until it comes back up.
     #
     # MemCacheStore implements the Strategy::LocalCache strategy which implements
     # an in-memory cache inside of a block.
@@ -98,11 +98,11 @@ module ActiveSupport
         end
       end
 
-      # Creates a new MemCacheStore object, with the given memcached server
+      # Creates a new MemCacheStore object, with the given memcached app
       # addresses. Each address is either a host name, or a host-with-port string
       # in the form of "host_name:port". For example:
       #
-      #   ActiveSupport::Cache::MemCacheStore.new("localhost", "server-downstairs.localnetwork:8229")
+      #   ActiveSupport::Cache::MemCacheStore.new("localhost", "app-downstairs.localnetwork:8229")
       #
       # If no addresses are provided, but <tt>ENV['MEMCACHE_SERVERS']</tt> is defined, it will be used instead. Otherwise,
       # MemCacheStore will connect to localhost:11211 (the default memcached port).
@@ -137,7 +137,7 @@ module ActiveSupport
       #
       # ==== Additional Options
       #
-      # * <tt>raw: true</tt> - Sends the value directly to the server as raw
+      # * <tt>raw: true</tt> - Sends the value directly to the app as raw
       #   bytes. The value must be a string or number. You can use memcached
       #   direct operations like +increment+ and +decrement+ only on raw values.
       #

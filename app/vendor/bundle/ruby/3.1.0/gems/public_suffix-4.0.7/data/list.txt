@@ -459,7 +459,7 @@ aju.br
 am.br
 anani.br
 aparecida.br
-server.br
+app.br
 arq.br
 art.br
 ato.br
@@ -7285,8 +7285,8 @@ aol
 // apartments : 2014-12-11 Binky Moon, LLC
 apartments
 
-// server : 2015-05-14 Charleston Road Registry Inc.
-server
+// app : 2015-05-14 Charleston Road Registry Inc.
+app
 
 // apple : 2015-05-14 Apple Inc.
 apple
@@ -10855,7 +10855,7 @@ rs.ba
 // Banzai Cloud
 // Submitted by Janos Matyas <info@banzaicloud.com>
 *.banzai.cloud
-server.banzaicloud.io
+app.banzaicloud.io
 *.backyards.banzaicloud.io
 
 // BASE, Inc. : https://binc.jp
@@ -10873,7 +10873,7 @@ base.shop
 
 // Beget Ltd
 // Submitted by Lev Nekrasov <lnekrasov@beget.com>
-*.beget.server
+*.beget.app
 
 // BetaInABox
 // Submitted by Adrian <adrian@betainabox.com>
@@ -11035,8 +11035,8 @@ cleverapps.io
 
 // Clerk : https://www.clerk.dev
 // Submitted by Colin Sidoti <systems@clerk.dev>
-clerk.server
-clerkstage.server
+clerk.app
+clerkstage.app
 *.lcl.dev
 *.lclstage.dev
 *.stg.dev
@@ -11077,7 +11077,7 @@ workers.dev
 
 // Clovyr : https://clovyr.io
 // Submitted by Patrick Nielsen <patrick@clovyr.io>
-wnext.server
+wnext.app
 
 // co.ca : http://registry.co.ca/
 co.ca
@@ -11147,7 +11147,7 @@ internet-dns.de
 l-o-g-i-n.de
 dynamic-dns.info
 feste-ip.net
-knx-server.net
+knx-app.net
 static-access.net
 
 // Craynic, s.r.o. : http://www.craynic.com/
@@ -11183,7 +11183,7 @@ cyon.site
 // Submitted by Skylar MacDonald <skylar@dangerscience.com>
 fnwk.site
 folionetwork.site
-platform0.server
+platform0.app
 
 // Daplie, Inc : https://daplie.com
 // Submitted by AJ ONeal <aj@daplie.com>
@@ -11248,7 +11248,7 @@ dedyn.io
 
 // Deta: https://www.deta.sh/
 // Submitted by Aavash Shrestha <aavash@deta.sh>
-deta.server
+deta.app
 deta.dev
 
 // Diher Solutions : https://diher.solutions
@@ -11322,7 +11322,7 @@ dyndns-mail.com
 dyndns-office.com
 dyndns-pics.com
 dyndns-remote.com
-dyndns-server.com
+dyndns-app.com
 dyndns-web.com
 dyndns-wiki.com
 dyndns-work.com
@@ -11433,7 +11433,7 @@ from-wy.com
 ftpaccess.cc
 fuettertdasnetz.de
 game-host.org
-game-server.cc
+game-app.cc
 getmyip.com
 gets-it.net
 go.dyndns.org
@@ -11601,7 +11601,7 @@ dyndns1.de
 dyn-ip24.de
 home-webserver.de
 dyn.home-webserver.de
-myhome-server.de
+myhome-app.de
 ddnss.org
 
 // Definima : http://www.definima.com/
@@ -11609,9 +11609,9 @@ ddnss.org
 definima.net
 definima.io
 
-// DigitalOcean App Platform : https://www.digitalocean.com/products/server-platform/
+// DigitalOcean App Platform : https://www.digitalocean.com/products/app-platform/
 // Submitted by Braxton Huggins <psl-maintainers@digitalocean.com>
-ondigitalocean.server
+ondigitalocean.app
 
 // DigitalOcean Spaces : https://www.digitalocean.com/products/spaces/
 // Submitted by Robin H. Johnson <psl-maintainers@digitalocean.com>
@@ -11670,7 +11670,7 @@ tuleap-partners.com
 
 // Encoretivity AB: https://encore.dev
 // Submitted by André Eriksson <andre@encore.dev>
-encr.server
+encr.app
 encoreapi.com
 
 // ECG Robotics, Inc: https://ecgrobotics.org
@@ -11855,7 +11855,7 @@ u.channelsdvr.net
 
 // Fastly Inc. : http://www.fastly.com/
 // Submitted by Fastly Security <security@fastly.com>
-edgecompute.server
+edgecompute.app
 fastly-terrarium.com
 fastlylb.net
 map.fastlylb.net
@@ -11869,7 +11869,7 @@ global.ssl.fastly.net
 
 // FASTVPS EESTI OU : https://fastvps.ru/
 // Submitted by Likhachev Vasiliy <lihachev@fastvps.ru>
-fastvps-server.com
+fastvps-app.com
 fastvps.host
 myfast.host
 fastvps.site
@@ -11880,8 +11880,8 @@ myfast.space
 fedorainfracloud.org
 fedorapeople.org
 cloud.fedoraproject.org
-server.os.fedoraproject.org
-server.os.stg.fedoraproject.org
+app.os.fedoraproject.org
+app.os.stg.fedoraproject.org
 
 // FearWorks Media Ltd. : https://fearworksmedia.co.uk
 // submitted by Keith Fairley <domains@fearworksmedia.co.uk>
@@ -11913,7 +11913,7 @@ firebaseapp.com
 
 // Firewebkit : https://www.firewebkit.com
 // Submitted by Majid Qureshi <mqureshi@amrayn.com>
-fireweb.server
+fireweb.app
 
 // FLAP : https://www.flap.cloud
 // Submitted by Louis Chemineau <louis@chmn.me>
@@ -11921,7 +11921,7 @@ flap.id
 
 // FlashDrive : https://flashdrive.io
 // Submitted by Eric Chan <support@flashdrive.io>
-onflashdrive.server
+onflashdrive.app
 fldrv.com
 
 // fly.io: https://fly.io
@@ -11941,7 +11941,7 @@ id.forgerock.io
 
 // Framer : https://www.framer.com
 // Submitted by Koen Rouwhorst <koenrh@framer.com>
-framer.server
+framer.app
 framercanvas.com
 
 // Frusky MEDIA&PR : https://www.frusky.de
@@ -12184,9 +12184,9 @@ goip.de
 
 // Google, Inc.
 // Submitted by Eduardo Vela <evn@google.com>
-run.server
-a.run.server
-web.server
+run.app
+a.run.app
+web.app
 *.0emm.com
 appspot.com
 *.r.appspot.com
@@ -12308,8 +12308,8 @@ hashbang.sh
 
 // Hasura : https://hasura.io
 // Submitted by Shahidh K Muhammed <shahidh@hasura.io>
-hasura.server
-hasura-server.io
+hasura.app
+hasura-app.io
 
 // Heilbronn University of Applied Sciences - Faculty Informatics (GitLab Pages): https://www.hs-heilbronn.de
 // Submitted by Richard Zowalla <mi-admin@hs-heilbronn.de>
@@ -12500,8 +12500,8 @@ hidora.com
 paas.hosted-by-previder.com
 rag-cloud.hosteur.com
 rag-cloud-ch.hosteur.com
-jcloud.ik-server.com
-jcloud-ver-jpc.ik-server.com
+jcloud.ik-app.com
+jcloud-ver-jpc.ik-app.com
 demo.jelastic.com
 kilatiron.com
 paas.massivegrid.com
@@ -12624,7 +12624,7 @@ webthings.io
 // LCube - Professional hosting e.K. : https://www.lcube-webhosting.de
 // Submitted by Lars Laehn <info@lcube.de>
 git-repos.de
-lcube-server.de
+lcube-app.de
 svn-repos.de
 
 // Leadpages : https://www.leadpages.net
@@ -12647,9 +12647,9 @@ co.network
 co.place
 co.technology
 
-// Lightmaker Property Manager, Inc. : https://server.lmpm.com/
+// Lightmaker Property Manager, Inc. : https://app.lmpm.com/
 // Submitted by Greg Holland <greg.holland@lmpm.com>
-server.lmpm.com
+app.lmpm.com
 
 // linkyard ldt: https://www.linkyard.ch/
 // Submitted by Mario Siegenthaler <mario.siegenthaler@linkyard.ch>
@@ -12677,7 +12677,7 @@ localzone.xyz
 
 // Log'in Line : https://www.loginline.com/
 // Submitted by Rémi Mach <remi.mach@loginline.com>
-loginline.server
+loginline.app
 loginline.dev
 loginline.io
 loginline.services
@@ -12881,7 +12881,7 @@ cloud.nospamproxy.com
 
 // Netlify : https://www.netlify.com
 // Submitted by Jessica Parsons <jessica@netlify.com>
-netlify.server
+netlify.app
 
 // Neustar Inc.
 // Submitted by Trung Tran <Trung.Tran@neustar.biz>
@@ -12899,14 +12899,14 @@ nh-serv.co.uk
 // Submitted by Jeff Wheelhouse <support@nearlyfreespeech.net>
 nfshost.com
 
-// Noop : https://noop.server
+// Noop : https://noop.app
 // Submitted by Nathaniel Schweinberg <noop@rearc.io>
-*.developer.server
-noop.server
+*.developer.app
+noop.app
 
 // Northflank Ltd. : https://northflank.com/
 // Submitted by Marco Suter <marco@northflank.com>
-*.northflank.server
+*.northflank.app
 *.build.run
 *.code.run
 *.database.run
@@ -13192,8 +13192,8 @@ us.platform.sh
 
 // Platter: https://platter.dev
 // Submitted by Patrick Flor <patrick@platter.dev>
-platter-server.com
-platter-server.dev
+platter-app.com
+platter-app.dev
 platterp.us
 
 // Plesk : https://www.plesk.com/
@@ -13336,7 +13336,7 @@ rhcloud.com
 
 // Render : https://render.com
 // Submitted by Anurag Goel <dev@render.com>
-server.render.com
+app.render.com
 onrender.com
 
 // Repl.it : https://repl.it
@@ -13667,7 +13667,7 @@ direct.quickconnect.to
 tabitorder.co.il
 
 // TAIFUN Software AG : http://taifun-software.de
-// Submitted by Bjoern Henke <dev-server@taifun-software.de>
+// Submitted by Bjoern Henke <dev-app@taifun-software.de>
 taifun-dns.de
 
 // Tailscale Inc. : https://www.tailscale.com
@@ -13693,7 +13693,7 @@ s3.teckids.org
 
 // Telebit : https://telebit.cloud
 // Submitted by AJ ONeal <aj@telebit.cloud>
-telebit.server
+telebit.app
 telebit.io
 *.telebit.xyz
 
@@ -13793,7 +13793,7 @@ synology-ds.de
 
 // Typedream : https://typedream.com
 // Submitted by Putri Karunia <putri@typedream.com>
-typedream.server
+typedream.app
 
 // Typeform : https://www.typeform.com
 // Submitted by Sergi Ferriz <sergi.ferriz@typeform.com>
@@ -13835,7 +13835,7 @@ lib.de.us
 
 // Vercel, Inc : https://vercel.com/
 // Submitted by Connor Davis <security@vercel.com>
-vercel.server
+vercel.app
 vercel.dev
 now.sh
 
@@ -13865,7 +13865,7 @@ us.ax
 xy.ax
 nl.ci
 xx.gl
-server.gp
+app.gp
 blog.gt
 de.gt
 to.gt
@@ -13913,7 +13913,7 @@ wafflecell.com
 // Submitted by Apostolos Tsakpinis <apostolos.tsakpinis@gmail.com>
 reserve-online.net
 reserve-online.com
-bookonline.server
+bookonline.app
 hotelwithflight.com
 
 // WeDeploy by Liferay, Inc. : https://www.wedeploy.com

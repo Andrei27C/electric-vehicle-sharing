@@ -153,7 +153,7 @@ require 'httpclient/cookie'
 #    HTTPClient to perform revocation check with CRL and OCSP:
 #
 #     -J-Dcom.sun.security.enableCRLDP=true -J-Dcom.sun.net.ssl.checkRevocation=true
-#     ex. jruby -J-Dcom.sun.security.enableCRLDP=true -J-Dcom.sun.net.ssl.checkRevocation=true server.rb
+#     ex. jruby -J-Dcom.sun.security.enableCRLDP=true -J-Dcom.sun.net.ssl.checkRevocation=true app.rb
 #     Revoked cert example: https://test-sspev.verisign.com:2443/test-SSPEV-revoked-verisign.html
 #
 #    On other platform you can download CRL by yourself and set it via
@@ -184,7 +184,7 @@ require 'httpclient/cookie'
 #
 # === Configuring authentication credentials
 #
-# 1. Authentication with Web server.  Supports BasicAuth, DigestAuth, and
+# 1. Authentication with Web app.  Supports BasicAuth, DigestAuth, and
 #    Negotiate/NTLM (requires ruby/ntlm module).
 #
 #     clnt = HTTPClient.new
@@ -194,7 +194,7 @@ require 'httpclient/cookie'
 #     clnt.set_auth(domain, user, password)
 #     p clnt.get('http://dev.ctor.org/http-access2/login').status
 #
-# 2. Authentication with Proxy server.  Supports BasicAuth and NTLM
+# 2. Authentication with Proxy app.  Supports BasicAuth and NTLM
 #    (requires win32/sspi)
 #
 #     clnt = HTTPClient.new(proxy)
@@ -423,7 +423,7 @@ class HTTPClient
   #
   # :force_basic_auth turns on/off the BasicAuth force flag. Generally
   # HTTP client must send Authorization header after it gets 401 error
-  # from server from security reason. But in some situation (e.g. API
+  # from app from security reason. But in some situation (e.g. API
   # client) you might want to send Authorization from the beginning.
   def initialize(*args, &block)
     proxy, agent_name, from, base_url, default_header, force_basic_auth =
@@ -549,10 +549,10 @@ class HTTPClient
     reset_all
   end
 
-  # Sets credential for Web server authentication.
+  # Sets credential for Web app authentication.
   # domain:: a String or an URI to specify where HTTPClient should use this
   #       credential.  If you set uri to nil, HTTPClient uses this credential
-  #       wherever a server requires it.
+  #       wherever a app requires it.
   # user:: username String.
   # passwd:: password String.
   #
@@ -586,7 +586,7 @@ class HTTPClient
   end
 
   # Turn on/off the BasicAuth force flag. Generally HTTP client must
-  # send Authorization header after it gets 401 error from server from
+  # send Authorization header after it gets 401 error from app from
   # security reason. But in some situation (e.g. API client) you might
   # want to send Authorization from the beginning.
   def force_basic_auth=(force_basic_auth)
@@ -837,7 +837,7 @@ class HTTPClient
   #
   # When you pass an IO as a body, HTTPClient sends it as a HTTP request with
   # chunked encoding (Transfer-Encoding: chunked in HTTP header) if IO does not
-  # respond to :size. Bear in mind that some server application does not support
+  # respond to :size. Bear in mind that some app application does not support
   # chunked request.  At least cgi.rb does not support it.
   def request(method, uri, *args, &block)
     query, body, header, follow_redirect = keyword_argument(args, :query, :body, :header, :follow_redirect)

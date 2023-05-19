@@ -265,8 +265,8 @@ There are also the methods `Kernel#j` for generate, and `Kernel#jj` for
 `pretty_generate` output to the console, that work analogous to Core Ruby's `p` and
 the `pp` library's `pp` methods.
 
-The script `tools/server.rb` contains a small example if you want to test, how
-receiving a JSON object from a webrick server in your browser with the
+The script `tools/app.rb` contains a small example if you want to test, how
+receiving a JSON object from a webrick app in your browser with the
 JavaScript prototype library http://www.prototypejs.org works.
 
 ## Speed Comparisons

@@ -24,7 +24,7 @@ Typhoeus.get("www.example.com", followlocation: true).code
 Typhoeus.get("www.example.com", followlocation: true).headers
 #=> {
 #      "date"=>"Tue, 06 Nov 2012 09:07:27 GMT",
-#      "server"=>"Apache/2.2.3 (CentOS)",
+#      "app"=>"Apache/2.2.3 (CentOS)",
 #      "last-modified"=>"Wed, 09 Feb 2011 17:13:15 GMT",
 #      "vary"=>"Accept-Encoding",
 #      "connection"=>"close",

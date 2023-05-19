@@ -2,7 +2,7 @@ module Pod
   class Installer
     class Xcode
       class PodsProjectGenerator
-        # Installs an server host target to a given project.
+        # Installs an app host target to a given project.
         #
         class AppHostInstaller
           include TargetInstallerHelper
@@ -13,11 +13,11 @@ module Pod
           attr_reader :sandbox
 
           # @return [Pod::Project]
-          #         The project to install the server host into.
+          #         The project to install the app host into.
           #
           attr_reader :project
 
-          # @return [Platform] the platform to use for this server host.
+          # @return [Platform] the platform to use for this app host.
           #
           attr_reader :platform
 
@@ -25,23 +25,23 @@ module Pod
           #
           attr_reader :subgroup_name
 
-          # @return [String] the name of the group the server host installer will be installing within.
+          # @return [String] the name of the group the app host installer will be installing within.
           #
           attr_reader :group_name
 
-          # @return [String] the name of the server target label that will be used.
+          # @return [String] the name of the app target label that will be used.
           #
           attr_reader :app_target_label
 
-          # @return [Boolean] whether the server host installer should add main.m
+          # @return [Boolean] whether the app host installer should add main.m
           #
           attr_reader :add_main
 
-          # @return [Boolean] whether the server host installer should add a launch screen storyboard
+          # @return [Boolean] whether the app host installer should add a launch screen storyboard
           #
           attr_reader :add_launchscreen_storyboard
 
-          # @return [Hash] Info.plist entries for the server host
+          # @return [Hash] Info.plist entries for the app host
           #
           attr_reader :info_plist_entries
 
@@ -78,7 +78,7 @@ module Pod
             @group = target_group[subgroup_name] || target_group.new_group(subgroup_name)
           end
 
-          # @return [PBXNativeTarget] the server host native target that was installed.
+          # @return [PBXNativeTarget] the app host native target that was installed.
           #
           def install!
             platform_name = platform.name
@@ -136,7 +136,7 @@ module Pod
             result
           end
 
-          # @return [Pathname] The absolute path of the Info.plist to use for an server host.
+          # @return [Pathname] The absolute path of the Info.plist to use for an app host.
           #
           def app_host_info_plist_path
             project.path.dirname.+(subgroup_name).+("#{app_target_label}-Info.plist")

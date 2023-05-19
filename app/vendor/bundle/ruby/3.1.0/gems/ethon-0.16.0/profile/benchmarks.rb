@@ -8,7 +8,7 @@ require 'net/http'
 require 'cgi'
 require 'benchmark/ips'
 
-require_relative '../spec/support/server'
+require_relative '../spec/support/app'
 require_relative '../spec/support/localhost_server'
 
 LocalhostServer.new(TESTSERVER.new, 3000)

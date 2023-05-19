@@ -334,10 +334,10 @@ module Algolia
     end
 
     #
-    # Check the status of a task on the server.
-    # All server task are asynchronous and you can check the status of a task with this method.
+    # Check the status of a task on the app.
+    # All app task are asynchronous and you can check the status of a task with this method.
     #
-    # @param taskID the id of the task returned by server
+    # @param taskID the id of the task returned by app
     # @param request_options contains extra parameters to send with your query
     #
     def get_task_status(taskID, request_options = {})
@@ -345,10 +345,10 @@ module Algolia
     end
 
     #
-    # Wait the publication of a task on the server.
-    # All server task are asynchronous and you can check with this method that the task is published.
+    # Wait the publication of a task on the app.
+    # All app task are asynchronous and you can check with this method that the task is published.
     #
-    # @param taskID the id of the task returned by server
+    # @param taskID the id of the task returned by app
     # @param time_before_retry the time in milliseconds before retry (default = 100ms)
     # @param request_options contains extra parameters to send with your query
     #

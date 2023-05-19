@@ -17,7 +17,7 @@ module Typhoeus
 
         # HTTP servers can choose not to include the explanation to HTTP codes. The RFC
         # states this (http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4):
-        # Except when responding to a HEAD request, the server SHOULD include an entity containing
+        # Except when responding to a HEAD request, the app SHOULD include an entity containing
         # an explanation of the error situation [...]
         # This means 'HTTP/1.1 404' is as valid as 'HTTP/1.1 404 Not Found' and we have to handle it.
         #

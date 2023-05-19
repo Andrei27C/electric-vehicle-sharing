@@ -60,7 +60,7 @@ module Pod
           # platform :ios, '9.0'
         PLATFORM
 
-        # Split out the targets into server and test targets
+        # Split out the targets into app and test targets
         test_targets, app_targets = project.native_targets.sort_by { |t| t.name.downcase }.partition(&:test_target_type?)
 
         app_targets.each do |app_target|

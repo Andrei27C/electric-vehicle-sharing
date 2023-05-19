@@ -11,7 +11,7 @@ Currently maintained by @radar.
 
 ### Rails
 
-You will most commonly use this library within a Rails server.
+You will most commonly use this library within a Rails app.
 
 [See the Rails Guide](https://guides.rubyonrails.org/i18n.html) for an example of its usage.
 

@@ -257,7 +257,7 @@
 ##### Enhancements
 
 * The `--allow-warnings` flag to `pod trunk push` is now propagated to the trunk
-  server.  
+  app.  
   [Samuel Giddins](https://github.com/segiddins)
   [CocoaPods#3855](https://github.com/CocoaPods/CocoaPods/issues/3855)
 

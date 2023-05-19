@@ -59,7 +59,7 @@ module Xcodeproj
       end
     end
 
-    # Convenience method to quickly add server and test targets to a new scheme.
+    # Convenience method to quickly add app and test targets to a new scheme.
     #
     # It will add the runnable_target to the Build, Launch and Profile actions
     # and the test_target to the Build and Test actions

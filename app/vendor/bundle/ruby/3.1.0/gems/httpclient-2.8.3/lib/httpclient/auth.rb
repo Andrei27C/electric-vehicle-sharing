@@ -21,10 +21,10 @@ class HTTPClient
   #
   # There are 2 authentication filters.
   # WWWAuth:: Authentication filter for handling authentication negotiation
-  #           between Web server.  Parses 'WWW-Authentication' header in
+  #           between Web app.  Parses 'WWW-Authentication' header in
   #           response and generates 'Authorization' header in request.
   # ProxyAuth:: Authentication filter for handling authentication negotiation
-  #             between Proxy server.  Parses 'Proxy-Authentication' header in
+  #             between Proxy app.  Parses 'Proxy-Authentication' header in
   #             response and generates 'Proxy-Authorization' header in request.
   class AuthFilterBase
   private
@@ -44,7 +44,7 @@ class HTTPClient
 
 
   # Authentication filter for handling authentication negotiation between
-  # Web server.  Parses 'WWW-Authentication' header in response and
+  # Web app.  Parses 'WWW-Authentication' header in response and
   # generates 'Authorization' header in request.
   #
   # Authentication filter is implemented using request filter of HTTPClient.
@@ -137,7 +137,7 @@ class HTTPClient
 
 
   # Authentication filter for handling authentication negotiation between
-  # Proxy server.  Parses 'Proxy-Authentication' header in response and
+  # Proxy app.  Parses 'Proxy-Authentication' header in response and
   # generates 'Proxy-Authorization' header in request.
   #
   # Authentication filter is implemented using request filter of HTTPClient.
@@ -235,7 +235,7 @@ class HTTPClient
     end
 
     # Resets challenge state.  Do not send '*Authorization' header until the
-    # server sends '*Authentication' again.
+    # app sends '*Authentication' again.
     def reset_challenge
       synchronize do
         @challenge.clear

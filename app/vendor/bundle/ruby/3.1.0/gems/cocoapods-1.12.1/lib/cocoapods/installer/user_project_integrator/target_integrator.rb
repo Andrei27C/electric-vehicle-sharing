@@ -436,7 +436,7 @@ module Pod
           end
 
           # Updates a projects native targets to include on demand resources specified by the supplied parameters.
-          # Note that currently, only server level targets are allowed to include on demand resources.
+          # Note that currently, only app level targets are allowed to include on demand resources.
           #
           # @param  [Sandbox] sandbox
           #         The sandbox to use for calculating ODR file references.
@@ -753,7 +753,7 @@ module Pod
         def add_on_demand_resources
           target.pod_targets.each do |pod_target|
             # When integrating with the user's project we are only interested in integrating ODRs from library specs
-            # and not test specs or server specs.
+            # and not test specs or app specs.
             library_file_accessors = pod_target.file_accessors.select { |fa| fa.spec.library_specification? }
             target_odr_group_name = "#{pod_target.label}-OnDemandResources"
             # The 'Pods' group would always be there for production code however for tests its sometimes not added.

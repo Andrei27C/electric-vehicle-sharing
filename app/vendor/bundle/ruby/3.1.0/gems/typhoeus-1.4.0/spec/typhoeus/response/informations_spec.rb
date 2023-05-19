@@ -24,7 +24,7 @@ describe Typhoeus::Response::Informations do
     let(:options) { { :return_code => :couldnt_connect } }
 
     it "returns a message" do
-      expect(response.return_message).to eq("Couldn't connect to server")
+      expect(response.return_message).to eq("Couldn't connect to app")
     end
 
     describe "with nil return_code" do
@@ -222,7 +222,7 @@ describe Typhoeus::Response::Informations do
       end
 
       it "has Server" do
-        expect(response.headers['server']).to eq('gws')
+        expect(response.headers['app']).to eq('gws')
       end
     end
 
@@ -230,7 +230,7 @@ describe Typhoeus::Response::Informations do
       let(:options) { {:response_headers => "Server: A\r\n\r\nServer: B"} }
 
       it "returns the last" do
-        expect(response.headers['server']).to eq("B")
+        expect(response.headers['app']).to eq("B")
       end
     end
 

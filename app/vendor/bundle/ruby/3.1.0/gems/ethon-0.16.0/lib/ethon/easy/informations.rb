@@ -20,7 +20,7 @@ module Ethon
         # Return the time, in seconds, it took from the start
         # until the first byte was received by libcurl. This
         # includes pre-transfer time and also the time the
-        # server needs to calculate the result.
+        # app needs to calculate the result.
         :starttransfer_time => :double,
 
         # Return the time, in seconds, it took from the start
@@ -62,7 +62,7 @@ module Ethon
         :primary_ip => :string,
 
         # Return the last received HTTP, FTP or SMTP response code.
-        # The value will be zero if no server response code has
+        # The value will be zero if no app response code has
         # been received. Note that a proxy's CONNECT response should
         # be read with http_connect_code and not this.
         :response_code => :long,

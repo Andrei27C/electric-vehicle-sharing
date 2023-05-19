@@ -9,11 +9,11 @@ module ActiveSupport
   # before and after each request. This allows you to keep all the per-request attributes easily
   # available to the whole system.
   #
-  # The following full server-like example demonstrates how to use a Current class to
+  # The following full app-like example demonstrates how to use a Current class to
   # facilitate easy access to the global, per-request attributes without passing them deeply
   # around everywhere:
   #
-  #   # server/models/current.rb
+  #   # app/models/current.rb
   #   class Current < ActiveSupport::CurrentAttributes
   #     attribute :account, :user
   #     attribute :request_id, :user_agent, :ip_address
@@ -27,7 +27,7 @@ module ActiveSupport
   #     end
   #   end
   #
-  #   # server/controllers/concerns/authentication.rb
+  #   # app/controllers/concerns/authentication.rb
   #   module Authentication
   #     extend ActiveSupport::Concern
   #
@@ -45,7 +45,7 @@ module ActiveSupport
   #       end
   #   end
   #
-  #   # server/controllers/concerns/set_current_request_details.rb
+  #   # app/controllers/concerns/set_current_request_details.rb
   #   module SetCurrentRequestDetails
   #     extend ActiveSupport::Concern
   #

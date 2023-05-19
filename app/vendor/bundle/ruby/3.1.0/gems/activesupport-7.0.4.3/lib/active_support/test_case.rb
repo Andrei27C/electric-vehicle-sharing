@@ -71,7 +71,7 @@ module ActiveSupport
       #   parallelize(workers: :number_of_processors, with: :threads)
       #
       # The threaded parallelization uses minitest's parallel executor directly.
-      # The processes parallelization uses a Ruby DRb server.
+      # The processes parallelization uses a Ruby DRb app.
       #
       # Because parallelization presents an overhead, it is only enabled when the
       # number of tests to run is above the +threshold+ param. The default value is
@@ -103,7 +103,7 @@ module ActiveSupport
       end
 
       # Clean up hook for parallel testing. This can be used to drop databases
-      # if your server uses multiple write/read databases or other clean up before
+      # if your app uses multiple write/read databases or other clean up before
       # the tests finish. This runs before the forked process is closed.
       #
       # Note: this feature is not available with the threaded parallelization.

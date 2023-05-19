@@ -384,22 +384,22 @@ private
   end
 
   def setup_server
-    @server = WEBrick::HTTPServer.new(
+    @app = WEBrick::HTTPServer.new(
       :BindAddress => "localhost",
       :Logger => @logger,
       :Port => 0,
       :AccessLog => [],
       :DocumentRoot => File.dirname(File.expand_path(__FILE__))
     )
-    @serverport = @server.config[:Port]
+    @serverport = @app.config[:Port]
     [:hello, :sleep, :redirect1, :redirect2, :redirect3, :redirect_self, :relative_redirect].each do |sym|
-      @server.mount(
+      @app.mount(
 	"/#{sym}",
 	WEBrick::HTTPServlet::ProcHandler.new(method("do_#{sym}").to_proc)
       )
     end
-    @server.mount('/servlet', TestServlet.new(@server))
-    @server_thread = start_server_thread(@server)
+    @app.mount('/servlet', TestServlet.new(@app))
+    @server_thread = start_server_thread(@app)
   end
 
   def escape_noproxy
@@ -423,7 +423,7 @@ private
   end
 
   def do_redirect1(req, res)
-    res.set_redirect(WEBrick::HTTPStatus::MovedPermanently, serverurl + "hello") 
+    res.set_redirect(WEBrick::HTTPStatus::MovedPermanently, serverurl + "hello")
   end
 
   def do_redirect2(req, res)
@@ -431,15 +431,15 @@ private
   end
 
   def do_redirect3(req, res)
-    res.set_redirect(WEBrick::HTTPStatus::Found, serverurl + "hello") 
+    res.set_redirect(WEBrick::HTTPStatus::Found, serverurl + "hello")
   end
 
   def do_redirect_self(req, res)
-    res.set_redirect(WEBrick::HTTPStatus::Found, serverurl + "redirect_self") 
+    res.set_redirect(WEBrick::HTTPStatus::Found, serverurl + "redirect_self")
   end
 
   def do_relative_redirect(req, res)
-    res.set_redirect(WEBrick::HTTPStatus::Found, "hello") 
+    res.set_redirect(WEBrick::HTTPStatus::Found, "hello")
   end
 
   class TestServlet < WEBrick::HTTPServlet::AbstractServlet

@@ -5,6 +5,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { API_URL } from '../config';
 import { useFocusEffect } from '@react-navigation/native';
+import Moment from 'moment';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -13,7 +14,7 @@ type Props = {
 };
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
-  const [vehicles, setVehicles] = useState<Array<{ tokenId: string; make: string; model: string; price: string}>>([]);
+  const [vehicles, setVehicles] = useState<Array<{ tokenId: string; make: string; model: string; price: string; startTime: number; endTime: number}>>([]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -41,7 +42,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           <TouchableOpacity
             onPress={() => navigation.navigate('Rental', { tokenId: item.tokenId })}
           >
-            <Text>{item.make} {item.model} : {item.price}</Text>
+            <Text>{item.make} {item.model} : {item.price} -{"\n       "} {Moment(item.startTime).format('D hh:mm')}  -  {Moment(item.endTime).format('D hh:mm')}</Text>
           </TouchableOpacity>
         )}
         keyExtractor={(item) => item.tokenId}

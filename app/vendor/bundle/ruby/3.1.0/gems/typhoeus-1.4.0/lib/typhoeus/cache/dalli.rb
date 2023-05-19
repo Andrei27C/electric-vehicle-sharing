@@ -6,7 +6,7 @@ module Typhoeus
       #   Typhoeus::Config.cache = Typhoeus::Cache::Dalli.new
       #
       # @param [ Dalli::Client ] client
-      #   A connection to the cache server. Defaults to `Dalli::Client.new`
+      #   A connection to the cache app. Defaults to `Dalli::Client.new`
       # @param [ Hash ] options
       #   Options
       # @option options [ Integer ] :default_ttl

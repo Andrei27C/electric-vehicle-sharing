@@ -27,7 +27,7 @@ module Pod
           hash['platforms'] = platforms
         end
         specs_by_type = subspecs.group_by(&:spec_type)
-        all_appspecs = specs_by_type[:server] || []
+        all_appspecs = specs_by_type[:app] || []
         all_testspecs = specs_by_type[:test] || []
         all_subspecs = specs_by_type[:library] || []
 

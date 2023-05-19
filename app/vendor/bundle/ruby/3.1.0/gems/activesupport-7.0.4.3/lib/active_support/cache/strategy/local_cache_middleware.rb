@@ -16,17 +16,17 @@ module ActiveSupport
           def initialize(name, local_cache_key)
             @name = name
             @local_cache_key = local_cache_key
-            @server = nil
+            @app = nil
           end
 
-          def new(server)
-            @server = server
+          def new(app)
+            @app = app
             self
           end
 
           def call(env)
             LocalCacheRegistry.set_cache_for(local_cache_key, LocalStore.new)
-            response = @server.call(env)
+            response = @app.call(env)
             response[2] = ::Rack::BodyProxy.new(response[2]) do
               LocalCacheRegistry.set_cache_for(local_cache_key, nil)
             end

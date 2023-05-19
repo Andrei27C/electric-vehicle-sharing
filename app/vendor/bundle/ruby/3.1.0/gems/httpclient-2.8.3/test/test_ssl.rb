@@ -444,7 +444,7 @@ private
   def setup_server
     logger = Logger.new(STDERR)
     logger.level = Logger::Severity::FATAL	# avoid logging SSLError (ERROR level)
-    @server = WEBrick::HTTPServer.new(
+    @app = WEBrick::HTTPServer.new(
       :BindAddress => "localhost",
       :Logger => logger,
       :Port => 0,
@@ -452,20 +452,20 @@ private
       :DocumentRoot => DIR,
       :SSLEnable => true,
       :SSLCACertificateFile => File.join(DIR, 'ca.cert'),
-      :SSLCertificate => cert('server.cert'),
-      :SSLPrivateKey => key('server.key'),
+      :SSLCertificate => cert('app.cert'),
+      :SSLPrivateKey => key('app.key'),
       :SSLVerifyClient => nil, #OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT|OpenSSL::SSL::VERIFY_PEER,
       :SSLClientCA => cert('ca.cert'),
       :SSLCertName => nil
     )
-    @serverport = @server.config[:Port]
+    @serverport = @app.config[:Port]
     [:hello, :sleep].each do |sym|
-      @server.mount(
+      @app.mount(
         "/#{sym}",
         WEBrick::HTTPServlet::ProcHandler.new(method("do_#{sym}").to_proc)
       )
     end
-    @server_thread = start_server_thread(@server)
+    @server_thread = start_server_thread(@app)
   end
 
   def setup_server_with_ssl_version(ssl_version)
@@ -475,7 +475,7 @@ private
     end
     logger = Logger.new(STDERR)
     logger.level = Logger::Severity::FATAL	# avoid logging SSLError (ERROR level)
-    @server = WEBrick::HTTPServer.new(
+    @app = WEBrick::HTTPServer.new(
       :BindAddress => "localhost",
       :Logger => logger,
       :Port => 0,
@@ -483,24 +483,24 @@ private
       :DocumentRoot => DIR,
       :SSLEnable => true,
       :SSLCACertificateFile => File.join(DIR, 'ca.cert'),
-      :SSLCertificate => cert('server.cert'),
-      :SSLPrivateKey => key('server.key')
+      :SSLCertificate => cert('app.cert'),
+      :SSLPrivateKey => key('app.key')
     )
-    @server.ssl_context.ssl_version = ssl_version
-    @serverport = @server.config[:Port]
+    @app.ssl_context.ssl_version = ssl_version
+    @serverport = @app.config[:Port]
     [:hello].each do |sym|
-      @server.mount(
+      @app.mount(
         "/#{sym}",
         WEBrick::HTTPServlet::ProcHandler.new(method("do_#{sym}").to_proc)
       )
     end
-    @server_thread = start_server_thread(@server)
+    @server_thread = start_server_thread(@app)
   end
 
   def setup_server_with_server_cert(ca_cert, server_cert, server_key)
     logger = Logger.new(STDERR)
     logger.level = Logger::Severity::FATAL	# avoid logging SSLError (ERROR level)
-    @server = WEBrick::HTTPServer.new(
+    @app = WEBrick::HTTPServer.new(
       :BindAddress => "localhost",
       :Logger => logger,
       :Port => 0,
@@ -514,14 +514,14 @@ private
       :SSLClientCA => nil,
       :SSLCertName => nil
     )
-    @serverport = @server.config[:Port]
+    @serverport = @app.config[:Port]
     [:hello].each do |sym|
-      @server.mount(
+      @app.mount(
         "/#{sym}",
         WEBrick::HTTPServlet::ProcHandler.new(method("do_#{sym}").to_proc)
       )
     end
-    @server_thread = start_server_thread(@server)
+    @server_thread = start_server_thread(@app)
   end
 
   def do_hello(req, res)
@@ -536,12 +536,12 @@ private
     res.body = "sleep"
   end
 
-  def start_server_thread(server)
+  def start_server_thread(app)
     t = Thread.new {
       Thread.current.abort_on_exception = true
-      server.start
+      app.start
     }
-    while server.status != :Running
+    while app.status != :Running
       sleep 0.1
       unless t.alive?
 	t.join

@@ -43,7 +43,7 @@ module Helper
     @proxyio = StringIO.new
     @proxylogger = Logger.new(@proxyio)
     @proxylogger.level = Logger::Severity::DEBUG
-    @server = @proxyserver = @client = nil
+    @app = @proxyserver = @client = nil
     @server_thread = @proxyserver_thread = nil
     @serverport = Port
     @proxyport = ProxyPort
@@ -52,7 +52,7 @@ module Helper
   def teardown
     teardown_client if @client
     teardown_proxyserver if @proxyserver
-    teardown_server if @server
+    teardown_server if @app
   end
 
   def setup_client
@@ -83,7 +83,7 @@ module Helper
   end
 
   def teardown_server
-    @server.shutdown
+    @app.shutdown
     #@server_thread.kill
   end
 
@@ -92,12 +92,12 @@ module Helper
     #@proxyserver_thread.kill
   end
 
-  def start_server_thread(server)
+  def start_server_thread(app)
     t = Thread.new {
       Thread.current.abort_on_exception = true
-      server.start
+      app.start
     }
-    while server.status != :Running
+    while app.status != :Running
       Thread.pass
       unless t.alive?
         t.join

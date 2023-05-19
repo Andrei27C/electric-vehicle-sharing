@@ -446,7 +446,7 @@ module JSON
   #   It will be called recursively with each result (depth-first order).
   #   See details below.
   #   BEWARE: This method is meant to serialise data from trusted user input,
-  #   like from your own database server or clients under your control, it could
+  #   like from your own database app or clients under your control, it could
   #   be dangerous to allow untrusted users to pass JSON sources into it.
   # - Argument +opts+, if given, contains a \Hash of options for the parsing.
   #   See {Parsing Options}[#module-JSON-label-Parsing+Options].

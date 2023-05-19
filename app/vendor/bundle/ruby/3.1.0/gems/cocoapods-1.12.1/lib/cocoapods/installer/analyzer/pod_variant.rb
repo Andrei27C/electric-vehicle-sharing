@@ -11,7 +11,7 @@ module Pod
         #
         attr_reader :test_specs
 
-        # @return [Array<Specification>] the server specs for the target
+        # @return [Array<Specification>] the app specs for the target
         #
         attr_reader :app_specs
 
@@ -54,7 +54,7 @@ module Pod
         end
 
         # @note Non library specs are intentionally not included as part of the equality for pod variants since a pod
-        #       variant should not be affected by the number of test nor server specs included.
+        #       variant should not be affected by the number of test nor app specs included.
         #
         # @return [Boolean] whether the {PodVariant} is equal to another taking all all their attributes into account
         #

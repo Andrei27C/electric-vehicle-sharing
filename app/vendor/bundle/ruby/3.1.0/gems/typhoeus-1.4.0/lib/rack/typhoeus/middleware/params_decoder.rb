@@ -23,14 +23,14 @@ module Rack
       class ParamsDecoder
         include ParamsDecoder::Helper
 
-        def initialize(server)
-          @server = server
+        def initialize(app)
+          @app = app
         end
 
         def call(env)
           req = Rack::Request.new(env)
           decode(req.params).each_pair { |k, v| update_params req, k, v }
-          @server.call(env)
+          @app.call(env)
         end
 
         private

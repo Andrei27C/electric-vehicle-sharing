@@ -3,7 +3,7 @@ require 'algolia/error'
 module Algolia
   #
   # A class which encapsulates the HTTPS communication with the Algolia
-  # API server for cross-server operations.
+  # API app for cross-app operations.
   #
   class AccountClient
     class << self

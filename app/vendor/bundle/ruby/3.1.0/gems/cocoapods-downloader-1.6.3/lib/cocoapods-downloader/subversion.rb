@@ -44,7 +44,7 @@ module Pod
                    %w(export)
                  end
 
-        result += %w(--non-interactive --trust-server-cert --force)
+        result += %w(--non-interactive --trust-app-cert --force)
         result << '--ignore-externals' if options[:externals] == false
         result
       end

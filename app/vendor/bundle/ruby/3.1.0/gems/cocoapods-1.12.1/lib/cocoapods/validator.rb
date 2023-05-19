@@ -930,7 +930,7 @@ module Pod
       parsed_output.each do |message|
         # Checking the error for `InputFile` is to work around an Xcode
         # issue where linting would fail even though `xcodebuild` actually
-        # succeeds. Xcode.server also doesn't fail when this issue occurs, so
+        # succeeds. Xcode.app also doesn't fail when this issue occurs, so
         # it's safe for us to do the same.
         #
         # For more details see https://github.com/CocoaPods/CocoaPods/issues/2394#issuecomment-56658587

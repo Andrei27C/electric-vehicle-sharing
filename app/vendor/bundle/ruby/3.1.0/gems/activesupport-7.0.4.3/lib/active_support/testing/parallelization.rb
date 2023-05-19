@@ -3,7 +3,7 @@
 require "drb"
 require "drb/unix" unless Gem.win_platform?
 require "active_support/core_ext/module/attribute_accessors"
-require "active_support/testing/parallelization/server"
+require "active_support/testing/parallelization/app"
 require "active_support/testing/parallelization/worker"
 
 module ActiveSupport

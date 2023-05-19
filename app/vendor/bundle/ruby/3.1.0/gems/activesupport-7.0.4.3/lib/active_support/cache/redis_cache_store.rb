@@ -35,14 +35,14 @@ module ActiveSupport
     # Redis cache store.
     #
     # Deployment note: Take care to use a *dedicated Redis cache* rather
-    # than pointing this at your existing Redis server. It won't cope well
+    # than pointing this at your existing Redis app. It won't cope well
     # with mixed usage patterns and it won't expire cache entries by default.
     #
-    # Redis cache server setup guide: https://redis.io/topics/lru-cache
+    # Redis cache app setup guide: https://redis.io/topics/lru-cache
     #
     # * Supports vanilla Redis, hiredis, and Redis::Distributed.
     # * Supports Memcached-like sharding across Redises with Redis::Distributed.
-    # * Fault tolerant. If the Redis server is unavailable, no exceptions are
+    # * Fault tolerant. If the Redis app is unavailable, no exceptions are
     #   raised. Cache fetches are all misses and writes are dropped.
     # * Local cache. Hot in-memory primary cache within block/middleware scope.
     # * +read_multi+ and +write_multi+ support for Redis mget/mset. Use Redis::Distributed
@@ -131,7 +131,7 @@ module ActiveSupport
       #   :url    Array   ->  Redis::Distributed.new([{ url: … }, { url: … }, …])
       #
       # No namespace is set by default. Provide one if the Redis cache
-      # server is shared with other apps: <tt>namespace: 'myapp-cache'</tt>.
+      # app is shared with other apps: <tt>namespace: 'myapp-cache'</tt>.
       #
       # Compression is enabled by default with a 1kB threshold, so cached
       # values larger than 1kB are automatically compressed. Disable by
@@ -141,7 +141,7 @@ module ActiveSupport
       # No expiry is set on cache entries by default. Redis is expected to
       # be configured with an eviction policy that automatically deletes
       # least-recently or -frequently used keys when it reaches max memory.
-      # See https://redis.io/topics/lru-cache for cache server setup.
+      # See https://redis.io/topics/lru-cache for cache app setup.
       #
       # Race condition TTL is not set by default. This can be used to avoid
       # "thundering herd" cache writes when hot cache entries are expired.
@@ -215,7 +215,7 @@ module ActiveSupport
           redis.with do |c|
             pattern = namespace_key(matcher, options)
             cursor = "0"
-            # Fetch keys in batches using SCAN to avoid blocking the Redis server.
+            # Fetch keys in batches using SCAN to avoid blocking the Redis app.
             nodes = c.respond_to?(:nodes) ? c.nodes : [c]
 
             nodes.each do |node|

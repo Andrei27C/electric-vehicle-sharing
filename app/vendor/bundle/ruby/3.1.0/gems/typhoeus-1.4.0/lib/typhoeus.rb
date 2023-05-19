@@ -12,7 +12,7 @@ require 'typhoeus/response'
 require 'typhoeus/version'
 
 # If we are using any Rack-based application, then we need the Typhoeus rack
-# middleware to ensure our server is running properly.
+# middleware to ensure our app is running properly.
 if defined?(Rack)
   require "rack/typhoeus"
 end

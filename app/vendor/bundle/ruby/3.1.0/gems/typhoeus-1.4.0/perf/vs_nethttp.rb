@@ -8,10 +8,10 @@ hydra = Typhoeus::Hydra.new(max_concurrency: 3)
 
 if defined? require_relative
   require_relative '../spec/support/localhost_server.rb'
-  require_relative '../spec/support/server.rb'
+  require_relative '../spec/support/app.rb'
 else
   require '../spec/support/localhost_server.rb'
-  require '../spec/support/server.rb'
+  require '../spec/support/app.rb'
 end
 LocalhostServer.new(TESTSERVER.new, 3000)
 LocalhostServer.new(TESTSERVER.new, 3001)

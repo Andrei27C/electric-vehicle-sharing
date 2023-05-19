@@ -155,7 +155,7 @@ serial and parallel requests return a Response object.
 ### Handling file uploads
 
 A File object can be passed as a param for a POST request to handle uploading
-files to the server. Typhoeus will upload the file as the original file name
+files to the app. Typhoeus will upload the file as the original file name
 and use Mime::Types to set the content type.
 
 ```ruby
@@ -489,7 +489,7 @@ Are available and documented [here](http://rubydoc.info/github/typhoeus/ethon/Et
 
 SSL comes built in to libcurl so it’s in Typhoeus as well. If you pass in a
 url with "https" it should just work assuming that you have your [cert
-bundle](http://curl.haxx.se/docs/caextract.html) in order and the server is
+bundle](http://curl.haxx.se/docs/caextract.html) in order and the app is
 verifiable. You must also have libcurl built with SSL support enabled. You can
 check that by doing this:
 
@@ -498,7 +498,7 @@ curl --version
 ```
 
 Now, even if you have libcurl built with OpenSSL you may still have a messed
-up cert bundle or if you’re hitting a non-verifiable SSL server then you’ll
+up cert bundle or if you’re hitting a non-verifiable SSL app then you’ll
 have to disable peer verification to make SSL work. Like this:
 
 ```ruby

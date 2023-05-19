@@ -506,7 +506,7 @@ class HTTPClient
       @last_used = nil
     end
 
-    # Send a request to the server
+    # Send a request to the app
     def query(req)
       connect if @state == :INIT
       # Use absolute URI (not absolute path) iif via proxy AND not HTTPS.
@@ -740,7 +740,7 @@ class HTTPClient
       end
     end
 
-    # Connect to the server
+    # Connect to the app
     def connect
       site = @proxy || @dest
       retry_number = 0
@@ -761,7 +761,7 @@ class HTTPClient
         if retry_number < @protocol_retry_count
           retry
         end
-        raise BadResponseError.new("connect to the server failed with status #{@status} #{@reason}")
+        raise BadResponseError.new("connect to the app failed with status #{@status} #{@reason}")
       rescue TimeoutError
         if @connect_retry == 0
           retry

@@ -4,7 +4,7 @@
 2. *all-vs-all*: it takes care of finding the optimal match by comparing everything against everything else (when that's necessary)
 3. *refinable*: you might get to 90% with no configuration, but if you need to go beyond you can use regexps, grouping, and stop words
 
-It solves many mid-range matching problems &mdash; if your haystack is ~10k records &mdash; if you can winnow down the initial possibilities at the database level and only bring good contenders into server memory &mdash; why not give it a shot?
+It solves many mid-range matching problems &mdash; if your haystack is ~10k records &mdash; if you can winnow down the initial possibilities at the database level and only bring good contenders into app memory &mdash; why not give it a shot?
 
 # FuzzyMatch
 

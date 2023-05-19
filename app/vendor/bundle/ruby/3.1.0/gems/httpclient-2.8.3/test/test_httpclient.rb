@@ -840,20 +840,20 @@ EOS
   end
 
   def test_get_with_block_chunked_string_recycle
-    server = TCPServer.open('localhost', 0)
+    app = TCPServer.open('localhost', 0)
     server_thread = Thread.new {
       Thread.abort_on_exception = true
-      sock = server.accept
+      sock = app.accept
       create_keepalive_thread(1, sock)
     }
-    url = "http://localhost:#{server.addr[1]}/"
+    url = "http://localhost:#{app.addr[1]}/"
     body = []
     begin
       _res = @client.get(url + 'chunked') { |str|
         body << str
       }
     ensure
-      server.close
+      app.close
       server_thread.join
     end
     assert_equal('abcdefghijklmnopqrstuvwxyz1234567890abcdef', body.join)
@@ -1713,9 +1713,9 @@ EOS
 
   def test_keepalive_disconnected
     client = HTTPClient.new
-    server = TCPServer.open('127.0.0.1', 0)
-    server.listen(30) # set enough backlogs
-    endpoint = "http://127.0.0.1:#{server.addr[1]}/"
+    app = TCPServer.open('127.0.0.1', 0)
+    app.listen(30) # set enough backlogs
+    endpoint = "http://127.0.0.1:#{app.addr[1]}/"
     queue = Queue.new
     Thread.new(queue) { |qs|
       Thread.abort_on_exception = true
@@ -1723,12 +1723,12 @@ EOS
       5.times { qs.pop }
       # emulate 10 keep-alive connections
       10.times do |idx|
-        sock = server.accept
+        sock = app.accept
         create_keepalive_disconnected_thread(idx, sock)
       end
       # return "23456" for the request which gets KeepAliveDisconnected
       5.times do
-        sock = server.accept
+        sock = app.accept
         sock.gets
         sock.gets
         sock.write("HTTP/1.1 200 OK\r\n")
@@ -1738,7 +1738,7 @@ EOS
       end
       # return "34567" for the rest requests
       while true
-        sock = server.accept
+        sock = app.accept
         sock.gets
         sock.gets
         sock.write("HTTP/1.1 200 OK\r\n")
@@ -1808,13 +1808,13 @@ EOS
   end
 
   def test_keepalive
-    server = TCPServer.open('localhost', 0)
+    app = TCPServer.open('localhost', 0)
     server_thread = Thread.new {
       Thread.abort_on_exception = true
-      sock = server.accept
+      sock = app.accept
       create_keepalive_thread(10, sock)
     }
-    url = "http://localhost:#{server.addr[1]}/"
+    url = "http://localhost:#{app.addr[1]}/"
     begin
       # content-length
       5.times do
@@ -1825,7 +1825,7 @@ EOS
         assert_equal('abcdefghijklmnopqrstuvwxyz1234567890abcdef', @client.get(url + 'chunked').body)
       end
     ensure
-      server.close
+      app.close
       server_thread.join
     end
   end
@@ -1879,10 +1879,10 @@ EOS
   end
 
   def test_ipv6literaladdress_in_uri
-    server = TCPServer.open('::1', 0) rescue return # Skip if IPv6 is unavailable.
+    app = TCPServer.open('::1', 0) rescue return # Skip if IPv6 is unavailable.
     server_thread = Thread.new {
       Thread.abort_on_exception = true
-      sock = server.accept
+      sock = app.accept
       while line = sock.gets
         break if line.chomp.empty?
       end
@@ -1892,11 +1892,11 @@ EOS
       sock.write("12345")
       sock.close
     }
-    uri = "http://[::1]:#{server.addr[1]}/"
+    uri = "http://[::1]:#{app.addr[1]}/"
     begin
       assert_equal('12345', @client.get(uri).body)
     ensure
-      server.close
+      app.close
       server_thread.kill
       server_thread.join
     end
@@ -1935,26 +1935,26 @@ private
   end
 
   def setup_server
-    @server = WEBrick::HTTPServer.new(
+    @app = WEBrick::HTTPServer.new(
       :BindAddress => "localhost",
       :Logger => @logger,
       :Port => 0,
       :AccessLog => [],
       :DocumentRoot => File.dirname(File.expand_path(__FILE__))
     )
-    @serverport = @server.config[:Port]
+    @serverport = @app.config[:Port]
     [
       :hello, :sleep, :servlet_redirect, :redirect1, :redirect2, :redirect3,
       :redirect_self, :relative_redirect, :redirect_see_other, :chunked,
       :largebody, :status, :compressed, :charset, :continue
     ].each do |sym|
-      @server.mount(
+      @app.mount(
         "/#{sym}",
         WEBrick::HTTPServlet::ProcHandler.new(method("do_#{sym}").to_proc)
       )
     end
-    @server.mount('/servlet', TestServlet.new(@server))
-    @server_thread = start_server_thread(@server)
+    @app.mount('/servlet', TestServlet.new(@app))
+    @server_thread = start_server_thread(@app)
   end
 
   def add_query_string(req)

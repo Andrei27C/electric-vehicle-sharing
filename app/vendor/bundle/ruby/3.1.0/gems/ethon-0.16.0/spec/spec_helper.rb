@@ -9,10 +9,10 @@ require 'rspec'
 
 if defined? require_relative
   require_relative 'support/localhost_server'
-  require_relative 'support/server'
+  require_relative 'support/app'
 else
   require 'support/localhost_server'
-  require 'support/server'
+  require 'support/app'
 end
 
 # Ethon.logger = Logger.new($stdout).tap do |log|

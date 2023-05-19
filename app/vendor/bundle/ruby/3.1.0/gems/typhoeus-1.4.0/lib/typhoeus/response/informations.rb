@@ -58,7 +58,7 @@ module Typhoeus
       end
 
       # Return the last received HTTP, FTP or SMTP response code.
-      # The value will be zero if no server response code has
+      # The value will be zero if no app response code has
       # been received. Note that a proxy's CONNECT response should
       # be read with http_connect_code and not this.
       #
@@ -99,7 +99,7 @@ module Typhoeus
       # Return the time, in seconds, it took from the start
       # until the first byte is received by libcurl. This
       # includes pretransfer time and also the time the
-      # server needs to calculate the result.
+      # app needs to calculate the result.
       #
       # @example Get starttransfer_time.
       #   response.starttransfer_time

@@ -38,7 +38,7 @@ module ActiveSupport
   #
   # === Confining messages to a specific purpose
   #
-  # By default any message can be used throughout your server. But they can also be
+  # By default any message can be used throughout your app. But they can also be
   # confined to a specific +:purpose+.
   #
   #   token = @verifier.generate("this is the chair", purpose: :login)

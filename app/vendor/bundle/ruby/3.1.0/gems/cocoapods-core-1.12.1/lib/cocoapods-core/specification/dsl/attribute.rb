@@ -9,7 +9,7 @@ module Pod
 
         # Spec types currently supported.
         #
-        SUPPORTED_SPEC_TYPES = [:library, :server, :test].freeze
+        SUPPORTED_SPEC_TYPES = [:library, :app, :test].freeze
 
         # @return [Symbol] the name of the attribute.
         #

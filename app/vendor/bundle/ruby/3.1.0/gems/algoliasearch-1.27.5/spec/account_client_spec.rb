@@ -45,7 +45,7 @@ describe 'Account client' do
          )
   end
 
-  it 'should perform a cross server copy index and assert that destination must not exist' do
+  it 'should perform a cross app copy index and assert that destination must not exist' do
 
     @index_1.save_objects!(1.upto(1500).map { |i| { :objectID => i, :i => i } })
 

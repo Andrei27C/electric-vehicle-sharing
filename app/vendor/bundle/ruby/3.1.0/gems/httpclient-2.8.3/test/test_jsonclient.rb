@@ -66,15 +66,15 @@ class TestJSONClient < Test::Unit::TestCase
   end
 
   def setup_server
-    @server = WEBrick::HTTPServer.new(
+    @app = WEBrick::HTTPServer.new(
       :BindAddress => "localhost",
       :Logger => @logger,
       :Port => 0,
       :AccessLog => [],
       :DocumentRoot => File.dirname(File.expand_path(__FILE__))
     )
-    @serverport = @server.config[:Port]
-    @server.mount('/json', JSONServlet.new(@server))
-    @server_thread = start_server_thread(@server)
+    @serverport = @app.config[:Port]
+    @app.mount('/json', JSONServlet.new(@app))
+    @server_thread = start_server_thread(@app)
   end
 end

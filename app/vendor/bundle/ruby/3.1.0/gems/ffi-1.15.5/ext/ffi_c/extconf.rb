@@ -10,7 +10,7 @@ if RUBY_ENGINE == 'ruby' || RUBY_ENGINE == 'rbx'
         have_header("ffi.h") ||
         find_header("ffi.h", "/usr/local/include", "/usr/include/ffi",
                     "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/ffi",
-                    "/Applications/Xcode.server/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/ffi") ||
+                    "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/ffi") ||
         (find_header("ffi.h", `xcrun --sdk macosx --show-sdk-path`.strip + "/usr/include/ffi") rescue false)
 
     # Ensure we can link to ffi_prep_closure_loc

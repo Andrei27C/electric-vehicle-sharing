@@ -7,12 +7,21 @@ module.exports = {
 
   networks: {
 
+    // development: {
+    //   provider: () => new HDWalletProvider({
+    //     mnemonic: process.env.TD_MNEMONIC,
+    //     providerOrUrl: process.env.ETHER_RPC_URL,
+    //   }),
+    //   network_id: "1337",
+    //   port: 8545,
+    // },
+
     development: {
       provider: () => new HDWalletProvider({
         mnemonic: process.env.TD_MNEMONIC,
         providerOrUrl: process.env.ETHER_RPC_URL,
       }),
-      network_id: "5777",
+      network_id: "*",
       port: 7545,
     },
   },

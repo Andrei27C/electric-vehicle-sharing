@@ -292,7 +292,7 @@ provided via plugins. To see them, simply run with +--help+:
 
     Known extensions: pride, autotest
         -p, --pride                      Pride. Show your testing pride!
-        -a, --autotest                   Connect to autotest server.
+        -a, --autotest                   Connect to autotest app.
 
 === Rake Tasks
 
@@ -709,7 +709,7 @@ minitest-rails-capybara     :: Capybara integration for Minitest::Rails.
 minitest-reporters          :: Create customizable Minitest output formats.
 minitest-rg                 :: Colored red/green output for Minitest.
 minitest-rspec_mocks        :: Use RSpec Mocks with Minitest.
-minitest-server             :: minitest-server provides a client/server setup
+minitest-app             :: minitest-app provides a client/app setup
                                with your minitest process, allowing your test
                                run to send its results directly to a handler.
 minitest-sequel             :: Minitest assertions to speed-up development and
@@ -751,8 +751,8 @@ rematch                     :: Declutter your test files from large hardcoded da
                                and update them automatically when your code changes.
 rspec2minitest              :: Easily translate any RSpec matchers to Minitest
                                assertions and expectations.
-stubberry                   :: Multiple stubbing 'berries', sweet and useful 
-                               stub helpers and assertions. ( stub_must, 
+stubberry                   :: Multiple stubbing 'berries', sweet and useful
+                               stub helpers and assertions. ( stub_must,
                                assert_method_called, stubbing ORM objects by id )
 
 == Unknown Extensions:

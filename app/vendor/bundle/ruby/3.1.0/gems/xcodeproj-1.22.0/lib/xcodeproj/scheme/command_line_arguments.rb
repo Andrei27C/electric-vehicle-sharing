@@ -101,7 +101,7 @@ module Xcodeproj
 
     # This class wraps the CommandLineArgument node of a .xcscheme XML file.
     # Environment arguments are accessible via the NSDictionary returned from
-    # [[NSProcessInfo processInfo] arguments] in your server code.
+    # [[NSProcessInfo processInfo] arguments] in your app code.
     #
     class CommandLineArgument < XMLElementWrapper
       # @param [nil,REXML::Element,Hash{Symbol => String,Bool}] node_or_argument

@@ -59,7 +59,7 @@ module Typhoeus
     # @see Typhoeus::Request#set_defaults
     attr_accessor :user_agent
 
-    # Defines wether to use a proxy server for every request.
+    # Defines wether to use a proxy app for every request.
     #
     # @return [ String ]
     #

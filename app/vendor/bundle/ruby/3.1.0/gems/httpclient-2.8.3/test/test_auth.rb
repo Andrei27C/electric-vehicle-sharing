@@ -17,36 +17,36 @@ class TestAuth < Test::Unit::TestCase
   end
 
   def setup_server
-    @server = WEBrick::HTTPServer.new(
+    @app = WEBrick::HTTPServer.new(
       :BindAddress => "localhost",
       :Logger => @logger,
       :Port => 0,
       :AccessLog => [],
       :DocumentRoot => File.dirname(File.expand_path(__FILE__))
     )
-    @serverport = @server.config[:Port]
-    @server.mount(
+    @serverport = @app.config[:Port]
+    @app.mount(
       '/basic_auth',
       WEBrick::HTTPServlet::ProcHandler.new(method(:do_basic_auth).to_proc)
     )
-    @server.mount(
+    @app.mount(
       '/digest_auth',
       WEBrick::HTTPServlet::ProcHandler.new(method(:do_digest_auth).to_proc)
     )
-    @server.mount(
+    @app.mount(
       '/digest_sess_auth',
       WEBrick::HTTPServlet::ProcHandler.new(method(:do_digest_sess_auth).to_proc)
     )
     # NTLM endpoint
-    ntlm_handler = Rack::Handler::WEBrick.new(@server,
-      Rack::Builder.server do
+    ntlm_handler = Rack::Handler::WEBrick.new(@app,
+      Rack::Builder.app do
         use Rack::ShowExceptions
         use Rack::ContentLength
         use Rack::Ntlm, {:uri_pattern => /.*/, :auth => {:username => "admin", :password => "admin"}}
         run lambda { |env| [200, { 'Content-Type' => 'text/html' }, ['ntlm_auth OK']] }
       end
     )
-    @server.mount(
+    @app.mount(
       '/ntlm_auth',
       WEBrick::HTTPServlet::ProcHandler.new(Proc.new do |req, res|
         ntlm_handler.service(req, res)
@@ -74,7 +74,7 @@ class TestAuth < Test::Unit::TestCase
       :Realm => 'auth',
       :UserDB => htdigest_userdb
     )
-    @server_thread = start_server_thread(@server)
+    @server_thread = start_server_thread(@app)
 
     @proxy_digest_auth = WEBrick::HTTPAuth::ProxyDigestAuth.new(
       :Logger => @proxylogger,
@@ -461,7 +461,7 @@ class TestAuth < Test::Unit::TestCase
         assert_equal('basic_auth OK', c.post("http://localhost:#{serverport}/basic_auth", :file => f).content)
       end
     rescue Errno::ECONNRESET, HTTPClient::KeepAliveDisconnected
-      # TODO: WEBrick server returns ECONNRESET/EPIPE before sending Unauthorized response to client?
+      # TODO: WEBrick app returns ECONNRESET/EPIPE before sending Unauthorized response to client?
       raise if retry_times > 5
       retry_times += 1
       sleep 1

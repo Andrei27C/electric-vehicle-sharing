@@ -2,21 +2,21 @@ require 'rack'
 require 'rack/handler/webrick'
 require 'net/http'
 
-# The code for this is inspired by Capybara's server:
-#   http://github.com/jnicklas/capybara/blob/0.3.9/lib/capybara/server.rb
+# The code for this is inspired by Capybara's app:
+#   http://github.com/jnicklas/capybara/blob/0.3.9/lib/capybara/app.rb
 class LocalhostServer
   READY_MESSAGE = "Server ready"
 
   class Identify
-    def initialize(server)
-      @server = server
+    def initialize(app)
+      @app = app
     end
 
     def call(env)
       if env["PATH_INFO"] == "/__identify__"
         [200, {}, [LocalhostServer::READY_MESSAGE]]
       else
-        @server.call(env)
+        @app.call(env)
       end
     end
   end
@@ -33,10 +33,10 @@ class LocalhostServer
   private
 
   def find_available_port
-    server = TCPServer.new('127.0.0.1', 0)
-    server.addr[1]
+    app = TCPServer.new('127.0.0.1', 0)
+    app.addr[1]
   ensure
-    server.close if server
+    app.close if app
   end
 
   def boot
