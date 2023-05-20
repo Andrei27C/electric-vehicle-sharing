@@ -1,194 +1,112 @@
 pragma solidity ^0.8.1;
 
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-//import "hardhat/console.sol";
 import "truffle/Console.sol";
 
-
 contract ElectricVehicle is ERC1155, Ownable {
+    using SafeMath for uint256;
+
     struct Vehicle {
         string make;
         string model;
-        uint256 price;
+        uint256 pricePerHour;
+        uint256 maxRentalHours;
         uint256 startTime;
-        address renter;
+        uint256 endTime;
+        address currentRenter;
     }
 
-    mapping(uint256 => Vehicle) public vehicleData;
+    mapping(uint256 => Vehicle) public vehicles;
+    uint256 private currentTokenId = 0;
 
-    uint256 private _currentTokenId = 0;
+    // User balances
+    mapping(address => uint256) public balances;
 
-    constructor(string memory uri) ERC1155(uri) {}
+    // Total income from rentals
+    uint256 public totalRentalIncome;
 
+    event VehicleRented(uint256 indexed tokenId, address indexed renter, uint256 startTime, uint256 endTime);
+    event RentalEnded(uint256 indexed tokenId, address indexed renter);
 
-    function mintVehicle(
-        string memory make,
-        string memory model,
-        uint256 price
-    ) public onlyOwner {
-        console.log("Vehicle Minted");
-        _mint(msg.sender, _currentTokenId, 1, "");
-        vehicleData[_currentTokenId] = Vehicle(make, model, price, 0, address(0));
-        _currentTokenId++;
+    constructor() ERC1155('') Ownable() {}
+
+    //section User functions
+    function depositFunds() public payable {
+        balances[msg.sender] = balances[msg.sender].add(msg.value);
     }
 
-    function rentVehicle(uint256 tokenId, uint256 startTime) public {
-        require(balanceOf(msg.sender, tokenId) == 1, "User does not own the vehicle token");
-        require(vehicleData[tokenId].renter == address(0), "Vehicle is already rented");
+    function withdrawFunds(uint256 amount) public {
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        balances[msg.sender] = balances[msg.sender].sub(amount);
+        payable(msg.sender).transfer(amount);
+    }
 
-        vehicleData[tokenId].startTime = startTime;
-        vehicleData[tokenId].renter = msg.sender;
+    function checkBalance() public view returns (uint256) {
+        return balances[msg.sender];
+    }
+
+    function rentVehicle(uint256 tokenId, uint256 rentalHours) public {
+        require(rentalHours <= vehicles[tokenId].maxRentalHours, "Rental duration exceeds the maximum allowed");
+        require(vehicles[tokenId].currentRenter == address(0), "Vehicle is currently rented");
+
+        // Make sure the user has enough balance to rent the vehicle
+        uint256 requiredRentalFee = vehicles[tokenId].pricePerHour.mul(rentalHours);
+        require(balances[msg.sender] >= requiredRentalFee, "Insufficient balance to rent this vehicle");
+
+        // Subtract the required rental fee from the user's balance
+        balances[msg.sender] = balances[msg.sender].sub(requiredRentalFee);
+
+        // Add the rental fee to the total income
+        totalRentalIncome = totalRentalIncome.add(requiredRentalFee);
+
+        // Set the vehicle's current renter, start time and end time
+        vehicles[tokenId].startTime = block.timestamp;
+        vehicles[tokenId].endTime = block.timestamp + (rentalHours * 1 hours);
+        vehicles[tokenId].currentRenter = msg.sender;
+
+        emit VehicleRented(tokenId, msg.sender, vehicles[tokenId].startTime, vehicles[tokenId].endTime);
     }
 
     function endRental(uint256 tokenId) public {
-        require(msg.sender == vehicleData[tokenId].renter, "Caller is not the renter");
+        require(vehicles[tokenId].currentRenter == msg.sender, "You are not the current renter of this vehicle");
 
-        vehicleData[tokenId].startTime = 0;
-        vehicleData[tokenId].renter = address(0);
+        uint256 rentalHours = (vehicles[tokenId].endTime - vehicles[tokenId].startTime) / 1 hours;
+        uint256 rentalCost = vehicles[tokenId].pricePerHour * rentalHours;
+        balances[owner()] += rentalCost;
 
-        // Logic to transfer the rental fee from the renter's balance goes here
-        // This would likely involve interaction with a separate contract or system that manages user balances
+        vehicles[tokenId].currentRenter = address(0);
+        vehicles[tokenId].startTime = 0;
+        vehicles[tokenId].endTime = 0;
+
+        emit RentalEnded(tokenId, msg.sender);
     }
+    //end section User functions
 
-    function getVehicleData(uint256 tokenId)
-    public
-    view
-    returns (
+    //section Owner functions
+    function createVehicle(
+        address to,
         string memory make,
         string memory model,
-        uint256 price,
-        uint256 startTime,
-        address renter
-    )
-    {
-        Vehicle memory vehicle = vehicleData[tokenId];
-        return (vehicle.make, vehicle.model, vehicle.price, vehicle.startTime, vehicle.renter);
+        uint256 pricePerHour,
+        uint256 maxRentalHours
+    ) public onlyOwner {
+        console.log("Creating vehicle");
+        _mint(to, currentTokenId, 1, "");
+        vehicles[currentTokenId] = Vehicle(make, model, pricePerHour, maxRentalHours, 0, 0, address(0));
+        currentTokenId++;
     }
 
-    function ownerAddress() public view returns (address) {
-        return owner();
+    function withdrawIncome(uint256 amount) public onlyOwner {
+        // Ensure the contract has earned enough income
+        require(totalRentalIncome >= amount, "Insufficient income");
+
+        // Subtract the amount from the total income
+        totalRentalIncome = totalRentalIncome.sub(amount);
+
+        // Send the amount to the owner
+        payable(msg.sender).transfer(amount);
     }
-
-//
-//    function rentVehicle(uint256 tokenId, uint256 startTime, uint256 endTime) public payable{
-//        console.log("Rented vehicle %s from %s to %s", tokenId, startTime, endTime);
-//
-//        require(_vehicleData[tokenId].price != 0, "Vehicle does not exist");
-//        require(balanceOf(_vehicleData[tokenId].appAddress, tokenId) == 1, "The app does not own this vehicle");
-//        require(_vehicleData[tokenId].endTime < startTime, "Vehicle is already rented during this time");
-//
-//        uint256 rentalHours = (endTime - startTime) / 1 hours;
-//        uint256 requiredRentalFee = rentalHours * _vehicleData[tokenId].price;
-//
-////        require(msg.value >= requiredRentalFee, "Rental fee is not enough");
-//
-//        // Send rental fee to the app owner
-//        payable(_vehicleData[tokenId].appAddress).transfer(msg.value);
-//
-//        _vehicleData[tokenId].startTime = startTime;
-//        _vehicleData[tokenId].endTime = endTime;
-//
-//        console.log("Rented vehicle %s from %s to %s", tokenId, startTime, endTime);
-////        Console.log("Rented vehicle %s from %s to %s", tokenId, startTime, endTime);
-//
-//        // Transfer ownership to the renter
-////        safeTransferFrom(_vehicleData[tokenId].appAddress, msg.sender, tokenId, 1, "");
-//        _vehicleData[tokenId].appAddress = msg.sender;
-//
-//        // Emit the event
-//        emit VehicleRented(tokenId, startTime, endTime);
-//    }
-
-    //
-
-//    function rentVehicle(uint256 tokenId, uint256 startTime) public payable {
-//        require(_vehicleData[tokenId].price != 0, "Vehicle does not exist");
-//        require(balanceOf(_vehicleData[tokenId].appAddress, tokenId) == 1, "The app does not own this vehicle");
-//        require(_vehicleData[tokenId].endTime < startTime, "Vehicle is already rented during this time");
-//
-//        uint256 endTime = startTime + MAX_RENTAL_TIME;
-//
-//        uint256 rentalHours = MAX_RENTAL_TIME / 1 hours;
-//        uint256 requiredRentalFee = rentalHours * _vehicleData[tokenId].price;
-//
-//        require(msg.value >= requiredRentalFee, "Rental fee is not enough");
-//
-//        // Send rental fee to the app owner
-//        payable(_vehicleData[tokenId].appAddress).transfer(msg.value);
-//
-//        _vehicleData[tokenId].startTime = startTime;
-//        _vehicleData[tokenId].endTime = endTime;
-//
-//        // Transfer ownership to the renter
-//        _vehicleData[tokenId].appAddress = msg.sender;
-//
-//        // Emit the event
-//        emit VehicleRented(tokenId, startTime, endTime);
-//    }
-    //
-
-
-
-
-    // region checkRentalStatus
-
-//    function endRental(uint256 tokenId) public checkRentalStatus(tokenId) {
-//        // Transfer ownership back to the app
-//        safeTransferFrom(msg.sender, _vehicleData[tokenId].appAddress, tokenId, 1, "");
-//
-//        // Reset rental start and end times
-//        _vehicleData[tokenId].startTime = 0;
-//        _vehicleData[tokenId].endTime = 0;
-//
-//        emit RentalEnded(tokenId, msg.sender);
-//    }
-    //endregion
-
-    //region vehicle data
-//    function getVehicleData(uint256 tokenId)
-//    public
-//    view
-//    returns (
-//        string memory make,
-//        string memory model,
-//        uint256 price,
-//        uint256 startTime,
-//        uint256 endTime
-//    )
-//    {
-//        Vehicle storage vehicle = _vehicleData[tokenId];
-//        return (vehicle.make, vehicle.model, vehicle.price, vehicle.startTime, vehicle.endTime);
-//    }
-//
-//    function getAllVehicleData(uint256 tokenId)
-//    public
-//    view
-//    returns (
-//        string memory make,
-//        string memory model,
-//        uint256 price,
-//        uint256 startTime,
-//        uint256 endTime,
-//        address appAddress
-//    )
-//    {
-//        Vehicle storage vehicle = _vehicleData[tokenId];
-//        return (vehicle.make, vehicle.model, vehicle.price, vehicle.startTime, vehicle.endTime, vehicle.appAddress);
-//    }
-
-    function totalSupply() public view returns (uint256) {
-        return _currentTokenId;
-    }
-    //endregion
-
-    //getters
-    function getOwner(uint256 tokenId) public view returns (address) {
-        return vehicleData[tokenId].renter;
-    }
-
-    function getStartTime(uint256 tokenId) public view returns (uint256) {
-        return vehicleData[tokenId].startTime;
-    }
-
+    //end section Owner functions
 }
