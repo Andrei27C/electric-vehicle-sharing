@@ -54,6 +54,10 @@ contract ElectricVehicle is ERC1155, Ownable {
         return pointsBalances[msg.sender];
     }
 
+    function getOwner() public view returns (address) {
+        return owner();
+    }
+
     //todo check if the renter has more than enough balance
     function rentVehicle(uint256 tokenId) public {
         require(vehicles[tokenId].currentRenter == address(0), "Vehicle is currently rented");

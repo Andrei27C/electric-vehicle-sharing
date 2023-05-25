@@ -13,11 +13,13 @@ type RegisterScreenProps = {
 export default function RegisterScreen({ navigation }: RegisterScreenProps) {
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [address, setAddress] = React.useState('');
 
   const register = async () => {
     try {
-      const response = await axios.post(`${API_URL}/register`, { username, password });
+      const response = await axios.post(`${API_URL}/register`, { username, password, address });
       console.log(response.data);
+
       if (response.data.success) {
         console.log('Registered successfully!');
         await AsyncStorage.setItem('token', response.data.token);  // store token in local storage
@@ -42,6 +44,13 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
         value={password}
         onChangeText={text => setPassword(text)}
         secureTextEntry
+        style={{ marginBottom: 16 }}
+        autoCapitalize="none"
+      />
+      <TextInput
+        label="Address"
+        value={address}
+        onChangeText={text => setAddress(text)}
         style={{ marginBottom: 16 }}
         autoCapitalize="none"
       />

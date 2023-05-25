@@ -22,7 +22,6 @@ const CreateVehicleScreen: React.FC<Props> = ({ navigation }) => {
     try {
       const token = await AsyncStorage.getItem('token');
       const userRole = await AsyncStorage.getItem('userRole');
-      console.log('userRole', userRole);
       await axios.post(`${API_URL}/create-vehicle`, {  role: userRole, make, model, pricePerHour }, {
         headers: { Authorization: `Bearer ${token}` }
       });

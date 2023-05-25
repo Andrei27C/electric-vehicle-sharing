@@ -10,6 +10,7 @@ export type RootStackParamList = {
   Owner: undefined;
   Login: undefined;
   Register: undefined;
+  VehiclesOwner: undefined;
 };
 
 export interface Vehicle {
@@ -21,6 +22,13 @@ export interface Vehicle {
   startTime?: string;
   endTime?: string;
   currentRenter?: string;
+}
+
+export interface User {
+  username: string;
+  role: string;
+  vehicle?: Vehicle;
+  points?: number;
 }
 
 export type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
@@ -40,3 +48,9 @@ export type LoginScreenRouteProp = RouteProp<RootStackParamList, 'Login'>;
 
 export type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 export type RegisterScreenRouteProp = RouteProp<RootStackParamList, 'Register'>;
+
+export type OwnerScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Owner'>;
+export type OwnerScreenRouteProp = RouteProp<RootStackParamList, 'Owner'>;
+
+export type VehiclesOwnerScreenNavigationProp = StackNavigationProp<RootStackParamList, 'VehiclesOwner'>;
+export type VehiclesOwnerScreenRouteProp = RouteProp<RootStackParamList, 'VehiclesOwner'>;

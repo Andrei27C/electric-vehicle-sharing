@@ -18,12 +18,18 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const login = async () => {
     try {
       const response = await axios.post(`${API_URL}/login`, { username, password });
-      console.log(response.data);
+      console.log("Logged in as: ", response.data.user.username);
       await AsyncStorage.setItem('token', response.data.token);
       await AsyncStorage.setItem('userName', response.data.user.username);
       await AsyncStorage.setItem('userId', response.data.user.id.toString());
       await AsyncStorage.setItem('userRole', response.data.user.role);
-      navigation.navigate('Home');
+      await AsyncStorage.setItem('userPoints', response.data.user.points.toString());
+      await AsyncStorage.setItem('userAddress', response.data.user.address);
+      if(response.data.user.role === 'admin') {
+        navigation.navigate('Owner');
+      }
+      else
+        navigation.navigate('Home');
     } catch (error) {
       console.error('Failed to log in:', error);
     }
@@ -37,14 +43,17 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         value={username}
         onChangeText={setUsername}
         autoCapitalize="none"
+        secureTextEntry={false}
+        style={{ marginTop: 10 }}
       />
       <TextInput
         label="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        style={{ marginTop: 10 }}
       />
-      <Button mode="contained" onPress={login}>
+      <Button mode="contained" onPress={login} style={{ marginTop: 10 }}>
         Log In
       </Button>
       <Button mode="contained" onPress={() => navigation.navigate('Register')} style={{ marginTop: 10 }}>

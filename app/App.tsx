@@ -9,6 +9,7 @@ import { RootStackParamList } from './src/types/navigation';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import LoginScreen from "./src/screens/LoginScreen";
 import RegisterScreen from "./src/screens/RegisterScreen";
+import VehiclesOwnerScreen from "./src/screens/admin/VehiclesOwnerScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -36,6 +37,8 @@ const App = () => {
         <Stack.Screen name="CreateVehicle" component={CreateVehicleScreen} />
         <Stack.Screen name="Rental" component={RentalScreen} />
         <Stack.Screen name="Owner" component={OwnerScreen} />
+        <Stack.Screen name="VehiclesOwner" component={VehiclesOwnerScreen} />
+
       </Stack.Navigator>
 
     </NavigationContainer>

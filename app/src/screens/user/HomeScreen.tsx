@@ -7,6 +7,7 @@ import { API_URL } from '../../config';
 import { useFocusEffect } from '@react-navigation/native';
 import VehicleList from "../../components/VehicleList";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { fetchUserDetails } from "../../utils/fetchUserDetails";
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -34,28 +35,21 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         }
       };
 
-      fetchVehicles();
-      return () => {};
+      fetchVehicles().then(r => void 0);
     }, [])
   );
 
   useEffect(() => {
     const fetchUserPoints = async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
-        const userId = await AsyncStorage.getItem('userId');
-        console.log('Fetching user points:', userId);
-        const response = await axios.get(`${API_URL}/get-user-points/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        console.log('Fetched user points:', response.data.points);
-        setUserPoints(response.data.points);
+        const userPoints = await AsyncStorage.getItem('userPoints');
+        console.log('Fetched user points:', userPoints);
+        setUserPoints(userPoints ? parseInt(userPoints) : 0);
       } catch (error) {
         console.error('Failed to fetch user points:', error);
       }
     };
-
-    fetchUserPoints();
+    fetchUserPoints().then(r => void 0);
   }, []);
 
   const rentVehicle = (vehicle: Vehicle) => {
@@ -70,12 +64,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         <Text>Your Points: {userPoints}</Text>
       </View>
       <VehicleList vehicles={vehicles} onRent={rentVehicle} />
-      <TouchableOpacity onPress={() => navigation.navigate('CreateVehicle')}>
-        <Text>Create Vehicle</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate('Owner')}>
-        <Text>See all vehicles data</Text>
-      </TouchableOpacity>
+      {/*<TouchableOpacity onPress={() => navigation.navigate('CreateVehicle')}>*/}
+      {/*  <Text>Create Vehicle</Text>*/}
+      {/*</TouchableOpacity>*/}
+      {/*<TouchableOpacity onPress={() => navigation.navigate('Owner')}>*/}
+      {/*  <Text>See all vehicles data</Text>*/}
+      {/*</TouchableOpacity>*/}
     </View>
   );
 };

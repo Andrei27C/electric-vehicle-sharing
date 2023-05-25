@@ -12,7 +12,9 @@ db.serialize(() => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
-        role TEXT NOT NULL
+        role TEXT NOT NULL,
+        points INTEGER DEFAULT 0,
+        address TEXT NOT NULL
     )`, (err) => {
     if (err) {
       console.error(err.message);

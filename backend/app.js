@@ -22,7 +22,8 @@ app.use(expressJwt({
 
 //database
 const db = require("./database/db.js");
-
+const UserModel = require("./models/user.js");
+let userModelInstance = new UserModel();
 //web3
 const web3 = new Web3(process.env.ETHER_RPC_WSS);
 app.use(cors());
@@ -70,7 +71,7 @@ function toDateTime(secs) {
 
 // Registration route
 app.post("/register", (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, address } = req.body;
 
   // check if username already exists
   db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
@@ -79,6 +80,7 @@ app.post("/register", (req, res) => {
     }
 
     if (row) {
+      console.log("Username already exists");
       return res.status(400).json({ error: "Username already exists" });
     }
 
@@ -90,7 +92,7 @@ app.post("/register", (req, res) => {
       }
 
       // Store new user in the database
-      db.run(`INSERT INTO users(username, password, role) VALUES (?,?,?)`, [username, hash, "user"], function(err) {
+      db.run(`INSERT INTO users(username, password, role, points, address) VALUES (?,?,?,?,?)`, [username, hash, "user", 0, address], function(err) {
         if (err) {
           console.log(err);
           return res.status(500).json({ error: "Error storing user" });
@@ -99,7 +101,7 @@ app.post("/register", (req, res) => {
         const userId = this.lastID;
         const token = jwt.sign({ sub: userId }, process.env.JWT_SECRET, { expiresIn: "1 day" });
 
-        res.json({ message: "Registration successful", token });
+        res.json({ success: true,  message: "Registration successful", token });
       });
     });
   });
@@ -107,7 +109,6 @@ app.post("/register", (req, res) => {
 
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
-
   db.get(`SELECT * FROM users WHERE username = ?`, [username], function(err, row) {
     if (err) {
       return res.status(500).json({ error: "Error retrieving user" });
@@ -128,9 +129,11 @@ app.post("/login", (req, res) => {
 
       // Passwords match, create a JWT
       const token = jwt.sign({ sub: row.id }, process.env.JWT_SECRET, { expiresIn: "1 day" });
-      const user = { id: row.id, username: row.username, role: row.role };
-      console.log("user:", user);
-      res.json({ message: "Login successful", token: token, user: user });
+
+      userModelInstance = new UserModel(row.id, row.username, row.password,  row.role, row.points, row.address );
+
+      console.log("user:", userModelInstance);
+      res.json({ message: "Login successful", token: token, user: userModelInstance });
     });
   });
 });
@@ -209,16 +212,17 @@ app.get("/get-all-vehicles-data", async (req, res) => {
 app.get("/contract-owner", async (req, res) => {
   console.log("-----/contract-owner-----");
   try {
-    const owner = await electricVehicleContract.methods.ownerAddress().call();
+    const owner = await electricVehicleContract.methods.getOwner().call();
+    console.log("   owner:", owner);
     res.send({ owner });
   } catch (error) {
+    console.log("   Failed to fetch owner address:", error);
     res.status(500).send({ error: "Failed to fetch owner address" });
   }
 });
 
 //create-vehicle endpoint
 app.post("/create-vehicle", async (req, res) => {
-  console.log(req.body);
   const { role, make, model, pricePerHour } = req.body;
 
   console.log("-----/create-vehicle-----");
@@ -265,6 +269,7 @@ app.post("/create-vehicle", async (req, res) => {
     console.error("Error creating vehicle:", error.message);
     res.status(400).json({ success: false, message: error.message });
   }
+  console.log("----end-----/create-vehicle-----");
 });
 
 //get one vehicle endpoint
@@ -309,6 +314,7 @@ const convertRentalFeeToEther = async (rentalFeeUSD) => {
     throw new Error("Could not calculate rental fee");
   }
 };
+
 app.post("/rent-vehicle/:tokenId", async (req, res) => {
   console.log("---/rent-vehicle/:tokenId---");
   //todo: send the private key from the app
@@ -449,6 +455,28 @@ app.get("/get-user-points/:userId", async (req, res) => {
     // Use the contract's balanceOf method to fetch the user's points
     const points = await electricVehicleContract.methods.getPoints().call();
     res.json({ points });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.get("/user/:userId", async (req, res) => {
+  console.log("---/user/:userId---");
+  try {
+    const userId  = req.params;
+    db.get("SELECT * FROM users WHERE id = ?", [userId], (err, row) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      if (row) {
+        let user = UserModel.fromDB(row);
+        console.log(user);
+        res.json({ user });
+      } else {
+        console.log(`No user found with id ${userId}`);
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
