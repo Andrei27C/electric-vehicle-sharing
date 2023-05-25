@@ -8,18 +8,20 @@ export type RootStackParamList = {
     tokenId: string;
   };
   Owner: undefined;
+  Login: undefined;
+  Register: undefined;
 };
 
-export type Vehicle = {
+export interface Vehicle {
   tokenId: string;
   make: string;
   model: string;
-  price: number;
-  startTime: number;
-  endTime: number;
-  appAddress: string;
-};
-
+  pricePerHour: number;
+  maxRentalHours: number;
+  startTime?: string;
+  endTime?: string;
+  currentRenter?: string;
+}
 
 export type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 export type HomeScreenRouteProp = RouteProp<RootStackParamList, 'Home'>;
@@ -32,3 +34,9 @@ export type CreateVehicleScreenRouteProp = RouteProp<RootStackParamList, 'Create
 
 export type RentalScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Rental'>;
 export type RentalScreenRouteProp = RouteProp<RootStackParamList, 'Rental'>;
+
+export type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
+export type LoginScreenRouteProp = RouteProp<RootStackParamList, 'Login'>;
+
+export type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
+export type RegisterScreenRouteProp = RouteProp<RootStackParamList, 'Register'>;

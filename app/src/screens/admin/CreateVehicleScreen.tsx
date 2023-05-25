@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../types/navigation';
-import { API_URL } from '../config';
+import { RootStackParamList } from '../../types/navigation';
+import { API_URL } from '../../config';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 type CreateVehicleScreenNavigationProp = StackNavigationProp<RootStackParamList, 'CreateVehicle'>;
@@ -15,11 +16,16 @@ type Props = {
 const CreateVehicleScreen: React.FC<Props> = ({ navigation }) => {
   const [make, setMake] = useState('');
   const [model, setModel] = useState('');
-  const [price, setPrice] = useState('');
+  const [pricePerHour, setPricePerHour] = useState('');
 
   const createVehicle = async () => {
     try {
-      await axios.post(`${API_URL}/create-vehicle`, { make, model, price });
+      const token = await AsyncStorage.getItem('token');
+      const userRole = await AsyncStorage.getItem('userRole');
+      console.log('userRole', userRole);
+      await axios.post(`${API_URL}/create-vehicle`, {  role: userRole, make, model, pricePerHour }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       navigation.goBack();
     } catch (error) {
       console.error('Failed to create vehicle:', error);
@@ -33,7 +39,7 @@ const CreateVehicleScreen: React.FC<Props> = ({ navigation }) => {
       <Text>Model:</Text>
       <TextInput value={model} onChangeText={setModel} />
       <Text>Price:</Text>
-      <TextInput value={price} onChangeText={setPrice} />
+      <TextInput value={pricePerHour} onChangeText={setPricePerHour} />
       <TouchableOpacity onPress={createVehicle}>
         <Text>Create Vehicle</Text>
       </TouchableOpacity>

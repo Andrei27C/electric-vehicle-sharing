@@ -37,25 +37,25 @@ contract('ElectricVehicle', function(accounts) {
 
   it('User should be able to rent a vehicle if they have enough balance', async function() {
     await contractInstance.depositFunds({from: user1, value: web3.utils.toWei('1', 'ether')});
-    await contractInstance.createVehicle(user1, "Tesla", "Model S", web3.utils.toWei('0.01', 'ether'), 10, {from: owner});
+    await contractInstance.createVehicle("Tesla", "Model S", web3.utils.toWei('0.01', 'ether'));
 
     let tokenId = 0;  // use the correct tokenId here
-    let rentalHours = 5;
+    let nowSeconds = Math.floor(Date.now() / 1000);
 
-    await contractInstance.rentVehicle(tokenId, rentalHours, {from: user1});
+    await contractInstance.rentVehicle(tokenId, {from: user1});
 
     let vehicle = await contractInstance.vehicles(tokenId);
     assert.equal(vehicle.currentRenter, user1);
   });
 
   it('User should not be able to rent a vehicle if they do not have enough balance', async function() {
-    await contractInstance.createVehicle(user1, "Tesla", "Model S", web3.utils.toWei('0.01', 'ether'), 10, {from: owner});
+    await contractInstance.createVehicle("Tesla", "Model S", web3.utils.toWei('0.01', 'ether'));
 
     let tokenId = 0;  // use the correct tokenId here
-    let rentalHours = 5;
+    let nowSeconds = Math.floor(Date.now() / 1000);
 
     await truffleAssert.reverts(
-      contractInstance.rentVehicle(tokenId, rentalHours, {from: user1}),
+      contractInstance.rentVehicle(tokenId, {from: user1}),
       'Insufficient balance to rent this vehicle'
     );
   });

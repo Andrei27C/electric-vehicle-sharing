@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList } from 'react-native';
 import axios from 'axios';
-import { Vehicle } from "../types/navigation";
+import { Vehicle } from "../../types/navigation";
 import { useFocusEffect } from "@react-navigation/native";
-import { API_URL } from '../config';
+import { API_URL } from '../../config';
 
 
 const OwnerScreen: React.FC = () => {
@@ -59,10 +59,9 @@ const OwnerScreen: React.FC = () => {
             <Text>Token ID: {item.tokenId}</Text>
             <Text>Make: {item.make}</Text>
             <Text>Model: {item.model}</Text>
-            <Text>Price: {item.price}</Text>
+            <Text>Price: {item.pricePerHour}</Text>
             <Text>startTime: {item.startTime}</Text>
-            <Text>endTime: {item.endTime}</Text>
-            <Text>appAddress: {item.appAddress}</Text>
+            <Text>currentRenter: {item.currentRenter}</Text>
           </View>
         )}
         keyExtractor={(item) => item.tokenId}

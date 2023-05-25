@@ -1,14 +1,30 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+dotenv.config();
 const fs = require("fs");
 const path = require("path");
 const Web3 = require("web3");
 const axios = require("axios");
-
-dotenv.config();
-const web3 = new Web3(process.env.ETHER_RPC_WSS);
 const app = express();
+
+
+//jwt
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const bodyParser = require("body-parser");
+app.use(bodyParser.json());
+const expressJwt = require("express-jwt");
+app.use(expressJwt({
+  secret: process.env.JWT_SECRET,
+  algorithms: ["HS256"]
+}).unless({ path: ["/login", "/register"] }));
+
+//database
+const db = require("./database/db.js");
+
+//web3
+const web3 = new Web3(process.env.ETHER_RPC_WSS);
 app.use(cors());
 app.use(express.json());
 const PORT = process.env.PORT || 3000;
@@ -23,6 +39,9 @@ const electricVehicleAddress = electricVehicleJSON.networks["1337"].address;
 console.log("ETHER_RPC_URL:", process.env.ETHER_RPC_WSS);
 console.log("ElectricVehicleAddress:", electricVehicleAddress);
 const electricVehicleContract = new web3.eth.Contract(electricVehicleABI, electricVehicleAddress);
+
+//initial tax
+const INITIAL_TAX = 1; //in dollars
 
 //account info
 const privateKey = process.env.TD_DEPLOYER_PRIVATE_KEY;
@@ -47,6 +66,77 @@ function toDateTime(secs) {
   return t;
 }
 
+//section login
+
+// Registration route
+app.post("/register", (req, res) => {
+  const { username, password } = req.body;
+
+  // check if username already exists
+  db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: "Error checking username" });
+    }
+
+    if (row) {
+      return res.status(400).json({ error: "Username already exists" });
+    }
+
+    // Hash the password
+    bcrypt.hash(password, 10, function(err, hash) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Error hashing password" });
+      }
+
+      // Store new user in the database
+      db.run(`INSERT INTO users(username, password, role) VALUES (?,?,?)`, [username, hash, "user"], function(err) {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ error: "Error storing user" });
+        }
+
+        const userId = this.lastID;
+        const token = jwt.sign({ sub: userId }, process.env.JWT_SECRET, { expiresIn: "1 day" });
+
+        res.json({ message: "Registration successful", token });
+      });
+    });
+  });
+});
+
+app.post("/login", (req, res) => {
+  const { username, password } = req.body;
+
+  db.get(`SELECT * FROM users WHERE username = ?`, [username], function(err, row) {
+    if (err) {
+      return res.status(500).json({ error: "Error retrieving user" });
+    }
+
+    if (!row) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    bcrypt.compare(password, row.password, function(err, match) {
+      if (err) {
+        return res.status(500).json({ error: "Error comparing passwords" });
+      }
+
+      if (!match) {
+        return res.status(401).json({ error: "Invalid username or password" });
+      }
+
+      // Passwords match, create a JWT
+      const token = jwt.sign({ sub: row.id }, process.env.JWT_SECRET, { expiresIn: "1 day" });
+      const user = { id: row.id, username: row.username, role: row.role };
+      console.log("user:", user);
+      res.json({ message: "Login successful", token: token, user: user });
+    });
+  });
+});
+
+//end section login
+
 const getVehiclesData = async () => {
   // console.log("electricVehicleContract:", electricVehicleContract);
 
@@ -57,20 +147,17 @@ const getVehiclesData = async () => {
 
   for (let i = 0; i < totalSupply; i++) {
     // const tokenId = await electricVehicleContract.methods.tokenByIndex(i).call();
-    const vehicle = await electricVehicleContract.methods.getVehicleData(i).call();
-    if(vehicle.endTime<Date.now())
+    const vehicle = await electricVehicleContract.methods.getAllVehicleData(i).call();
 
     // console.log(vehicle);
     vehicle.startTime = toDateTime(vehicle.startTime);
-    vehicle.endTime = toDateTime(vehicle.endTime);
 
     vehicles.push({
       tokenId: i,
       make: vehicle.make,
       model: vehicle.model,
-      price: vehicle.price,
-      startTime: vehicle.startTime,
-      endTime: vehicle.endTime
+      pricePerHour: vehicle.pricePerHour,
+      startTime: vehicle.startTime
     });
   }
   return vehicles;
@@ -79,6 +166,7 @@ app.get("/get-vehicles", async (req, res) => {
   console.log("-----/get-vehicles-----");
   try {
     const vehicles = await getVehiclesData();
+    // console.log("vehicles:", vehicles)
     res.json({ success: true, vehicles });
   } catch (error) {
     console.error("Failed to fetch vehicles:", error);
@@ -99,10 +187,9 @@ const getAllVehiclesData = async () => {
       tokenId: i,
       make: vehicle.make,
       model: vehicle.model,
-      price: vehicle.price,
+      pricePerHour: vehicle.pricePerHour,
       startTime: vehicle.startTime,
-      endTime: vehicle.endTime,
-      appAddress: vehicle.appAddress
+      currentRenter: vehicle.currentRenter
     });
   }
   return vehicles;
@@ -131,13 +218,23 @@ app.get("/contract-owner", async (req, res) => {
 
 //create-vehicle endpoint
 app.post("/create-vehicle", async (req, res) => {
+  console.log(req.body);
+  const { role, make, model, pricePerHour } = req.body;
+
+  console.log("-----/create-vehicle-----");
+  console.log("userRole: " , role);
   console.log("Calling create vehicle endpoint...");
-  const { make, model, price } = req.body;
-  console.log("  Input parameters:", { make, model, price, accountAddress: account.address });
+  if (role !== "admin") {
+    console.log("  Forbidden! You are not the owner.");
+    return res.status(403).json({ message: "Forbidden! You are not the owner." });
+  }
+
+
+  console.log("  Input parameters:", { make, model, pricePerHour, accountAddress: account.address });
 
   let gas;
   try {
-    const contractMethod = electricVehicleContract.methods.mintVehicle(account.address, make, model, price);
+    const contractMethod = electricVehicleContract.methods.createVehicle(make, model, pricePerHour);
     // gas = await contractMethod.estimateGas();
     gas = 500000;
   } catch (error) {
@@ -153,7 +250,7 @@ app.post("/create-vehicle", async (req, res) => {
       to: electricVehicleContract.options.address,
       gas,
       nonce,
-      data: electricVehicleContract.methods.mintVehicle(account.address, make, model, price).encodeABI()
+      data: electricVehicleContract.methods.createVehicle(make, model, pricePerHour).encodeABI()
     };
 
     const signedTx = await account.signTransaction(tx);
@@ -165,25 +262,26 @@ app.post("/create-vehicle", async (req, res) => {
 
     res.json({ success: true, message: "Vehicle created", txHash: txReceipt.transactionHash });
   } catch (error) {
+    console.error("Error creating vehicle:", error.message);
     res.status(400).json({ success: false, message: error.message });
   }
 });
 
 //get one vehicle endpoint
 app.get("/vehicles/:tokenId", async (req, res) => {
+  console.log("Calling get vehicle endpoint...");
   const { tokenId } = req.params;
-
+  console.log("  Input parameters:", { tokenId });
   try {
-    const vehicleData = await electricVehicleContract.methods.getVehicleData(tokenId).call();
+    const vehicleData = await electricVehicleContract.methods.getAllVehicleData(tokenId).call();
+    console.log("vehicleData:", vehicleData);
     const vehicle = {
-      tokenId,
-      make: vehicleData.make,
-      model: vehicleData.model,
-      price: vehicleData.price
+      tokenId, make: vehicleData.make, model: vehicleData.model, pricePerHour: vehicleData.pricePerHour
     };
 
     res.json({ success: true, vehicle });
   } catch (error) {
+    console.log("Error fetching vehicle:", error.message);
     res.status(400).json({ success: false, message: error.message });
   }
 });
@@ -193,16 +291,15 @@ async function getVehicleInfo(tokenId) {
   try {
     const owner = await electricVehicleContract.methods.getOwner(tokenId).call();
     const startTime = await electricVehicleContract.methods.getStartTime(tokenId).call();
-    const endTime = await electricVehicleContract.methods.getEndTime(tokenId).call();
 
     console.log(`Vehicle ${tokenId} Info:`);
     console.log(`  Owner: ${owner}`);
     console.log(`  Start Time: ${startTime}`);
-    console.log(`  End Time: ${endTime}`);
   } catch (error) {
     console.error("Error fetching vehicle info:", error);
   }
 }
+
 const convertRentalFeeToEther = async (rentalFeeUSD) => {
   try {
     const response = await axios.get("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd");
@@ -217,18 +314,16 @@ app.post("/rent-vehicle/:tokenId", async (req, res) => {
   //todo: send the private key from the app
   const renterPrivateKey = process.env.TD_ACCOUNT_1_PRIVATE_KEY;
   const { tokenId } = req.params;
-  let { endTime, rentalFeeUSD } = req.body;
+  let { rentalFeeUSD } = req.body;
 
-  if (!renterPrivateKey || !endTime || !rentalFeeUSD) {
+  if (!renterPrivateKey || !rentalFeeUSD) {
     return res.status(400).json({ success: false, message: "Missing required fields" });
   }
   console.log("asd");
   //calculate start time from now in seconds
   const startTime = Math.floor(Date.now() / 1000);
-  //transform end time to seconds
-  endTime = Math.floor(Date.parse(endTime) / 1000);
 
-  console.log("  Input parameters:", { tokenId, startTime, endTime, rentalFeeUSD, renterPrivateKey });
+  console.log("  Input parameters:", { tokenId, startTime, rentalFeeUSD, renterPrivateKey });
 
 
   let gas;
@@ -236,21 +331,21 @@ app.post("/rent-vehicle/:tokenId", async (req, res) => {
     const renterAccount = web3.eth.accounts.privateKeyToAccount(renterPrivateKey);
     console.log("  Renter address:", renterAccount.address);
     const rentalFeeEtherPerHour = await convertRentalFeeToEther(rentalFeeUSD);
-    let rentalFeeEther = rentalFeeEtherPerHour * (endTime - startTime) / 3600;
+    // let rentalFeeEther = rentalFeeEtherPerHour * ( - startTime) / 3600;
     //todo remove this
     // let rentalFeeEther = 1399897052300710;
-    console.log("rentalFeeEther: ", rentalFeeEther);
+    // console.log("rentalFeeEther: ", rentalFeeEther);
     // let gas = await electricVehicleContract.methods
     //   .rentVehicle(tokenId)
     //   .estimateGas({ from: renterAccount.address, value: rentalFeeEther });
     // console.log("gas: ", gas);
-    console.log("TIMES: " + startTime + " " + endTime);
+    console.log("TIMES: " + startTime);
     gas = 6721970;
     console.log("gas2: ", gas);
     const nonce = await web3.eth.getTransactionCount(renterAccount.address);
     console.log("  Nonce:", nonce);
     // build the transaction
-    const data = electricVehicleContract.methods.rentVehicle(tokenId, startTime, endTime).encodeABI();
+    const data = electricVehicleContract.methods.rentVehicle(tokenId).encodeABI();
     console.log(data);
     // const txData = {
     //   gas,
@@ -265,10 +360,9 @@ app.post("/rent-vehicle/:tokenId", async (req, res) => {
     const tx = {
       from: renterAccount.address,
       to: electricVehicleAddress,
-      value: rentalFeeEther,
       gas,
       nonce,
-      data: electricVehicleContract.methods.rentVehicle(tokenId, startTime, endTime).encodeABI(),
+      data: electricVehicleContract.methods.rentVehicle(tokenId).encodeABI()
     };
     console.log("tx: ", tx);
     // Sign the transaction
@@ -278,84 +372,12 @@ app.post("/rent-vehicle/:tokenId", async (req, res) => {
     const txHash = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
     res.json({ success: true, message: "Vehicle rented", txHash: txHash });
 
-    // // sign the transaction
-    // const customCommon = Common.forCustomChain(
-    //   'mainnet',
-    //   {
-    //     name: 'my-network',
-    //     networkId: networkId,
-    //     chainId: chainId,
-    //   },
-    //   'petersburg'  // hardfork
-    // )
-
-    //
-    // // const common = new Common({ chain: customChain });
-    // const chainId = await web3.eth.net.getId();
-    // console.log("chainId: ", chainId);
-    // const tx = new Tx(txData, {  common: customCommon });
-    // console.log("123_tx: ", tx);
-    //
-    // const renterPrivateKeyBuffer = Buffer.from('5d1d5ccb1a6923d78c173d18c4c82510cafbfc3632d517f157334498f728189a', 'hex');  // No '0x' at the start
-    //
-    // tx.sign(renterPrivateKeyBuffer);
-    // console.log("124_tx: ", tx);
-    //
-    // const serializedTx = tx.serialize();
-    // console.log("125_serializedTx: ", serializedTx);
-    //
-    // const rawTx = "0x" + serializedTx.toString("hex");
-    // console.log("126_raw: ", rawTx);
-    //
-    // const txReceipt = await web3.eth.sendSignedTransaction(rawTx);
-    // console.log("127_txReceipt: ", txReceipt);
-    //
-
-    // const signedTx = await renterAccount.signTransaction(tx);
-    // console.log("signedTx: ", signedTx);
-    // // const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-    // // console.log("txReceipt: ", txReceipt);
-    //
-    // await web3.eth.sendSignedTransaction(signedTx.rawTransaction)
-    //   .on("transactionHash", (hash) => {
-    //     console.log("Transaction hash:", hash);
-    //   })
-    //   .on("receipt", (receipt) => {
-    //     console.log("Transaction receipt:", receipt);
-    //     res.json({ success: true, message: "Vehicle rented", txHash: receipt.transactionHash });
-    //   })
-    //   .on("error", (error) => {
-    //     console.log("Transaction error:", error);
-    //     res.status(400).json({ success: false, message: error.message });
-    //   });
-    // console.log("after sendSignedTransaction");
-    //
-    // await electricVehicleContract.events.VehicleRented({
-    //   //filter: {tokenId: tokenId}, // Using tokenId as a filter
-    //   fromBlock: "latest" // Only listening for the latest block
-    // }, function(error, event) {
-    //   if (error) {
-    //     console.error(error);
-    //   } else {
-    //     console.log("Event data:" + event); // This will log the event data
-    //   }
-    // });
-
-    // electricVehicleContract.events.VehicleRented({}, (error, event) => {
-    //   if (error) {
-    //     console.error('Error in event:', error);
-    //   } else {
-    //     console.log('Event data:', event);
-    //   }
-    // });
     await getVehicleInfo(tokenId);
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
     console.log(error);
   }
 });
-
-
 
 
 //end-rental endpoint
@@ -367,7 +389,7 @@ async function endRental(tokenId, renterPrivateKey) {
 
   try {
     const gas = await electricVehicleContract.methods
-      .endRental(tokenId)
+      .endRental(tokenId, INITIAL_TAX)
       .estimateGas({ from: renterAccount.address });
     const nonce = await web3.eth.getTransactionCount(renterAccount.address);
 
@@ -376,7 +398,7 @@ async function endRental(tokenId, renterPrivateKey) {
       to: electricVehicleAddress,
       gas,
       nonce,
-      data: electricVehicleContract.methods.endRental(tokenId).encodeABI()
+      data: electricVehicleContract.methods.endRental(tokenId, INITIAL_TAX).encodeABI()
     };
 
     const signedTx = await renterAccount.signTransaction(tx);
@@ -397,7 +419,7 @@ app.post("/end-rental/:tokenId", async (req, res) => {
 
   try {
     const gas = await electricVehicleContract.methods
-      .endRental(tokenId)
+      .endRental(tokenId, INITIAL_TAX)
       .estimateGas({ from: renterAccount.address });
     const nonce = await web3.eth.getTransactionCount(renterAccount.address);
 
@@ -406,7 +428,7 @@ app.post("/end-rental/:tokenId", async (req, res) => {
       to: electricVehicleAddress,
       gas,
       nonce,
-      data: electricVehicleContract.methods.endRental(tokenId).encodeABI()
+      data: electricVehicleContract.methods.endRental(tokenId, INITIAL_TAX).encodeABI()
     };
 
     const signedTx = await renterAccount.signTransaction(tx);
@@ -415,6 +437,21 @@ app.post("/end-rental/:tokenId", async (req, res) => {
     res.json({ success: true, message: "Rental ended", txHash });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+app.get("/get-user-points/:userId", async (req, res) => {
+  console.log("---/get-user-points/:userId---");
+
+  const { userId } = req.params;
+  try {
+    const { userId } = req.params;
+    // Use the contract's balanceOf method to fetch the user's points
+    const points = await electricVehicleContract.methods.getPoints().call();
+    res.json({ points });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

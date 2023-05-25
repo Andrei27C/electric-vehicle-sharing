@@ -19,7 +19,7 @@ contract ElectricVehicle is ERC1155, Ownable {
 
     constructor() ERC1155("") Ownable() {}
 
-    function mintVehicle(
+    function createVehicle(
         address to,
         string memory make,
         string memory model,

@@ -13,7 +13,7 @@ contract('ElectricVehicle & Escrow', accounts => {
     escrow = await Escrow.new(electricVehicle.address);
 
     // Mint a vehicle
-    await electricVehicle.mintVehicle(owner, 'Tesla', 'Model S', web3.utils.toWei('0.01', 'ether'));
+    await electricVehicle.createVehicle('Tesla', 'Model S', web3.utils.toWei('0.01', 'ether'));
   });
 
   it('should mint a vehicle', async () => {
@@ -23,9 +23,8 @@ contract('ElectricVehicle & Escrow', accounts => {
 
   it('should start rental', async () => {
     const startTime = Math.floor(Date.now() / 1000);  // Now in UNIX timestamp
-    const endTime = startTime + 3600;  // One hour from now
 
-    await escrow.startRental(tokenId, startTime, endTime, {from: renter});
+    await escrow.startRental(tokenId, startTime, {from: renter});
 
     const vehicleRenter = await electricVehicle.getOwner(tokenId);
     assert.equal(vehicleRenter, renter);
