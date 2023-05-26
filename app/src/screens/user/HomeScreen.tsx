@@ -69,6 +69,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     fetchUserFunds().then();
   }, []);
 
+  //get user address
   useEffect(() => {
     const fetchUserAddress = async () => {
       try {
@@ -78,6 +79,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         console.error('Failed to get user address:', error);
       }
     };
+    fetchUserAddress().then();
   }, []);
 
   const fundAccount = async () => {

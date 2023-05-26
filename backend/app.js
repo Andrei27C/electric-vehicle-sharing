@@ -38,6 +38,7 @@ const HOST = process.env.HOST || "127.0.0.1";
 
 //utils
 const exchange = require("./utils/exchangeRate.js");
+const { getUserFunds, getUserPoints, getUserFundsData, getUserPointsData } = require("./controllers/userController");
 
 //initial tax
 const INITIAL_TAX = 1; //in dollars
@@ -105,9 +106,10 @@ app.post("/register", (req, res) => {
   });
 });
 
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  db.get(`SELECT * FROM users WHERE username = ?`, [username], function(err, row) {
+  // Get user from database
+  db.get(`SELECT * FROM users WHERE username = ?`, [username], async function(err, row) {
     if (err) {
       return res.status(500).json({ error: "Error retrieving user" });
     }
@@ -116,7 +118,8 @@ app.post("/login", (req, res) => {
       return res.status(401).json({ error: "Invalid username or password" });
     }
 
-    bcrypt.compare(password, row.password, function(err, match) {
+    // Compare passwords
+    bcrypt.compare(password, row.password, async function(err, match) {
       if (err) {
         return res.status(500).json({ error: "Error comparing passwords" });
       }
@@ -128,10 +131,17 @@ app.post("/login", (req, res) => {
       // Passwords match, create a JWT
       const token = jwt.sign({ sub: row.id }, process.env.JWT_SECRET, { expiresIn: "1 day" });
 
-      userModelInstance = new UserModel(row.id, row.username, row.password,  row.role, row.points, row.funds, row.address );
-      dbQueries.updateUserInDB(userModelInstance).then(r => console.log("updated user at login"));
-
-      console.log("user:", userModelInstance);
+      // update user in database
+      userModelInstance = new UserModel(row.id, row.username, row.password, row.role, row.points, row.funds, row.address);
+      try {
+        userModelInstance.funds = (await getUserFundsData(userModelInstance.id)).funds;
+        userModelInstance.points = (await getUserPointsData(userModelInstance.id)).points;
+        console.log("userModelInstance:", userModelInstance);
+        await dbQueries.updateUserInDB(userModelInstance);
+        console.log("updated user at login");
+      } catch (err) {
+        console.log(err);
+      }
       res.json({ message: "Login successful", token: token, user: userModelInstance });
     });
   });
@@ -447,9 +457,6 @@ app.post("/end-rental/:tokenId", async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 });
-
-
-
 
 
 
