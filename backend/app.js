@@ -2,9 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config();
-const fs = require("fs");
-const path = require("path");
-const Web3 = require("web3");
 const axios = require("axios");
 const app = express();
 
@@ -24,22 +21,23 @@ app.use(expressJwt({
 const db = require("./database/db.js");
 const UserModel = require("./models/user.js");
 let userModelInstance = new UserModel();
+const dbQueries = require('./database/queries');
+
+//user
+const userRoutes = require('./routes/userRoutes');
+app.use(userRoutes);
+
 //web3
-const web3 = new Web3(process.env.ETHER_RPC_WSS);
+const { web3, electricVehicleContract, electricVehicleABI, electricVehicleAddress } = require('./config/web3');
+
+//utils
 app.use(cors());
 app.use(express.json());
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || "127.0.0.1";
 
-//contract info
-const electricVehicleJSON = JSON.parse(fs.readFileSync(path.join(__dirname, "../smart-contract/build/contracts/ElectricVehicle.json"), "utf8"));
-const electricVehicleABI = electricVehicleJSON.abi;
-// const electricVehicleAddress = electricVehicleJSON.networks["5777"].address;
-const electricVehicleAddress = electricVehicleJSON.networks["1337"].address;
-
-console.log("ETHER_RPC_URL:", process.env.ETHER_RPC_WSS);
-console.log("ElectricVehicleAddress:", electricVehicleAddress);
-const electricVehicleContract = new web3.eth.Contract(electricVehicleABI, electricVehicleAddress);
+//utils
+const exchange = require("./utils/exchangeRate.js");
 
 //initial tax
 const INITIAL_TAX = 1; //in dollars
@@ -130,7 +128,8 @@ app.post("/login", (req, res) => {
       // Passwords match, create a JWT
       const token = jwt.sign({ sub: row.id }, process.env.JWT_SECRET, { expiresIn: "1 day" });
 
-      userModelInstance = new UserModel(row.id, row.username, row.password,  row.role, row.points, row.address );
+      userModelInstance = new UserModel(row.id, row.username, row.password,  row.role, row.points, row.funds, row.address );
+      dbQueries.updateUserInDB(userModelInstance).then(r => console.log("updated user at login"));
 
       console.log("user:", userModelInstance);
       res.json({ message: "Login successful", token: token, user: userModelInstance });
@@ -160,7 +159,9 @@ const getVehiclesData = async () => {
       make: vehicle.make,
       model: vehicle.model,
       pricePerHour: vehicle.pricePerHour,
-      startTime: vehicle.startTime
+      maxRentalHours: vehicle.maxRentalHours,
+      startTime: vehicle.startTime,
+      currentRenter: vehicle.currentRenter,
     });
   }
   return vehicles;
@@ -191,6 +192,7 @@ const getAllVehiclesData = async () => {
       make: vehicle.make,
       model: vehicle.model,
       pricePerHour: vehicle.pricePerHour,
+      maxRentalHours: vehicle.maxRentalHours,
       startTime: vehicle.startTime,
       currentRenter: vehicle.currentRenter
     });
@@ -336,7 +338,7 @@ app.post("/rent-vehicle/:tokenId", async (req, res) => {
   try {
     const renterAccount = web3.eth.accounts.privateKeyToAccount(renterPrivateKey);
     console.log("  Renter address:", renterAccount.address);
-    const rentalFeeEtherPerHour = await convertRentalFeeToEther(rentalFeeUSD);
+    const rentalFeeEtherPerHour = await exchange.convertRentalFeeToEther(rentalFeeUSD);
     // let rentalFeeEther = rentalFeeEtherPerHour * ( - startTime) / 3600;
     //todo remove this
     // let rentalFeeEther = 1399897052300710;
@@ -446,40 +448,8 @@ app.post("/end-rental/:tokenId", async (req, res) => {
   }
 });
 
-app.get("/get-user-points/:userId", async (req, res) => {
-  console.log("---/get-user-points/:userId---");
 
-  const { userId } = req.params;
-  try {
-    const { userId } = req.params;
-    // Use the contract's balanceOf method to fetch the user's points
-    const points = await electricVehicleContract.methods.getPoints().call();
-    res.json({ points });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
-app.get("/user/:userId", async (req, res) => {
-  console.log("---/user/:userId---");
-  try {
-    const userId  = req.params;
-    db.get("SELECT * FROM users WHERE id = ?", [userId], (err, row) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      if (row) {
-        let user = UserModel.fromDB(row);
-        console.log(user);
-        res.json({ user });
-      } else {
-        console.log(`No user found with id ${userId}`);
-      }
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+
+
 

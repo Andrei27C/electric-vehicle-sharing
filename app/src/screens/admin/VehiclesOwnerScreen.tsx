@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import { View } from "react-native";
+import { Divider, Text } from 'react-native-paper';
 import axios from 'axios';
 import { VehiclesOwnerScreenNavigationProp, Vehicle } from "../../types/navigation";
 import { useFocusEffect } from "@react-navigation/native";
 import { API_URL } from '../../config';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import VehicleList from "../../components/VehicleList";
 
 type Props = {
   navigation: VehiclesOwnerScreenNavigationProp;
@@ -60,23 +62,33 @@ const VehiclesOwnerScreen: React.FC<Props> = ({ navigation }) => {
     );
   }
 
+  const deleteVehicle = (vehicle: Vehicle) => {
+    console.log(`Deleting vehicle with id: ${vehicle.tokenId}`);
+    //todo delete vehicle
+    // navigation.navigate('Rental', { tokenId: vehicle.tokenId }, );
+    // add delete endpoint and so on
+  };
+
   return (
     <View>
-      <Text>Owner's Vehicles:</Text>
-      <FlatList
-        data={vehicles}
-        renderItem={({ item }) => (
-          <View>
-            <Text>Token ID: {item.tokenId}</Text>
-            <Text>Make: {item.make}</Text>
-            <Text>Model: {item.model}</Text>
-            <Text>Price: {item.pricePerHour}</Text>
-            <Text>startTime: {item.startTime}</Text>
-            <Text>currentRenter: {item.currentRenter}</Text>
-          </View>
-        )}
-        keyExtractor={(item) => item.tokenId}
-      />
+      {/*<Text>Owner's Vehicles:</Text>*/}
+      {/*<Divider/>*/}
+      <VehicleList vehicles={vehicles} onButton={deleteVehicle} buttonText={"Delete"}/>
+
+      {/*<FlatList*/}
+      {/*  data={vehicles}*/}
+      {/*  renderItem={({ item }) => (*/}
+      {/*    <View>*/}
+      {/*      <Text>Token ID: {item.tokenId}</Text>*/}
+      {/*      <Text>Make: {item.make}</Text>*/}
+      {/*      <Text>Model: {item.model}</Text>*/}
+      {/*      <Text>Price: {item.pricePerHour}</Text>*/}
+      {/*      <Text>startTime: {item.startTime}</Text>*/}
+      {/*      <Text>currentRenter: {item.currentRenter}</Text>*/}
+      {/*    </View>*/}
+      {/*  )}*/}
+      {/*  keyExtractor={(item) => item.tokenId}*/}
+      {/*/>*/}
     </View>
   );
 };

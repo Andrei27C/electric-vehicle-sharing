@@ -5,14 +5,15 @@ import { Vehicle } from "../types/navigation";
 
 interface VehicleListProps {
   vehicles: Vehicle[];
-  onRent: (vehicle: Vehicle) => void;
+  onButton: (vehicle: Vehicle) => void;
+  buttonText?: string;
 }
 
-const VehicleList: React.FC<VehicleListProps> = ({ vehicles, onRent }) => {
+const VehicleList: React.FC<VehicleListProps> = ({ vehicles, onButton, buttonText }) => {
   return (
     <ScrollView>
       {vehicles.map((vehicle) => (
-        <VehicleCard key={`${vehicle.make}-${vehicle.model}`} vehicle={vehicle} onRent={onRent} />
+        <VehicleCard key={`${vehicle.make}-${vehicle.model}`} vehicle={vehicle} onButton={onButton} buttonText={buttonText} />
       ))}
     </ScrollView>
   );

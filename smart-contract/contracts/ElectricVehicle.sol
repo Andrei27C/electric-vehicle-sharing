@@ -32,12 +32,14 @@ contract ElectricVehicle is ERC1155, Ownable {
 
     event VehicleRented(uint256 indexed tokenId, address indexed renter, uint256 startTime);
     event RentalEnded(uint256 indexed tokenId, address indexed renter);
+    event FundsDeposited(address indexed user, uint256 amount);
 
     constructor() ERC1155('') Ownable() {}
 
     //section User functions
     function depositFunds() public payable {
         balances[msg.sender] = balances[msg.sender].add(msg.value);
+        emit FundsDeposited(msg.sender, msg.value); // emit the event
     }
 
     function withdrawFunds(uint256 amount) public {
@@ -165,12 +167,13 @@ contract ElectricVehicle is ERC1155, Ownable {
         string memory make,
         string memory model,
         uint256 pricePerHour,
+        uint256 maxRentalHours,
         uint256 startTime,
         address currentRenter
     )
     {
         Vehicle storage vehicle = vehicles[tokenId];
-        return (vehicle.make, vehicle.model, vehicle.pricePerHour, vehicle.startTime, vehicle.currentRenter);
+        return (vehicle.make, vehicle.model, vehicle.pricePerHour, vehicle.maxRentalHours,vehicle.startTime, vehicle.currentRenter);
     }
     //end section getters functions
 }

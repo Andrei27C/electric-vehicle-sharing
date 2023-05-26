@@ -1,10 +1,10 @@
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require("sqlite3").verbose();
 
-let db = new sqlite3.Database('./ev-users.sqlite', (err) => {
+let db = new sqlite3.Database("./ev-users.sqlite", (err) => {
   if (err) {
     return console.error(err.message);
   }
-  console.log('Connected to the SQLite database.');
+  console.log("Connected to the SQLite database.");
 });
 
 db.serialize(() => {
@@ -14,6 +14,7 @@ db.serialize(() => {
         password TEXT NOT NULL,
         role TEXT NOT NULL,
         points INTEGER DEFAULT 0,
+        funds INTEGER DEFAULT 0,
         address TEXT NOT NULL
     )`, (err) => {
     if (err) {

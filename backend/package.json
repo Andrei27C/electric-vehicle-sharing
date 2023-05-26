@@ -22,6 +22,7 @@
     "express-jwt": "^6.1.0",
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.0",
+    "node-fetch": "^3.3.1",
     "path": "^0.12.7",
     "sqlite3": "^5.1.6",
     "web3": "^1.10.0"

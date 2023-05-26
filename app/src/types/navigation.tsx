@@ -4,9 +4,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 export type RootStackParamList = {
   Home: undefined;
   CreateVehicle: undefined;
-  Rental: {
-    tokenId: string;
-  };
+  Rental: undefined;
   Owner: undefined;
   Login: undefined;
   Register: undefined;
