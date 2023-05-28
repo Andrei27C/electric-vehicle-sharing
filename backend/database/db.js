@@ -15,7 +15,9 @@ db.serialize(() => {
         role TEXT NOT NULL,
         points INTEGER DEFAULT 0,
         funds INTEGER DEFAULT 0,
-        address TEXT NOT NULL
+        address TEXT NOT NULL,
+        vehicleId INTEGER DEFAULT null,
+        privateKey TEXT NOT NULL
     )`, (err) => {
     if (err) {
       console.error(err.message);

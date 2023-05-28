@@ -13,11 +13,11 @@ type RegisterScreenProps = {
 export default function RegisterScreen({ navigation }: RegisterScreenProps) {
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const [address, setAddress] = React.useState('');
+  const [privateKey, setPrivateKey] = React.useState('');
 
   const register = async () => {
     try {
-      const response = await axios.post(`${API_URL}/register`, { username, password, address });
+      const response = await axios.post(`${API_URL}/register`, { username, password, privateKey: privateKey });
       console.log(response.data);
 
       if (response.data.success) {
@@ -48,9 +48,9 @@ export default function RegisterScreen({ navigation }: RegisterScreenProps) {
         autoCapitalize="none"
       />
       <TextInput
-        label="Address"
-        value={address}
-        onChangeText={text => setAddress(text)}
+        label="Private Key"
+        value={privateKey}
+        onChangeText={text => setPrivateKey(text)}
         style={{ marginBottom: 16 }}
         autoCapitalize="none"
       />

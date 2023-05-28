@@ -6,6 +6,8 @@ import { HomeScreenRouteProp, RootStackParamList, Vehicle } from "../../types/na
 import { API_URL } from '../../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button, Divider, TextInput } from "react-native-paper";
+import VehicleCard from "../../components/VehicleCard";
+import { useFocusEffect } from "@react-navigation/native";
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -20,67 +22,92 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [userAddress, setUserAddress] = useState("0");
   const [userFundsDollars, setUserFundsDollars] = useState("0");
   const [fundsToBeFunded, setFundsToBeFunded] = useState("");
+  const [rentedVehicle, setRentedVehicle] = useState<Vehicle | null>(null);
 
-  //get user points
-  useEffect(() => {
-    console.log('Fetching user points...');
-    const fetchUserPoints = async () => {
-      try {
-        let userPoints = "0";
-        const token = await AsyncStorage.getItem('token');
-        const userId = await AsyncStorage.getItem('userId');
-        const response = await axios.get(`${API_URL}/get-user-points/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        userPoints = response.data.points;
-        await AsyncStorage.setItem('userPoints', userPoints.toString());
-        console.log('Fetched user points:', userPoints);
-        setUserPoints(userPoints);
-      } catch (error) {
-        console.error('Failed to fetch user points:', error);
-      }
-    };
-    fetchUserPoints().then();
-  }, []);
-
-  //get user funds
-  useEffect(() => {
-    console.log('Fetching user funds...');
-    const fetchUserFunds = async () => {
-      try {
-        let userFunds = "0";
-        const token = await AsyncStorage.getItem('token');
-        const userId = await AsyncStorage.getItem('userId');
-
-        const response = await axios.get(`${API_URL}/get-user-funds/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        userFunds = response.data.funds ? response.data.funds : "0";
-        let userFundsDollars = response.data.fundsDollars ? response.data.fundsDollars : "0";
-        console.log('   Fetched user funds wei: ', userFunds, " - dollars: ", userFundsDollars);
-
-        await AsyncStorage.setItem('userFunds', userFunds.toString());
-        setUserFunds(userFunds);
-        setUserFundsDollars(userFundsDollars);
-      } catch (error) {
-        console.error('Failed to fetch user funds:', error);
-      }
-    };
-    fetchUserFunds().then();
-  }, []);
+  //fetch user funds, points and rented vehicle
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('useFocusEffect');
+      fetchRentedVehicle().then();
+      fetchUserFunds().then();
+      fetchUserPoints().then();
+      // Returning an empty function to avoid a warning about useEffect cleanup function
+      return () => {};
+    }, [])
+  );
 
   //get user address
   useEffect(() => {
-    const fetchUserAddress = async () => {
-      try {
-        const userAddress =await AsyncStorage.getItem('userAddress');
-        setUserAddress(userAddress ? userAddress : "0");
-      } catch (error) {
-        console.error('Failed to get user address:', error);
-      }
-    };
     fetchUserAddress().then();
   }, []);
+
+  //get user points
+  const fetchUserPoints = async () => {
+    console.log('Fetching user points...');
+    try {
+      let userPoints = "0";
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+      const response = await axios.get(`${API_URL}/get-user-points/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      userPoints = response.data.points;
+      await AsyncStorage.setItem('userPoints', userPoints.toString());
+      console.log('Fetched user points:', userPoints);
+      setUserPoints(userPoints);
+    } catch (error) {
+      console.error('Failed to fetch user points:', error);
+    }
+  };
+
+  //get user funds
+  const fetchUserFunds = async () => {
+    console.log('Fetching user funds...');
+    try {
+      let userFunds = "0";
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+
+      const response = await axios.get(`${API_URL}/get-user-funds/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      userFunds = response.data.funds ? response.data.funds : "0";
+      let userFundsDollars = response.data.fundsDollars ? response.data.fundsDollars : "0";
+      console.log('   Fetched user funds wei: ', userFunds, " - dollars: ", userFundsDollars);
+
+      await AsyncStorage.setItem('userFunds', userFunds.toString());
+      setUserFunds(userFunds);
+      setUserFundsDollars(userFundsDollars);
+    } catch (error) {
+      console.error('Failed to fetch user funds:', error);
+    }
+  };
+
+  //get user address
+  const fetchUserAddress = async () => {
+    try {
+      const userAddress =await AsyncStorage.getItem('userAddress');
+      setUserAddress(userAddress ? userAddress : "0");
+    } catch (error) {
+      console.error('Failed to get user address:', error);
+    }
+  };
+
+  //get rented vehicle
+  const fetchRentedVehicle = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+
+      const response = await axios.get(`${API_URL}/get-rented-vehicle/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log('Fetched rented vehicle:', response.data.vehicle);
+      setRentedVehicle(response.data.vehicle);
+    } catch (error) {
+      console.error('Failed to fetch rented vehicle:', error);
+    }
+  };
 
   const fundAccount = async () => {
     try {
@@ -93,8 +120,27 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       console.log('Fetched funds:', response.data.funds);
       let totalUserFunds = parseFloat(userFunds) + parseFloat(response.data.funds);
       setUserFunds(totalUserFunds.toString());
+      setFundsToBeFunded("");
+      fetchUserFunds().then();
     } catch (error) {
       console.error('Failed to fetch funds:', error);
+    }
+  }
+
+  const endRental = async () => {
+    console.log('Ending rent...');
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+      console.log('Token:', token, 'userId:', userId);
+      const response = await axios.post(`${API_URL}/end-rental/${userId}`, null,{
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log('Rental ended', response.data.vehicle);
+      setRentedVehicle(response.data.vehicle);
+      fetchUserFunds().then();
+    } catch (error) {
+      console.error('Failed to end rental:', error);
     }
   }
 
@@ -127,14 +173,22 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       </View>
 
       <Divider style={styles.divider} />
+      {
+        rentedVehicle ?
+          <View>
+            <VehicleCard key={`${rentedVehicle.make}-${rentedVehicle.model}`} vehicle={rentedVehicle} onButton={endRental} buttonText={"End Rent"} />
+            <Text></Text>
+            {/* Render other vehicle details here */}
+          </View> :
+          <Button
+            mode="contained"
+            onPress={() => navigation.navigate('Rental')}
+            style={styles.button}
+          >
+            Rent a Vehicle
+          </Button>
+      }
 
-      <Button
-        mode="contained"
-        onPress={() => navigation.navigate('Rental')}
-        style={styles.button}
-      >
-        Rent a Vehicle
-      </Button>
     </View>
   );
 };

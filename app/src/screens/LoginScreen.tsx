@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { TextInput, Button, Title } from 'react-native-paper';
+import { TextInput, Button, Title, Dialog, Portal, Paragraph } from 'react-native-paper';
 import axios from 'axios';
 import { API_URL } from '../config';
 import { LoginScreenNavigationProp, LoginScreenRouteProp } from "../types/navigation";
@@ -33,6 +33,11 @@ const styles = StyleSheet.create({
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [visible, setVisible] = useState(false);
+
+  const showDialog = () => setVisible(true);
+  const hideDialog = () => setVisible(false);
 
   const login = async () => {
     try {
@@ -54,6 +59,8 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         navigation.navigate('Home');
     } catch (error) {
       console.error('Failed to log in:', error);
+      setError('Failed to log in.');
+      showDialog();
     }
   };
 
@@ -81,6 +88,18 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       <Button mode="outlined" onPress={() => navigation.navigate('Register')} style={styles.button}>
         Register
       </Button>
+
+      <Portal>
+        <Dialog visible={visible} onDismiss={hideDialog}>
+          <Dialog.Title>Error</Dialog.Title>
+          <Dialog.Content>
+            <Paragraph>{error}</Paragraph>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={hideDialog}>Done</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 };

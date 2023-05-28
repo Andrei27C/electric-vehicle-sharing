@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config();
-const axios = require("axios");
 const app = express();
 
 
@@ -28,7 +27,7 @@ const userRoutes = require('./routes/userRoutes');
 app.use(userRoutes);
 
 //web3
-const { web3, electricVehicleContract, electricVehicleABI, electricVehicleAddress } = require('./config/web3');
+const { web3, electricVehicleContract, electricVehicleAddress } = require('./config/web3');
 
 //utils
 app.use(cors());
@@ -38,7 +37,10 @@ const HOST = process.env.HOST || "127.0.0.1";
 
 //utils
 const exchange = require("./utils/exchangeRate.js");
-const { getUserFunds, getUserPoints, getUserFundsData, getUserPointsData } = require("./controllers/userController");
+const { getUserFunds, getUserPoints, getUserFundsData_FromContract, getUserPointsData,
+  getUserRentedVehicleData_FromContract
+} = require("./controllers/userController");
+const { updateUserInDB } = require("./database/queries");
 
 //initial tax
 const INITIAL_TAX = 1; //in dollars
@@ -67,14 +69,15 @@ function toDateTime(secs) {
 }
 
 //section login
-
 // Registration route
 app.post("/register", (req, res) => {
-  const { username, password, address } = req.body;
+  console.log("---register---");
+  const { username, password, privateKey } = req.body;
 
   // check if username already exists
   db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
     if (err) {
+      console.log(err);
       return res.status(500).json({ error: "Error checking username" });
     }
 
@@ -91,7 +94,9 @@ app.post("/register", (req, res) => {
       }
 
       // Store new user in the database
-      db.run(`INSERT INTO users(username, password, role, points, address) VALUES (?,?,?,?,?)`, [username, hash, "user", 0, address], function(err) {
+      const address = web3.eth.accounts.privateKeyToAccount(privateKey).address;
+      console.log("   Address: ", address)
+      db.run(`INSERT INTO users(username, password, role, points, address, privateKey) VALUES (?,?,?,?,?,?)`, [username, hash, "user", 0, address, privateKey], function(err) {
         if (err) {
           console.log(err);
           return res.status(500).json({ error: "Error storing user" });
@@ -107,6 +112,7 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
+  console.log("---login---");
   const { username, password } = req.body;
   // Get user from database
   db.get(`SELECT * FROM users WHERE username = ?`, [username], async function(err, row) {
@@ -132,13 +138,14 @@ app.post("/login", async (req, res) => {
       const token = jwt.sign({ sub: row.id }, process.env.JWT_SECRET, { expiresIn: "1 day" });
 
       // update user in database
-      userModelInstance = new UserModel(row.id, row.username, row.password, row.role, row.points, row.funds, row.address);
+      userModelInstance = new UserModel(row.id, row.username, row.password, row.role, row.points, row.funds, row.address, row.vehicleId, row.privateKey);
       try {
-        userModelInstance.funds = (await getUserFundsData(userModelInstance.id)).funds;
+        userModelInstance.funds = (await getUserFundsData_FromContract(userModelInstance.id)).funds;
         userModelInstance.points = (await getUserPointsData(userModelInstance.id)).points;
-        console.log("userModelInstance:", userModelInstance);
+        userModelInstance.vehicleId = (await getUserRentedVehicleData_FromContract(userModelInstance.id))?.vehicle?.id;
+        console.log("    userModelInstance:", userModelInstance);
         await dbQueries.updateUserInDB(userModelInstance);
-        console.log("updated user at login");
+        console.log("    updated user at login");
       } catch (err) {
         console.log(err);
       }
@@ -146,12 +153,9 @@ app.post("/login", async (req, res) => {
     });
   });
 });
-
 //end section login
 
 const getVehiclesData = async () => {
-  // console.log("electricVehicleContract:", electricVehicleContract);
-
   const totalSupply = await electricVehicleContract.methods.totalSupply().call();
   console.log("totalSupply:", totalSupply);
 
@@ -160,7 +164,8 @@ const getVehiclesData = async () => {
   for (let i = 0; i < totalSupply; i++) {
     // const tokenId = await electricVehicleContract.methods.tokenByIndex(i).call();
     const vehicle = await electricVehicleContract.methods.getAllVehicleData(i).call();
-
+    vehicle.pricePerHour = await exchange.convertWeiToUsd(vehicle.pricePerHour);
+    vehicle.pricePerHour = parseFloat(vehicle.pricePerHour).toFixed(2);
     // console.log(vehicle);
     vehicle.startTime = toDateTime(vehicle.startTime);
 
@@ -235,7 +240,7 @@ app.get("/contract-owner", async (req, res) => {
 
 //create-vehicle endpoint
 app.post("/create-vehicle", async (req, res) => {
-  const { role, make, model, pricePerHour } = req.body;
+  const { role, make, model, pricePerHour: pricePerHourUSD } = req.body;
 
   console.log("-----/create-vehicle-----");
   console.log("userRole: " , role);
@@ -244,13 +249,14 @@ app.post("/create-vehicle", async (req, res) => {
     console.log("  Forbidden! You are not the owner.");
     return res.status(403).json({ message: "Forbidden! You are not the owner." });
   }
+  console.log("  Input parameters:", { make, model, pricePerHour: pricePerHourUSD, accountAddress: account.address });
+  const pricePerHourWei = await exchange.convertUsdToWei(pricePerHourUSD);
+  console.log("  rentalFeeWeiPerHour:", pricePerHourWei);
 
-
-  console.log("  Input parameters:", { make, model, pricePerHour, accountAddress: account.address });
-
+  // Estimate gas
   let gas;
   try {
-    const contractMethod = electricVehicleContract.methods.createVehicle(make, model, pricePerHour);
+    const contractMethod = electricVehicleContract.methods.createVehicle(make, model, pricePerHourWei);
     // gas = await contractMethod.estimateGas();
     gas = 500000;
   } catch (error) {
@@ -258,6 +264,8 @@ app.post("/create-vehicle", async (req, res) => {
     res.status(500).json({ success: false, message: "Error estimating gas", error: error.message });
     return;
   }
+
+  // Create transaction
   try {
     const nonce = await web3.eth.getTransactionCount(account.address);
     console.log("  Nonce:", nonce);
@@ -266,15 +274,10 @@ app.post("/create-vehicle", async (req, res) => {
       to: electricVehicleContract.options.address,
       gas,
       nonce,
-      data: electricVehicleContract.methods.createVehicle(make, model, pricePerHour).encodeABI()
+      data: electricVehicleContract.methods.createVehicle(make, model, pricePerHourWei).encodeABI()
     };
-
     const signedTx = await account.signTransaction(tx);
-    console.log("  Signer address:", account.address);
-
-    // console.log('Raw transaction:', signedTx.rawTransaction);
     const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-
 
     res.json({ success: true, message: "Vehicle created", txHash: txReceipt.transactionHash });
   } catch (error) {
@@ -303,84 +306,42 @@ app.get("/vehicles/:tokenId", async (req, res) => {
   }
 });
 
-//rent endpoint
-async function getVehicleInfo(tokenId) {
-  try {
-    const owner = await electricVehicleContract.methods.getOwner(tokenId).call();
-    const startTime = await electricVehicleContract.methods.getStartTime(tokenId).call();
-
-    console.log(`Vehicle ${tokenId} Info:`);
-    console.log(`  Owner: ${owner}`);
-    console.log(`  Start Time: ${startTime}`);
-  } catch (error) {
-    console.error("Error fetching vehicle info:", error);
-  }
-}
-
-const convertRentalFeeToEther = async (rentalFeeUSD) => {
-  try {
-    const response = await axios.get("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd");
-    const etherPriceUSD = response.data.ethereum.usd;
-    return web3.utils.toWei((rentalFeeUSD / etherPriceUSD).toString(), "ether");
-  } catch (error) {
-    throw new Error("Could not calculate rental fee");
-  }
-};
-
+//rent vehicle endpoint
 app.post("/rent-vehicle/:tokenId", async (req, res) => {
   console.log("---/rent-vehicle/:tokenId---");
   //todo: send the private key from the app
-  const renterPrivateKey = process.env.TD_ACCOUNT_1_PRIVATE_KEY;
+  const renterPrivateKey = userModelInstance.privateKey;
   const { tokenId } = req.params;
-  let { rentalFeeUSD } = req.body;
 
-  if (!renterPrivateKey || !rentalFeeUSD) {
+  if (!renterPrivateKey) {
     return res.status(400).json({ success: false, message: "Missing required fields" });
   }
-  console.log("asd");
+
   //calculate start time from now in seconds
   const startTime = Math.floor(Date.now() / 1000);
 
-  console.log("  Input parameters:", { tokenId, startTime, rentalFeeUSD, renterPrivateKey });
-
+  console.log("  Input parameters:", { tokenId, startTime, renterPrivateKey });
 
   let gas;
   try {
     const renterAccount = web3.eth.accounts.privateKeyToAccount(renterPrivateKey);
     console.log("  Renter address:", renterAccount.address);
-    const rentalFeeEtherPerHour = await exchange.convertRentalFeeToEther(rentalFeeUSD);
-    // let rentalFeeEther = rentalFeeEtherPerHour * ( - startTime) / 3600;
-    //todo remove this
-    // let rentalFeeEther = 1399897052300710;
-    // console.log("rentalFeeEther: ", rentalFeeEther);
-    // let gas = await electricVehicleContract.methods
-    //   .rentVehicle(tokenId)
-    //   .estimateGas({ from: renterAccount.address, value: rentalFeeEther });
-    // console.log("gas: ", gas);
-    console.log("TIMES: " + startTime);
+
+    console.log("  TIMES: " + startTime);
     gas = 6721970;
-    console.log("gas2: ", gas);
+    console.log("  gas2: ", gas);
     const nonce = await web3.eth.getTransactionCount(renterAccount.address);
     console.log("  Nonce:", nonce);
     // build the transaction
     const data = electricVehicleContract.methods.rentVehicle(tokenId).encodeABI();
     console.log(data);
-    // const txData = {
-    //   gas,
-    //   chainId: 1337,
-    //   from: renterAccount.address,
-    //   to: "0x96FE9eAA58908B77f5a1CE3a361f43251890BF47",
-    //   nonce: nonce,
-    //   value: rentalFeeEther,
-    //   data: data
-    // };
 
     const tx = {
       from: renterAccount.address,
       to: electricVehicleAddress,
       gas,
       nonce,
-      data: electricVehicleContract.methods.rentVehicle(tokenId).encodeABI()
+      data: data
     };
     console.log("tx: ", tx);
     // Sign the transaction
@@ -388,75 +349,82 @@ app.post("/rent-vehicle/:tokenId", async (req, res) => {
 
     // Send the transaction
     const txHash = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+
+    // Update user in db
+    userModelInstance.vehicleId = tokenId;
+    await updateUserInDB(userModelInstance);
+
     res.json({ success: true, message: "Vehicle rented", txHash: txHash });
 
-    await getVehicleInfo(tokenId);
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
     console.log(error);
   }
 });
 
-
 //end-rental endpoint
 // Function to handle the end rental logic
-async function endRental(tokenId, renterPrivateKey) {
-  console.log("---/end-rental/:tokenId---");
-
-  const renterAccount = web3.eth.accounts.privateKeyToAccount(renterPrivateKey);
-
+const endRental = async (tokenId, initialTax, kilometersDriven, privateKey) => {
   try {
-    const gas = await electricVehicleContract.methods
-      .endRental(tokenId, INITIAL_TAX)
-      .estimateGas({ from: renterAccount.address });
-    const nonce = await web3.eth.getTransactionCount(renterAccount.address);
+    console.log('tokenId: ', tokenId, 'initialTax: ', initialTax, 'kilometersDriven: ', kilometersDriven, 'privateKey: ', privateKey);
+    let currentTime = Math.floor(Date.now() / 1000); // current time in seconds
+
+    //todo remove this
+    currentTime = currentTime + 3600;
+
+    const data = electricVehicleContract.methods.endRental(
+      tokenId,
+      currentTime,
+      initialTax,
+      kilometersDriven
+    ).encodeABI();
+
+    const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+
+    const nonce = await web3.eth.getTransactionCount(account.address);
+    const gasPrice = await web3.eth.getGasPrice();
+    const gasLimit = 6721975; // you may need to adjust this value
 
     const tx = {
-      from: renterAccount.address,
+      from: account.address,
       to: electricVehicleAddress,
-      gas,
+      gasLimit,
       nonce,
-      data: electricVehicleContract.methods.endRental(tokenId, INITIAL_TAX).encodeABI()
+      data: data
     };
 
-    const signedTx = await renterAccount.signTransaction(tx);
-    const txHash = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
 
-    return { success: true, message: "Rental ended", txHash };
+    const signedTx = await account.signTransaction(tx);
+    const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+    console.log("    a mers:  ",receipt);
+    return true;
   } catch (error) {
-    throw new Error(error.message);
+    console.error(error);
   }
-}
+  return false;
+};
 
-app.post("/end-rental/:tokenId", async (req, res) => {
-  console.log("---/end-rental/:tokenId---");
+app.post("/end-rental/:userId", async (req, res) => {
+  console.log("---/end-rental/:userId---");
 
-  const { tokenId } = req.params;
-  const { renterPrivateKey } = req.body;
-  const renterAccount = web3.eth.accounts.privateKeyToAccount(renterPrivateKey);
-
+  const { userId } = req.params;
+  console.log("userId: ", userId);
+  const user = await dbQueries.getUserFromDBById(userId);
+  console.log("user: ", user);
+  const renterAccount = user.privateKey;
+  console.log("renterAccount: ", renterAccount);
   try {
-    const gas = await electricVehicleContract.methods
-      .endRental(tokenId, INITIAL_TAX)
-      .estimateGas({ from: renterAccount.address });
-    const nonce = await web3.eth.getTransactionCount(renterAccount.address);
+    const KILOMETERS_DRIVEN = 50;
+    const vehicleId = (await getUserRentedVehicleData_FromContract(userId))?.vehicle?.id;
+    const receipt = await endRental(vehicleId, INITIAL_TAX, KILOMETERS_DRIVEN, renterAccount);
 
-    const tx = {
-      from: renterAccount.address,
-      to: electricVehicleAddress,
-      gas,
-      nonce,
-      data: electricVehicleContract.methods.endRental(tokenId, INITIAL_TAX).encodeABI()
-    };
+    // Update user in db
+    userModelInstance.vehicleId = (receipt === true) ? null : userModelInstance.vehicleId;
+    console.log("       ------vehicleId ", userModelInstance.vehicleId);
+    await updateUserInDB(userModelInstance);
 
-    const signedTx = await renterAccount.signTransaction(tx);
-    const txHash = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-
-    res.json({ success: true, message: "Rental ended", txHash });
+    res.json({ success: true, message: "Rental ended", receipt });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
 });
-
-
-

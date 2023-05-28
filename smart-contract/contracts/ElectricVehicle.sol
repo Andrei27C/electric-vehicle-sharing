@@ -31,7 +31,7 @@ contract ElectricVehicle is ERC1155, Ownable {
     uint256 public totalRentalIncome;
 
     event VehicleRented(uint256 indexed tokenId, address indexed renter, uint256 startTime);
-    event RentalEnded(uint256 indexed tokenId, address indexed renter);
+    event RentalEnded(uint256 indexed tokenId, address indexed renter, uint256 rentalFee, uint256 rentalDuration);
     event FundsDeposited(address indexed user, uint256 amount);
 
     constructor() ERC1155('') Ownable() {}
@@ -62,7 +62,7 @@ contract ElectricVehicle is ERC1155, Ownable {
 
     //todo check if the renter has more than enough balance
     function rentVehicle(uint256 tokenId) public {
-        require(vehicles[tokenId].currentRenter == address(0), "Vehicle is currently rented");
+        require(vehicles[tokenId].currentRenter == address(0) || vehicles[tokenId].currentRenter == owner(), "Vehicle is currently rented");
         require(balances[msg.sender] >= vehicles[tokenId].pricePerHour, "Insufficient balance to rent this vehicle");
 
         // Transfer the vehicle token to the renter
@@ -81,16 +81,18 @@ contract ElectricVehicle is ERC1155, Ownable {
         require(vehicles[tokenId].currentRenter == msg.sender, "You are not the current renter of this vehicle");
 
         // Calculate the rental fee
-        uint256 currentTime = block.timestamp;
-        console.log("   ---currentTime: %s", currentTime);
-        uint256 rentalDuration = endTime.sub(currentTime);
+        console.log("   ---startTime: %s", vehicles[tokenId].startTime);
+        console.log("   ---endTime: %s", endTime);
+        uint256 rentalDuration = endTime.sub(vehicles[tokenId].startTime);
         console.log("   ---rentalDuration: %s", rentalDuration);
+
         uint256 requiredRentalFee = vehicles[tokenId].pricePerHour.div(3600).mul(rentalDuration);
-        console.log("   ---pricePerHour: %s", vehicles[tokenId].pricePerHour);
+//        console.log("   ---pricePerHour: %s", vehicles[tokenId].pricePerHour);
         console.log("   ---requiredRentalFee: %s", requiredRentalFee);
+        requiredRentalFee.add(initialTax);
 
         // Subtract the rental fee from the renter's balance
-        balances[msg.sender] = balances[msg.sender].sub(requiredRentalFee.add(initialTax));
+        balances[msg.sender] = balances[msg.sender].sub(requiredRentalFee);
         // Add the rental fee to the total income and to the owner's balance
         addRentalIncome(requiredRentalFee);
 
@@ -104,7 +106,7 @@ contract ElectricVehicle is ERC1155, Ownable {
         // Award points for kilometers driven.
         addPoints(msg.sender, kilometersDriven);
 
-        emit RentalEnded(tokenId, msg.sender);
+        emit RentalEnded(tokenId, msg.sender, requiredRentalFee, rentalDuration);
     }
 
     //subsection points
@@ -132,8 +134,11 @@ contract ElectricVehicle is ERC1155, Ownable {
     ) public onlyOwner {
         uint256 maxRentalHours = 2 hours;
         console.log("---Creating vehicle---");
+        console.log("   ---make: %s", make);
+        console.log("   ---model: %s", model);
+        console.log("   ---pricePerHour: %s", pricePerHour);
         _mint(owner(), VEHICLES_TOKEN_ID, 1, "");
-        vehicles[VEHICLES_TOKEN_ID] = Vehicle(make, model, pricePerHour, maxRentalHours, 0, address(0));
+        vehicles[VEHICLES_TOKEN_ID] = Vehicle(make, model, pricePerHour, maxRentalHours, 0, owner());
         VEHICLES_TOKEN_ID++;
     }
 
@@ -175,5 +180,24 @@ contract ElectricVehicle is ERC1155, Ownable {
         Vehicle storage vehicle = vehicles[tokenId];
         return (vehicle.make, vehicle.model, vehicle.pricePerHour, vehicle.maxRentalHours,vehicle.startTime, vehicle.currentRenter);
     }
+
+    function getRentedVehicleByAddress()
+    public
+    view
+    returns (
+        uint256 id,
+        Vehicle memory vehicle
+    )
+    {
+        for (uint256 i = 0; i < VEHICLES_TOKEN_ID; i++) {
+            if (vehicles[i].currentRenter == msg.sender) {
+                Vehicle storage vehicleForRent = vehicles[i];
+                return (i,vehicleForRent);
+            }
+        }
+
+        revert("No vehicle currently rented by the provided address");
+    }
+
     //end section getters functions
 }

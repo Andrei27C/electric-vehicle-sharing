@@ -26,7 +26,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onButton, buttonText
     <Card style={styles.card}>
       <Card.Content style={styles.content}>
         <Title>{`${vehicle.make} ${vehicle.model}`}</Title>
-        <Subheading>Price per Hour: {vehicle.pricePerHour}</Subheading>
+        <Subheading>Price per Hour: ${vehicle.pricePerHour}</Subheading>
         <Subheading>Max Rental Hours: {vehicle.maxRentalHours / 3600}</Subheading>
         <Subheading>Current Renter: {vehicle.currentRenter}</Subheading>
       </Card.Content>

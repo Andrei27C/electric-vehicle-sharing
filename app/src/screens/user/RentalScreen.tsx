@@ -42,8 +42,7 @@ const RentalScreen: React.FC<Props> = ({ navigation }) => {
     try {
       const token = await AsyncStorage.getItem('token');
       const response = await axios.post(
-        `${API_URL}/rent-vehicle/${vehicle.tokenId}`,
-        {rentalFeeUSD: vehicle?.pricePerHour},
+        `${API_URL}/rent-vehicle/${vehicle.tokenId}`, {},
         {headers: { Authorization: `Bearer ${token}` }}
         );
       console.log(response.data);
