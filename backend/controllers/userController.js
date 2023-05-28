@@ -92,7 +92,7 @@ const getUserFundsData_FromContract = async (userId) => {
   return { funds: balance, fundsDollars: fundsDollars.toString() };
 };
 
-const getUserFunds = async (req, res) => {
+const getUserFundsWei = async (req, res) => {
   const { userId } = req.params;
   try {
     const result = await getUserFundsData_FromContract(userId);
@@ -158,7 +158,7 @@ const getUserRentedVehicle = async (req, res) => {
 
 module.exports = {
   fundAccount,
-  getUserFunds,
+  getUserFundsWei,
   getUserPoints,
   getUser,
   fundAccountData,
