@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, View } from "react-native";
-import { Divider, Text } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import axios from 'axios';
 import { VehiclesOwnerScreenNavigationProp, Vehicle } from "../../types/navigation";
 import { useFocusEffect } from "@react-navigation/native";
@@ -19,8 +19,8 @@ const VehiclesOwnerScreen: React.FC<Props> = ({ navigation }) => {
   useFocusEffect(
     React.useCallback(() => {
       console.log('useFocusEffect');
-      checkOwnership();
-      fetchVehicles();
+      checkOwnership().then();
+      fetchVehicles().then();
       // Returning an empty function to avoid a warning about useEffect cleanup function
       return () => {};
     }, [])
@@ -45,7 +45,8 @@ const VehiclesOwnerScreen: React.FC<Props> = ({ navigation }) => {
   const fetchVehicles = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/get-all-vehicles-data`,{
+      const userId = await AsyncStorage.getItem('userId');
+      const response = await axios.get(`${API_URL}/get-vehicles-data-for-view/${userId}`,{
         headers: { Authorization: `Bearer ${token}` },
       });
       setVehicles(response.data.vehicles);

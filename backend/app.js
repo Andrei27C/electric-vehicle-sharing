@@ -37,7 +37,7 @@ const HOST = process.env.HOST || "127.0.0.1";
 
 //utils
 const exchange = require("./utils/exchangeRate.js");
-const { getUserFunds, getUserPoints, getUserFundsData_FromContract, getUserPointsData,
+const { getUserFundsData_FromContract, getUserPointsData,
   getUserRentedVehicleData_FromContract
 } = require("./controllers/userController");
 const { updateUserInDB, getUserFromDBById } = require("./database/queries");
@@ -165,7 +165,7 @@ const getPreparedForFrontendVehicleData = async (vehicleId) => {
   return vehicle;
 }
 
-const getVehiclesData = async (ownerScreen) => {
+const getVehiclesDataForViewOnly = async (ownerScreen) => {
   const totalSupply = await electricVehicleContract.methods.totalSupply().call();
   const contractOwner = await getOwner();
   const vehicles = [];
@@ -174,6 +174,7 @@ const getVehiclesData = async (ownerScreen) => {
     const vehicle = await getPreparedForFrontendVehicleData(i);
     console.log("    vehicle:", vehicle);
 
+    // for user screen we need only active vehicles that are not rented by the user
     if(!ownerScreen) {
       if (vehicle.active === true && vehicle.currentRenter === contractOwner) {
         console.log("    entered here");
@@ -187,8 +188,12 @@ const getVehiclesData = async (ownerScreen) => {
         });
       }
     }
+    // for owner screen we need all information about the vehicle
     else
     {
+
+      if(vehicle.currentRenter === contractOwner)
+        vehicle.currentRenter = "Owner";
       vehicles.push({
         tokenId: i,
         make: vehicle.make,
@@ -204,10 +209,29 @@ const getVehiclesData = async (ownerScreen) => {
   }
   return vehicles;
 };
+app.get("/get-vehicles-data-for-view/:userId", async (req, res) => {
+  console.log("-----/get-vehicles-data-for-view-----");
+  const userId = req.params.userId;
+  try {
+    const dbUser = await dbQueries.getUserFromDBById(userId);
+    console.log("    dbUser:", dbUser)
+    let ownerScreen = false;
+    if(dbUser.role === "admin")
+      ownerScreen = true;
+    console.log("    ownerScreen:", ownerScreen)
+    const vehicles = await getVehiclesDataForViewOnly(ownerScreen);
+    res.json({ success: true, vehicles });
+  } catch (error) {
+    console.error("Failed to fetch vehicles:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch vehicles" });
+  }
+});
+
+
 app.get("/get-vehicles", async (req, res) => {
   console.log("-----/get-vehicles-----");
   try {
-    const vehicles = await getVehiclesData(false);
+    const vehicles = await getVehiclesDataForViewOnly(false);
     // console.log("vehicles:", vehicles)
     res.json({ success: true, vehicles });
   } catch (error) {
@@ -218,7 +242,7 @@ app.get("/get-vehicles", async (req, res) => {
 app.get("/get-all-vehicles-data", async (req, res) => {
   console.log("-----/get-all-vehicles-data-----");
   try {
-    const vehicles = await getVehiclesData(true);
+    const vehicles = await getVehiclesDataForViewOnly(true);
     res.json({ success: true, vehicles });
   } catch (error) {
     console.error("Failed to fetch vehicles:", error);

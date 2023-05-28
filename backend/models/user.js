@@ -12,7 +12,7 @@ class User {
   }
 
   static fromDB(row) {
-    return new User(row.id, row.username, row.role, row.password, row.points, row.funds, row.address, row.vehicleId, row.privateKey);
+    return new User(row.id, row.username, row.password, row.role, row.points, row.funds, row.address, row.vehicleId, row.privateKey);
   }
 }
 

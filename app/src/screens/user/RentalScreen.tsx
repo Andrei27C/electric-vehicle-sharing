@@ -24,7 +24,8 @@ const RentalScreen: React.FC<Props> = ({ navigation }) => {
       const fetchVehicles = async () => {
         try {
           const token = await AsyncStorage.getItem('token');
-          const response = await axios.get(`${API_URL}/get-vehicles`, {
+          const userId = await AsyncStorage.getItem('userId');
+          const response = await axios.get(`${API_URL}/get-vehicles-data-for-view/${userId}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           console.log('Fetched vehicles:', response.data.vehicles);
