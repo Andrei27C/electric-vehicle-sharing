@@ -54,7 +54,7 @@ const RentalScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={{ padding: 10 }}>
-      <VehicleList vehicles={vehicles} onButton={rentVehicle} buttonText={"Rent"} />
+      <VehicleList vehicles={vehicles} onButton={rentVehicle} buttonText={"Rent"} owner={false}/>
     </View>
   );
 };

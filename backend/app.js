@@ -155,29 +155,35 @@ app.post("/login", async (req, res) => {
 });
 //end section login
 
+const getOwner = async () => {
+  return await electricVehicleContract.methods.owner().call();
+};
+
 const getVehiclesData = async () => {
   const totalSupply = await electricVehicleContract.methods.totalSupply().call();
   console.log("totalSupply:", totalSupply);
-
+  const contractOwner = await getOwner();
   const vehicles = [];
 
   for (let i = 0; i < totalSupply; i++) {
-    // const tokenId = await electricVehicleContract.methods.tokenByIndex(i).call();
     const vehicle = await electricVehicleContract.methods.getAllVehicleData(i).call();
+
+    // Prepare data for frontend
     vehicle.pricePerHour = await exchange.convertWeiToUsd(vehicle.pricePerHour);
     vehicle.pricePerHour = parseFloat(vehicle.pricePerHour).toFixed(2);
-    // console.log(vehicle);
     vehicle.startTime = toDateTime(vehicle.startTime);
 
-    vehicles.push({
-      tokenId: i,
-      make: vehicle.make,
-      model: vehicle.model,
-      pricePerHour: vehicle.pricePerHour,
-      maxRentalHours: vehicle.maxRentalHours,
-      startTime: vehicle.startTime,
-      currentRenter: vehicle.currentRenter,
-    });
+    if(vehicle.active && vehicle.currentRenter === contractOwner){
+      vehicles.push({
+        tokenId: i,
+        make: vehicle.make,
+        model: vehicle.model,
+        pricePerHour: vehicle.pricePerHour,
+        maxRentalHours: vehicle.maxRentalHours,
+        startTime: vehicle.startTime,
+      });
+    }
+
   }
   return vehicles;
 };
@@ -199,8 +205,12 @@ const getAllVehiclesData = async () => {
   const vehicles = [];
 
   for (let i = 0; i < totalSupply; i++) {
-    // const tokenId = await electricVehicleContract.methods.tokenByIndex(i).call();
     const vehicle = await electricVehicleContract.methods.getAllVehicleData(i).call();
+
+    // Prepare data for frontend
+    vehicle.pricePerHour = await exchange.convertWeiToUsd(vehicle.pricePerHour);
+    vehicle.pricePerHour = parseFloat(vehicle.pricePerHour).toFixed(2);
+    vehicle.startTime = toDateTime(vehicle.startTime);
 
     vehicles.push({
       tokenId: i,
@@ -209,9 +219,11 @@ const getAllVehiclesData = async () => {
       pricePerHour: vehicle.pricePerHour,
       maxRentalHours: vehicle.maxRentalHours,
       startTime: vehicle.startTime,
-      currentRenter: vehicle.currentRenter
+      currentRenter: vehicle.currentRenter,
+      active: vehicle.active
     });
   }
+
   return vehicles;
 };
 app.get("/get-all-vehicles-data", async (req, res) => {

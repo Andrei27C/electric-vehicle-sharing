@@ -73,7 +73,7 @@ const VehiclesOwnerScreen: React.FC<Props> = ({ navigation }) => {
     <View>
       {/*<Text>Owner's Vehicles:</Text>*/}
       {/*<Divider/>*/}
-      <VehicleList vehicles={vehicles} onButton={deleteVehicle} buttonText={"Delete"}/>
+      <VehicleList vehicles={vehicles} onButton={deleteVehicle} buttonText={"Delete"} owner={true}/>
 
       {/*<FlatList*/}
       {/*  data={vehicles}*/}

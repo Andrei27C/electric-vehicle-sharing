@@ -7,6 +7,7 @@ interface VehicleCardProps {
   vehicle: Vehicle;
   onButton: (vehicle: Vehicle) => void;
   buttonText?: string;
+  owner?: boolean;
 }
 
 const styles = StyleSheet.create({
@@ -21,7 +22,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onButton, buttonText }) => {
+const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onButton, buttonText, owner }) => {
   return (
     <Card style={styles.card}>
       <Card.Content style={styles.content}>
@@ -29,6 +30,8 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onButton, buttonText
         <Subheading>Price per Hour: ${vehicle.pricePerHour}</Subheading>
         <Subheading>Max Rental Hours: {vehicle.maxRentalHours / 3600}</Subheading>
         <Subheading>Current Renter: {vehicle.currentRenter}</Subheading>
+        {owner && <Subheading>Start Time: {vehicle.startTime} </Subheading>}
+        {owner && <Subheading>Active: {vehicle.active ? "Yes" : "No"}</Subheading>}
       </Card.Content>
       <Card.Actions style={styles.actions}>
         <Button mode="contained" onPress={() => onButton(vehicle)}>{buttonText}</Button>

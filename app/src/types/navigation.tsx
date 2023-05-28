@@ -20,6 +20,7 @@ export interface Vehicle {
   startTime?: string;
   endTime?: string;
   currentRenter?: string;
+  active?: boolean;
 }
 
 export interface User {
