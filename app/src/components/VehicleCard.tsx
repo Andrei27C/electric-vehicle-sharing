@@ -29,7 +29,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onButton, buttonText
         <Title>{`${vehicle.make} ${vehicle.model}`}</Title>
         <Subheading>Price per Hour: ${vehicle.pricePerHour}</Subheading>
         <Subheading>Max Rental Hours: {vehicle.maxRentalHours / 3600}</Subheading>
-        <Subheading>Current Renter: {vehicle.currentRenter}</Subheading>
+        {owner && <Subheading>Current Renter: {vehicle.currentRenter}</Subheading>}
         {owner && <Subheading>Start Time: {vehicle.startTime} </Subheading>}
         {owner && <Subheading>Active: {vehicle.active ? "Yes" : "No"}</Subheading>}
       </Card.Content>

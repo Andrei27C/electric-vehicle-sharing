@@ -159,21 +159,27 @@ const getOwner = async () => {
   return await electricVehicleContract.methods.owner().call();
 };
 
-const getVehiclesData = async () => {
+
+const getPreparedForFrontendVehicleData = async (vehicleId) => {
+  const vehicle = await electricVehicleContract.methods.getAllVehicleData(vehicleId).call();
+
+  // Prepare data for frontend
+  vehicle.pricePerHour = await exchange.convertWeiToUsd(vehicle.pricePerHour);
+  vehicle.pricePerHour = parseFloat(vehicle.pricePerHour).toFixed(2);
+  vehicle.startTime = toDateTime(vehicle.startTime);
+
+  return vehicle;
+}
+
+const getVehiclesData = async (ownerScreen) => {
   const totalSupply = await electricVehicleContract.methods.totalSupply().call();
-  console.log("totalSupply:", totalSupply);
   const contractOwner = await getOwner();
   const vehicles = [];
 
   for (let i = 0; i < totalSupply; i++) {
-    const vehicle = await electricVehicleContract.methods.getAllVehicleData(i).call();
+    const vehicle = await getPreparedForFrontendVehicleData(i);
 
-    // Prepare data for frontend
-    vehicle.pricePerHour = await exchange.convertWeiToUsd(vehicle.pricePerHour);
-    vehicle.pricePerHour = parseFloat(vehicle.pricePerHour).toFixed(2);
-    vehicle.startTime = toDateTime(vehicle.startTime);
-
-    if(vehicle.active && vehicle.currentRenter === contractOwner){
+    if(vehicle.active && vehicle.currentRenter === contractOwner && !ownerScreen){
       vehicles.push({
         tokenId: i,
         make: vehicle.make,
@@ -183,6 +189,19 @@ const getVehiclesData = async () => {
         startTime: vehicle.startTime,
       });
     }
+    else
+    {
+      vehicles.push({
+        tokenId: i,
+        make: vehicle.make,
+        model: vehicle.model,
+        pricePerHour: vehicle.pricePerHour,
+        maxRentalHours: vehicle.maxRentalHours,
+        startTime: vehicle.startTime,
+        currentRenter: vehicle.currentRenter,
+        active: vehicle.active
+      });
+    }
 
   }
   return vehicles;
@@ -190,7 +209,7 @@ const getVehiclesData = async () => {
 app.get("/get-vehicles", async (req, res) => {
   console.log("-----/get-vehicles-----");
   try {
-    const vehicles = await getVehiclesData();
+    const vehicles = await getVehiclesData(false);
     // console.log("vehicles:", vehicles)
     res.json({ success: true, vehicles });
   } catch (error) {
@@ -199,18 +218,12 @@ app.get("/get-vehicles", async (req, res) => {
   }
 });
 
-//get all vehicles data endpoint
 const getAllVehiclesData = async () => {
   const totalSupply = await electricVehicleContract.methods.totalSupply().call();
   const vehicles = [];
 
   for (let i = 0; i < totalSupply; i++) {
-    const vehicle = await electricVehicleContract.methods.getAllVehicleData(i).call();
-
-    // Prepare data for frontend
-    vehicle.pricePerHour = await exchange.convertWeiToUsd(vehicle.pricePerHour);
-    vehicle.pricePerHour = parseFloat(vehicle.pricePerHour).toFixed(2);
-    vehicle.startTime = toDateTime(vehicle.startTime);
+    const vehicle = await getPreparedForFrontendVehicleData(i);
 
     vehicles.push({
       tokenId: i,
@@ -226,10 +239,11 @@ const getAllVehiclesData = async () => {
 
   return vehicles;
 };
+
 app.get("/get-all-vehicles-data", async (req, res) => {
   console.log("-----/get-all-vehicles-data-----");
   try {
-    const vehicles = await getAllVehiclesData();
+    const vehicles = await getVehiclesData(true);
     res.json({ success: true, vehicles });
   } catch (error) {
     console.error("Failed to fetch vehicles:", error);
