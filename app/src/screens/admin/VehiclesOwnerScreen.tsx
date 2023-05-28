@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View } from "react-native";
+import { Alert, View } from "react-native";
 import { Divider, Text } from 'react-native-paper';
 import axios from 'axios';
 import { VehiclesOwnerScreenNavigationProp, Vehicle } from "../../types/navigation";
@@ -62,11 +62,20 @@ const VehiclesOwnerScreen: React.FC<Props> = ({ navigation }) => {
     );
   }
 
-  const deleteVehicle = (vehicle: Vehicle) => {
+  const deleteVehicle = async (vehicle: Vehicle) => {
     console.log(`Deleting vehicle with id: ${vehicle.tokenId}`);
-    //todo delete vehicle
-    // navigation.navigate('Rental', { tokenId: vehicle.tokenId }, );
-    // add delete endpoint and so on
+    try {
+      const token = await AsyncStorage.getItem('token');
+      await axios.delete(`${API_URL}/delete-vehicle/${vehicle.tokenId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // Refresh vehicles list after deletion
+      await fetchVehicles();
+      Alert.alert('Success', 'Vehicle successfully deleted.');
+    } catch (error) {
+      console.error('Failed to delete vehicle:', error);
+      Alert.alert('Error', 'Failed to delete vehicle. Please try again.');
+    }
   };
 
   return (

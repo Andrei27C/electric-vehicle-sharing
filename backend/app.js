@@ -40,33 +40,27 @@ const exchange = require("./utils/exchangeRate.js");
 const { getUserFunds, getUserPoints, getUserFundsData_FromContract, getUserPointsData,
   getUserRentedVehicleData_FromContract
 } = require("./controllers/userController");
-const { updateUserInDB } = require("./database/queries");
+const { updateUserInDB, getUserFromDBById } = require("./database/queries");
+const { epochSecondsToDateTime } = require("./utils/timeConverter");
 
 //initial tax
 const INITIAL_TAX = 1; //in dollars
 
 //account info
-const privateKey = process.env.TD_DEPLOYER_PRIVATE_KEY;
-console.log("Private Key: ", privateKey);
-const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-console.log("Account Address: ", account.address);
+// const privateKey = process.env.TD_DEPLOYER_PRIVATE_KEY;
+// console.log("Private Key: ", privateKey);
+// const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+// console.log("Account Address: ", account.address);
 
 //start server
 app.listen(PORT, HOST, () => {
   console.log(`Server running at ${HOST}:${PORT}`);
 });
 
-
 //server methods
 app.get("/", (req, res) => {
   res.send("EV Sharing API");
 });
-
-function toDateTime(secs) {
-  let t = new Date(1970, 0, 1); // Epoch
-  t.setSeconds(secs);
-  return t;
-}
 
 //section login
 // Registration route
@@ -166,7 +160,7 @@ const getPreparedForFrontendVehicleData = async (vehicleId) => {
   // Prepare data for frontend
   vehicle.pricePerHour = await exchange.convertWeiToUsd(vehicle.pricePerHour);
   vehicle.pricePerHour = parseFloat(vehicle.pricePerHour).toFixed(2);
-  vehicle.startTime = toDateTime(vehicle.startTime);
+  vehicle.startTime = epochSecondsToDateTime(vehicle.startTime);
 
   return vehicle;
 }
@@ -178,16 +172,20 @@ const getVehiclesData = async (ownerScreen) => {
 
   for (let i = 0; i < totalSupply; i++) {
     const vehicle = await getPreparedForFrontendVehicleData(i);
+    console.log("    vehicle:", vehicle);
 
-    if(vehicle.active && vehicle.currentRenter === contractOwner && !ownerScreen){
-      vehicles.push({
-        tokenId: i,
-        make: vehicle.make,
-        model: vehicle.model,
-        pricePerHour: vehicle.pricePerHour,
-        maxRentalHours: vehicle.maxRentalHours,
-        startTime: vehicle.startTime,
-      });
+    if(!ownerScreen) {
+      if (vehicle.active === true && vehicle.currentRenter === contractOwner) {
+        console.log("    entered here");
+        vehicles.push({
+          tokenId: i,
+          make: vehicle.make,
+          model: vehicle.model,
+          pricePerHour: vehicle.pricePerHour,
+          maxRentalHours: vehicle.maxRentalHours,
+          startTime: vehicle.startTime,
+        });
+      }
     }
     else
     {
@@ -217,29 +215,6 @@ app.get("/get-vehicles", async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch vehicles" });
   }
 });
-
-const getAllVehiclesData = async () => {
-  const totalSupply = await electricVehicleContract.methods.totalSupply().call();
-  const vehicles = [];
-
-  for (let i = 0; i < totalSupply; i++) {
-    const vehicle = await getPreparedForFrontendVehicleData(i);
-
-    vehicles.push({
-      tokenId: i,
-      make: vehicle.make,
-      model: vehicle.model,
-      pricePerHour: vehicle.pricePerHour,
-      maxRentalHours: vehicle.maxRentalHours,
-      startTime: vehicle.startTime,
-      currentRenter: vehicle.currentRenter,
-      active: vehicle.active
-    });
-  }
-
-  return vehicles;
-};
-
 app.get("/get-all-vehicles-data", async (req, res) => {
   console.log("-----/get-all-vehicles-data-----");
   try {
@@ -266,16 +241,20 @@ app.get("/contract-owner", async (req, res) => {
 
 //create-vehicle endpoint
 app.post("/create-vehicle", async (req, res) => {
-  const { role, make, model, pricePerHour: pricePerHourUSD } = req.body;
-
   console.log("-----/create-vehicle-----");
-  console.log("userRole: " , role);
-  console.log("Calling create vehicle endpoint...");
+
+  const { userId, make, model, pricePerHour: pricePerHourUSD } = req.body;
+  const dbAccount = getUserFromDBById(userId);
+  const role = dbAccount.role;
   if (role !== "admin") {
     console.log("  Forbidden! You are not the owner.");
     return res.status(403).json({ message: "Forbidden! You are not the owner." });
   }
+
+  const account = web3.eth.accounts.privateKeyToAccount(dbAccount.privateKey);
+
   console.log("  Input parameters:", { make, model, pricePerHour: pricePerHourUSD, accountAddress: account.address });
+
   const pricePerHourWei = await exchange.convertUsdToWei(pricePerHourUSD);
   console.log("  rentalFeeWeiPerHour:", pricePerHourWei);
 
@@ -454,3 +433,55 @@ app.post("/end-rental/:userId", async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 });
+
+
+
+
+app.delete("/delete-vehicle/:tokenId", async (req, res) => {
+  console.log("---/delete-vehicle/:tokenId---");
+
+  // Only the owner of the contract (admin role) can delete a vehicle
+  const adminPrivateKey = process.env.TD_DEPLOYER_PRIVATE_KEY;
+  const { tokenId } = req.params;
+
+  if (!adminPrivateKey) {
+    return res.status(400).json({ success: false, message: "Missing required fields" });
+  }
+
+  console.log("  Input parameters:", { tokenId, adminPrivateKey });
+
+  try {
+    const adminAccount = web3.eth.accounts.privateKeyToAccount(adminPrivateKey);
+    console.log("  Admin address:", adminAccount.address);
+
+    const gas = await electricVehicleContract.methods.deleteVehicle(tokenId).estimateGas({ from: adminAccount.address });
+
+    console.log("  Estimated gas: ", gas);
+    const nonce = await web3.eth.getTransactionCount(adminAccount.address);
+    console.log("  Nonce:", nonce);
+
+    // Build the transaction
+    const data = electricVehicleContract.methods.deleteVehicle(tokenId).encodeABI();
+    const tx = {
+      from: adminAccount.address,
+      to: electricVehicleAddress,
+      gas,
+      nonce,
+      data: data
+    };
+    console.log("tx: ", tx);
+
+    // Sign the transaction
+    const signedTx = await adminAccount.signTransaction(tx);
+
+    // Send the transaction
+    const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+
+    res.json({ success: true, message: "Vehicle deleted", txReceipt: txReceipt });
+
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+    console.log(error);
+  }
+});
+

@@ -47,7 +47,6 @@ const fundAccount = async (req, res) => {
 
 const getUserPointsData = async (userId) => {
   let user = await dbQueries.getUserFromDBById(userId);
-  // Use the contract's balanceOf method to fetch the user's points
   const points = await electricVehicleContract.methods.getPoints().call({from: user.address})
   return { points };
 };
