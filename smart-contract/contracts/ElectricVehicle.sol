@@ -15,6 +15,7 @@ contract ElectricVehicle is ERC1155, Ownable {
         uint256 maxRentalHours; // = in seconds
         uint256 startTime;
         address currentRenter;
+        bool active;
     }
 
     mapping(uint256 => Vehicle) public vehicles;
@@ -53,6 +54,8 @@ contract ElectricVehicle is ERC1155, Ownable {
     }
 
     function getPoints() public view returns (uint256) {
+        console.log("---getPoints---");
+        console.log("   ---pointsBalances[msg.sender]: %s", pointsBalances[msg.sender]);
         return pointsBalances[msg.sender];
     }
 
@@ -62,7 +65,8 @@ contract ElectricVehicle is ERC1155, Ownable {
 
     //todo check if the renter has more than enough balance
     function rentVehicle(uint256 tokenId) public {
-        require(vehicles[tokenId].currentRenter == address(0) || vehicles[tokenId].currentRenter == owner(), "Vehicle is currently rented");
+        require(vehicles[tokenId].active == true, "Vehicle is not active");
+        require(vehicles[tokenId].currentRenter == owner(), "Vehicle is currently rented");
         require(balances[msg.sender] >= vehicles[tokenId].pricePerHour, "Insufficient balance to rent this vehicle");
 
         // Transfer the vehicle token to the renter
@@ -87,7 +91,6 @@ contract ElectricVehicle is ERC1155, Ownable {
         console.log("   ---rentalDuration: %s", rentalDuration);
 
         uint256 requiredRentalFee = vehicles[tokenId].pricePerHour.div(3600).mul(rentalDuration);
-//        console.log("   ---pricePerHour: %s", vehicles[tokenId].pricePerHour);
         console.log("   ---requiredRentalFee: %s", requiredRentalFee);
         requiredRentalFee.add(initialTax);
 
@@ -115,13 +118,15 @@ contract ElectricVehicle is ERC1155, Ownable {
         require(balanceOf(msg.sender, POINTS_TOKEN_ID) >= amount, "Insufficient points");
         _burn(msg.sender, POINTS_TOKEN_ID, amount);
     }
-//    // Add points to a user's account
-//    function addPoints(address user, uint256 amount) internal {
-//        pointsBalances[user] = pointsBalances[user].add(amount);
-//    }
+
     function addPoints(address user, uint256 amount) internal {
+        console.log("---addPoints---");
+        console.log("   ---user: %s", user);
+        console.log("   ---amount: %s", amount);
         pointsBalances[user] = pointsBalances[user].add(amount);
         _mint(user, POINTS_TOKEN_ID, amount, "");
+        console.log("   ---pointsBalances[user]: %s", pointsBalances[user]);
+        console.log("   ---balanceOf(user, POINTS_TOKEN_ID): %s", balanceOf(user, POINTS_TOKEN_ID));
     }
     //end subsection points
     //end section User functions
@@ -138,8 +143,21 @@ contract ElectricVehicle is ERC1155, Ownable {
         console.log("   ---model: %s", model);
         console.log("   ---pricePerHour: %s", pricePerHour);
         _mint(owner(), VEHICLES_TOKEN_ID, 1, "");
-        vehicles[VEHICLES_TOKEN_ID] = Vehicle(make, model, pricePerHour, maxRentalHours, 0, owner());
+        vehicles[VEHICLES_TOKEN_ID] = Vehicle(make, model, pricePerHour, maxRentalHours, 0, owner(), true);
         VEHICLES_TOKEN_ID++;
+    }
+
+
+    function deleteVehicle(uint256 tokenId) public onlyOwner {
+        require(tokenId < VEHICLES_TOKEN_ID, "Vehicle does not exist");
+        require(vehicles[tokenId].currentRenter == owner(), "Vehicle is currently rented");
+        require(vehicles[tokenId].active, "Vehicle is already deleted");
+
+        // Burn the vehicle token
+        _burn(owner(), tokenId, 1);
+
+        // Set vehicle data to default values
+        vehicles[tokenId].active = false;
     }
 
     // Add rental income to owner's account
@@ -174,11 +192,12 @@ contract ElectricVehicle is ERC1155, Ownable {
         uint256 pricePerHour,
         uint256 maxRentalHours,
         uint256 startTime,
-        address currentRenter
+        address currentRenter,
+        bool active
     )
     {
         Vehicle storage vehicle = vehicles[tokenId];
-        return (vehicle.make, vehicle.model, vehicle.pricePerHour, vehicle.maxRentalHours,vehicle.startTime, vehicle.currentRenter);
+        return (vehicle.make, vehicle.model, vehicle.pricePerHour, vehicle.maxRentalHours,vehicle.startTime, vehicle.currentRenter, vehicle.active);
     }
 
     function getRentedVehicleByAddress()

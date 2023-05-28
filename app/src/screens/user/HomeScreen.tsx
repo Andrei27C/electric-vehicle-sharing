@@ -29,8 +29,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     React.useCallback(() => {
       console.log('useFocusEffect');
       fetchRentedVehicle().then();
-      fetchUserFunds().then();
-      fetchUserPoints().then();
       // Returning an empty function to avoid a warning about useEffect cleanup function
       return () => {};
     }, [])
@@ -39,6 +37,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   //get user address
   useEffect(() => {
     fetchUserAddress().then();
+    fetchUserPoints().then();
+    fetchUserFunds().then();
+    fetchRentedVehicle().then();
   }, []);
 
   //get user points
@@ -139,6 +140,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       console.log('Rental ended', response.data.vehicle);
       setRentedVehicle(response.data.vehicle);
       fetchUserFunds().then();
+      fetchUserPoints().then();
     } catch (error) {
       console.error('Failed to end rental:', error);
     }
