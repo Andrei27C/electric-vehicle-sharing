@@ -268,8 +268,9 @@ app.post("/create-vehicle", async (req, res) => {
   console.log("-----/create-vehicle-----");
 
   const { userId, make, model, pricePerHour: pricePerHourUSD } = req.body;
-  const dbAccount = getUserFromDBById(userId);
+  const dbAccount = await getUserFromDBById(userId);
   const role = dbAccount.role;
+  console.log("   dbAccount: ",dbAccount);
   if (role !== "admin") {
     console.log("  Forbidden! You are not the owner.");
     return res.status(403).json({ message: "Forbidden! You are not the owner." });
