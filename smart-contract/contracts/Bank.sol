@@ -9,16 +9,17 @@ contract Bank is Ownable {
 
     event Deposit(address indexed user, uint256 amount);
     event Withdraw(address indexed user, uint256 amount);
+    event Transfer(address indexed from, address indexed to, uint256 value);
 
-    address private rentalServiceAddress;
+    address private rentalAddress;
+    address private vehicleManagerAddress;
 
     modifier onlyRentalService {
-        require(msg.sender == rentalServiceAddress, "Caller is not the Rental Service");
+        require(msg.sender == rentalAddress, "Caller is not the Rental Service");
         _;
     }
 
-    constructor(address _rentalServiceAddress) {
-        rentalServiceAddress = _rentalServiceAddress;
+    constructor() {
     }
 
     function deposit() public payable {
@@ -33,17 +34,19 @@ contract Bank is Ownable {
         emit Withdraw(msg.sender, amount);
     }
 
-    function getBalance() public view returns (uint256) {
-        return balances[msg.sender];
+    function getBalance(address sender) public view returns (uint256) {
+        return balances[sender];
     }
 
-    function internalTransfer(address from, address to, uint256 amount) public onlyOwner {
-        require(_balances[from] >= amount, "Insufficient balance");
-        _balances[from] = _balances[from].sub(amount);
-        _balances[to] = _balances[to].add(amount);
+    function internalTransfer(address from, address to, uint256 amount) public onlyRentalService {
+        require(balances[from] >= amount, "Insufficient balance");
+        balances[from] = balances[from].sub(amount);
+        balances[to] = balances[to].add(amount);
+        emit Transfer(from, to, amount);
+
     }
 
-    function updateRentalServiceAddress(address newAddress) public onlyOwner {
-        rentalServiceAddress = newAddress;
+    function updateRentalAddress(address newAddress) public onlyOwner {
+        rentalAddress = newAddress;
     }
 }

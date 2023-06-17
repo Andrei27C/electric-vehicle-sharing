@@ -2,7 +2,10 @@ pragma solidity ^0.8.1;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "truffle/Console.sol";
 import "./ElectricVehicleToken.sol";
+import "./Bank.sol";
+import "./Rental.sol";
 
 contract VehicleManager is Ownable {
     using SafeMath for uint256;
@@ -20,6 +23,14 @@ contract VehicleManager is Ownable {
     mapping(uint256 => Vehicle) public vehicles;
 
     ElectricVehicleToken public evToken;
+//    Bank public bank;
+
+    address private rentalContractAddress;
+
+    modifier onlyRentalContract {
+        require(msg.sender == rentalContractAddress, "Caller is not the Rental contract");
+        _;
+    }
 
     event VehicleRented(uint256 indexed tokenId, address indexed renter, uint256 startTime);
     event RentalEnded(uint256 indexed tokenId, address indexed renter, uint256 rentalFee, uint256 rentalDuration);
@@ -27,45 +38,7 @@ contract VehicleManager is Ownable {
 
     constructor(ElectricVehicleToken _evToken) {
         evToken = _evToken;
-    }
-
-    function rentVehicle(uint256 tokenId) public {
-        require(vehicles[tokenId].active == true, "Vehicle is not active");
-        require(vehicles[tokenId].currentRenter == owner(), "Vehicle is currently rented");
-        require(balances[msg.sender] >= vehicles[tokenId].pricePerHour, "Insufficient balance to rent this vehicle");
-
-//        // Transfer the vehicle token to the renter
-//        evToken.transferVehicle(tokenId, owner(), msg.sender);
-
-        // Set the vehicle's current renter, start time
-        vehicles[tokenId].startTime = block.timestamp;
-        vehicles[tokenId].currentRenter = msg.sender;
-
-        emit VehicleRented(tokenId, msg.sender, vehicles[tokenId].startTime);
-    }
-
-    function endRental(uint256 tokenId, uint256 endTime, uint256 initialTax, uint256 kilometersDriven) public {
-        require(vehicles[tokenId].currentRenter == msg.sender, "You are not the current renter of this vehicle");
-
-        // Calculate the rental fee
-        uint256 rentalDuration = endTime.sub(vehicles[tokenId].startTime);
-        uint256 requiredRentalFee = vehicles[tokenId].pricePerHour.div(3600).mul(rentalDuration);
-        requiredRentalFee.add(initialTax);
-
-        // Subtract the rental fee from the renter's balance
-        balances[msg.sender] = balances[msg.sender].sub(requiredRentalFee);
-
-//        // Transfer the vehicle token back to the owner
-//        evToken.transferVehicle(tokenId, msg.sender, owner());
-
-        // Reset the vehicle's current renter, start time
-        vehicles[tokenId].currentRenter = owner();
-        vehicles[tokenId].startTime = 0;
-
-        // Award points for kilometers driven.
-        evToken.mintPoints(msg.sender, kilometersDriven);
-
-        emit RentalEnded(tokenId, msg.sender, requiredRentalFee, rentalDuration);
+//        bank = _bank;
     }
 
     function createVehicle(
@@ -82,6 +55,38 @@ contract VehicleManager is Ownable {
         vehicles[tokenId] = Vehicle(make, model, pricePerHour, maxRentalHours, 0, owner(), true);
     }
 
+    function rentVehicle(uint256 tokenId, uint256 startTime, address sender) public onlyRentalContract{
+        require(vehicles[tokenId].active == true, "Vehicle is not active");
+        require(vehicles[tokenId].currentRenter == owner(), "Vehicle is currently rented");
+        require(startTime > 0, "Cannot rent a vehicle in the past");
+
+        // Set the vehicle's current renter, start time
+        vehicles[tokenId].startTime = startTime;
+        vehicles[tokenId].currentRenter = sender;
+
+        emit VehicleRented(tokenId, sender, vehicles[tokenId].startTime);
+    }
+
+    function endRental(uint256 tokenId, uint256 endTime, uint256 kilometersDriven, address sender) public onlyRentalContract returns (uint256){
+        require(vehicles[tokenId].currentRenter == sender, "You are not the current renter of this vehicle");
+        require(endTime > vehicles[tokenId].startTime, "Cannot end rental in the past");
+        require(kilometersDriven > 0, "Kilometers driven must be greater than 0");
+
+        // Calculate the rental fee
+        uint256 rentalDuration = endTime.sub(vehicles[tokenId].startTime);
+        uint256 requiredRentalFee = vehicles[tokenId].pricePerHour.div(3600).mul(rentalDuration);
+
+        // Reset the vehicle's current renter, start time
+        vehicles[tokenId].currentRenter = owner();
+        vehicles[tokenId].startTime = 0;
+
+        // Award points for kilometers driven.
+        evToken.mintPoints(sender, kilometersDriven);
+
+        emit RentalEnded(tokenId, sender, requiredRentalFee, rentalDuration);
+        return requiredRentalFee;
+    }
+
     function deleteVehicle(uint256 tokenId) public onlyOwner {
         require(tokenId < evToken.totalVehicleSupply(), "Vehicle does not exist");
         require(vehicles[tokenId].currentRenter == owner(), "Vehicle is currently rented");
@@ -93,6 +98,8 @@ contract VehicleManager is Ownable {
         // Set vehicle data to default values
         vehicles[tokenId].active = false;
     }
+
+    //section getters
 
     function getAllVehicleData(uint256 tokenId)
     public
@@ -126,6 +133,10 @@ contract VehicleManager is Ownable {
         }
 
         revert("No vehicle currently rented by the provided address");
+    }
+
+    function updateRentalAddress(address newAddress) public onlyOwner {
+        rentalContractAddress = newAddress;
     }
 
 }
