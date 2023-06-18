@@ -23,7 +23,6 @@ contract VehicleManager is Ownable {
     mapping(uint256 => Vehicle) public vehicles;
 
     ElectricVehicleToken public evToken;
-//    Bank public bank;
 
     address private rentalContractAddress;
 
@@ -38,7 +37,6 @@ contract VehicleManager is Ownable {
 
     constructor(ElectricVehicleToken _evToken) {
         evToken = _evToken;
-//        bank = _bank;
     }
 
     function createVehicle(
