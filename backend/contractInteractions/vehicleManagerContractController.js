@@ -166,6 +166,23 @@ const getOwner = async () => {
   }
   return false;
 };
+const getPoints = async (address) => {
+  try {
+    return await vehicleManagerContract.methods.getPoints(address).call({from: user.address})
+  }
+  catch (error) {
+    console.error(error);
+  }
+  return false;
+}
+const getVehicleByAddress = async (address) => {
+try {
+    return await vehicleManagerContract.methods.getRentedVehicleByAddress().call({from: address});
+  } catch (error) {
+    console.error(error);
+  }
+  return false;
+}
 
 module.exports = {
   callContractEndRental,
@@ -174,5 +191,7 @@ module.exports = {
   callContractCreateVehicle,
   callContractDeleteVehicle,
   callContractGetTotalSupply,
-  getOwner
+  getOwner,
+  getPoints,
+  getVehicleByAddress
 }

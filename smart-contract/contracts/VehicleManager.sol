@@ -137,6 +137,10 @@ contract VehicleManager is Ownable {
         revert("No vehicle currently rented by the provided address");
     }
 
+    function getPoints(address account) public view returns (uint256) {
+        return evToken.balanceOfPoints(account);
+    }
+
     function updateRentalAddress(address newAddress) public onlyOwner {
         rentalContractAddress = newAddress;
     }

@@ -12,7 +12,7 @@ const {
 } = require("./userController");
 const dbQueries = require("../database/queries");
 
-exports.register = (req, res) => {
+const register = async (req, res) => {
   console.log("---register---");
   const { username, password, privateKey } = req.body;
 
@@ -53,7 +53,7 @@ exports.register = (req, res) => {
   });
 };
 
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   console.log("---login---");
   const { username, password } = req.body;
   // Get user from database
@@ -96,4 +96,8 @@ exports.login = async (req, res) => {
   });
 };
 
-module.exports = userModelInstance;
+module.exports = {
+  userModelInstance,
+  register,
+  login
+};
