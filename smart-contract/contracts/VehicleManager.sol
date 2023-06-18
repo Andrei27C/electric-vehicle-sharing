@@ -101,6 +101,10 @@ contract VehicleManager is Ownable {
 
     //section getters
 
+    function getNoOfVehicles() public view returns (uint256) {
+        return evToken.totalVehicleSupply();
+    }
+
     function getAllVehicleData(uint256 tokenId)
     public
     view
