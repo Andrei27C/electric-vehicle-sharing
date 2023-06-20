@@ -4,18 +4,17 @@ const exchange = require('../utils/exchangeRate');
 const { convertWeiToUsd } = require("../utils/exchangeRate");
 const bankContractCalls = require("../contractInteractions/bankContractController");
 const vManagerContractCalls = require("../contractInteractions/vehicleManagerContractController");
+const rentalContractCalls = require("../contractInteractions/rentalContractController");
 
-const fundAccountData = async (userId, amount) => {
-  let user = await dbQueries.getUserFromDBById(userId);
-  const userAddress = user.address;
-
-  return await bankContractCalls.depositFunds(amount, userAddress);
-};
 const fundAccount = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const amount = req.body.amount; // Amount to be funded
-    const result = await fundAccountData(userId, amount);
+    const amountUSD = req.body.amount; // Amount to be funded
+    let user = await dbQueries.getUserFromDBById(userId);
+    const userAddress = user.address;
+
+    const result =  await bankContractCalls.depositFunds(amountUSD, userAddress);
+    // const result = await fundAccountData(userId, amount);
     res.json(result);
   } catch (error) {
     console.error(error);
@@ -23,6 +22,59 @@ const fundAccount = async (req, res) => {
       success: false,
       message: 'Failed to fund account',
     });
+  }
+};
+
+const rent = async (req, res) => {
+  console.log("---/rent-vehicle/:tokenId---");
+  let userModelInstance = await dbQueries.getUserFromDBById(req.session.userId);
+  //todo: send the private key from the app
+  const renterPrivateKey = req.session.privateKey;
+  const { tokenId } = req.params;
+
+  if (!renterPrivateKey) {
+    return res.status(400).json({ success: false, message: "Missing required fields" });
+  }
+
+  try{
+    const resContract = await rentalContractCalls.rentVehicle(tokenId, renterPrivateKey);
+    if(!resContract.success){
+      return res.status(400).json({ success: false, message: resContract.message });
+    }
+
+    // Update user in db
+    userModelInstance.vehicleId = tokenId;
+    await dbQueries.updateUserInDB(userModelInstance);
+
+    res.json({ success: true, message: "Vehicle rented", txHash: resContract.message });
+
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+    console.log(error);
+  }
+};
+const endRental = async (req, res) => {
+  console.log("---/end-rental/:userId---");
+  let userModelInstance = await dbQueries.getUserFromDBById(req.session.userId);
+  const { userId } = req.params;
+  console.log("userId: ", userId);
+  const user = await dbQueries.getUserFromDBById(userId);
+  console.log("user: ", user);
+  const renterAccount = user.privateKey;
+  console.log("renterAccount: ", renterAccount);
+  try {
+    const KILOMETERS_DRIVEN = 50;
+    const vehicleId = (await getUserRentedVehicleData_FromContract(userId))?.vehicle?.id;
+    const receipt = await rentalContractCalls.endRental(vehicleId, KILOMETERS_DRIVEN, renterAccount);
+
+    // Update user in db
+    userModelInstance.vehicleId = (receipt === true) ? null : userModelInstance.vehicleId;
+    console.log("       ------vehicleId ", userModelInstance.vehicleId);
+    await dbQueries.updateUserInDB(userModelInstance);
+
+    res.json({ success: true, message: "Rental ended", receipt });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -97,16 +149,18 @@ const getUserRentedVehicleData_FromContract = async (userId) => {
     const address = user.address;
     console.log("address:------" , address);
     const res = await vManagerContractCalls.getVehicleByAddress(address);
-
-    return { vehicle: {
-        id: res.id,
-        make: res.vehicle.make,
-        model: res.vehicle.model,
-        pricePerHour: res.vehicle.pricePerHour,
-        maxRentalHours: res.vehicle.maxRentalHours,
-        startTime: res.vehicle.startTime,
-        currentRenter: res.vehicle.currentRenter
-      }};
+    if(res)
+      return { vehicle: {
+          id: res.id,
+          make: res.vehicle.make,
+          model: res.vehicle.model,
+          pricePerHour: res.vehicle.pricePerHour,
+          maxRentalHours: res.vehicle.maxRentalHours,
+          startTime: res.vehicle.startTime,
+          currentRenter: res.vehicle.currentRenter
+        }};
+    else
+      return { vehicle: null };
   } catch (error) {
     // console.error(error);
     return { vehicle: null };
@@ -119,7 +173,7 @@ const getUserRentedVehicle = async (req, res) => {
   try {
     const result = await getUserRentedVehicleData_FromContract(userId);
     if(result.vehicle != null) {
-      result.vehicle.pricePerHour = await convertWeiToUsd(result.vehicle.pricePerHour);
+      result.vehicle.pricePerHour = (await convertWeiToUsd(result.vehicle.pricePerHour)).toNumber();
     }
 
     // console.log("result:------" , result);
@@ -132,10 +186,11 @@ const getUserRentedVehicle = async (req, res) => {
 
 module.exports = {
   fundAccount,
+  endRental,
+  rent,
   getUserFundsWei,
   getUserPoints,
   getUser,
-  fundAccountData,
   getUserFundsData_FromContract,
   getUserPointsData,
   getUserData,

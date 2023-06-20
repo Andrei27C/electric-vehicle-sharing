@@ -44,13 +44,23 @@ const OwnerScreen: React.FC<Props> = ({ navigation }) => {
   }
 
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10 }}>
-      <Button mode="contained" onPress={() => navigation.navigate('CreateVehicle')}>
-        Create Vehicle
-      </Button>
-      <Button mode="contained" onPress={() => navigation.navigate('VehiclesOwner')}>
-        See all vehicles data
-      </Button>
+    <View style={{ padding: 10 }}>
+      <Text style={{ fontSize: 24, marginBottom: 10 }}>Vehicle</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+        <Button mode="contained" onPress={() => navigation.navigate('CreateVehicle')}>
+          Create Vehicle
+        </Button>
+        <Button mode="contained" onPress={() => navigation.navigate('VehiclesOwner')}>
+          See all vehicles data
+        </Button>
+      </View>
+
+      <Text style={{ fontSize: 24, marginBottom: 10 }}>User</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Button mode="contained" onPress={() => navigation.navigate('UsersOwner')}>
+          See all users
+        </Button>
+      </View>
     </View>
   );
 };

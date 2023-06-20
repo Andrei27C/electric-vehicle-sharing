@@ -5,9 +5,10 @@ import { User } from "../types/navigation";
 interface UserCardProps {
   user: User;
   onFundPoints: (user: User) => void;
+  onDelete: (user: User) => void;
 }
 
-const UserCard: React.FC<UserCardProps> = ({ user, onFundPoints }) => {
+const UserCard: React.FC<UserCardProps> = ({ user, onFundPoints, onDelete }) => {
   return (
     <Card>
       <Card.Title title={`${user.username} `} />
@@ -18,6 +19,9 @@ const UserCard: React.FC<UserCardProps> = ({ user, onFundPoints }) => {
       </Card.Content>
       <Card.Actions>
         <Button onPress={() => onFundPoints(user)}>Fund Account</Button>
+      </Card.Actions>
+      <Card.Actions>
+        <Button onPress={() => onDelete(user)}>Delete</Button>
       </Card.Actions>
     </Card>
   );

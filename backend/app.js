@@ -3,6 +3,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config();
 const app = express();
+const session = require("express-session");
 
 //jwt
 const jwt = require("jsonwebtoken");
@@ -15,13 +16,24 @@ app.use(expressJwt({
   algorithms: ["HS256"]
 }).unless({ path: ["/login", "/register"] }));
 
-//user
+//use express session
+app.use(session({
+  secret: 'secret',
+  resave: false,
+  saveUninitialized: true,
+}));
+
+//user routes
 const userRoutes = require('./routes/userRoutes');
 app.use(userRoutes); // Add user routes to middleware chain.
 
-//auth
+//auth routes
 const authRoutes = require('./routes/authRoutes');
 app.use(authRoutes); // Add auth routes to middleware chain.
+
+//vehicle routes
+const vehRoutes = require('./routes/vehicleRoutes');
+app.use(vehRoutes); // Add auth routes to middleware chain.
 
 //utils
 app.use(cors());
@@ -44,8 +56,3 @@ app.listen(PORT, HOST, () => {
 app.get("/", (req, res) => {
   res.send("EV Sharing API");
 });
-
-
-
-
-

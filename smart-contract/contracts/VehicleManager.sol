@@ -95,6 +95,7 @@ contract VehicleManager is Ownable {
 
         // Set vehicle data to default values
         vehicles[tokenId].active = false;
+        vehicles[tokenId].currentRenter = address(0);
     }
 
     //section getters

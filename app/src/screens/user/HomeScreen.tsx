@@ -160,7 +160,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
       <View style={styles.fundContainer}>
         <TextInput
-          label="Amount"
+          label="Amount in USD"
           value={fundsToBeFunded.toString()}
           onChangeText={text => setFundsToBeFunded(text)}
           style={styles.input}

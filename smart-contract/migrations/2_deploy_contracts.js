@@ -26,4 +26,5 @@ module.exports = async function (deployer, network, accounts) {
 
   // Set Rental address in VehicleManager contract
   await vehicleManagerInstance.updateRentalAddress(rentalInstance.address);
+  await bankInstance.updateRentalAddress(rentalInstance.address);
 };

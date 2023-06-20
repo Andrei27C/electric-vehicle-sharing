@@ -14,8 +14,8 @@ contract Bank is Ownable {
     address private rentalAddress;
     address private vehicleManagerAddress;
 
-    modifier onlyRentalService {
-        require(msg.sender == rentalAddress, "Caller is not the Rental Service");
+    modifier onlyRentalAddress {
+        require(msg.sender == rentalAddress, "Bank.sol: Caller is not the Rental Service");
         _;
     }
 
@@ -38,7 +38,7 @@ contract Bank is Ownable {
         return balances[sender];
     }
 
-    function internalTransfer(address from, address to, uint256 amount) public onlyRentalService {
+    function internalTransfer(address from, address to, uint256 amount) public onlyRentalAddress {
         require(balances[from] >= amount, "Insufficient balance");
         balances[from] = balances[from].sub(amount);
         balances[to] = balances[to].add(amount);

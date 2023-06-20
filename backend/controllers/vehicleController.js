@@ -1,18 +1,15 @@
-const { exchange } = require("../utils/exchangeRate");
+const exchange = require("../utils/exchangeRate");
 const { epochSecondsToDateTime } = require("../utils/timeConverter");
-const { getUserFromDBById, updateUserInDB } = require("../database/queries");
 const dbQueries = require("../database/queries");
-const { userModelInstance } = require("../models/user");
-const { getUserRentedVehicleData_FromContract } = require("./userController");
+// const { userModelInstance } = require("../models/user");
 const vManagerContractCalls = require("../contractInteractions/vehicleManagerContractController");
-
 
 const createVehicle = async (req, res) => {
   console.log("-----/create-vehicle-----");
 
   const { userId, make, model, pricePerHour: pricePerHourUSD } = req.body;
 
-  const dbAccount = await getUserFromDBById(userId);
+  const dbAccount = await dbQueries.getUserFromDBById(userId);
   const privateKey = dbAccount.privateKey;
   const role = dbAccount.role;
   if (role !== "admin") {
@@ -22,7 +19,7 @@ const createVehicle = async (req, res) => {
   const pricePerHourWei = await exchange.convertUsdToWei(pricePerHourUSD);
   console.log("  rentalFeeWeiPerHour:", pricePerHourWei);
   try{
-    const resContract = await vManagerContractCalls.callContractCreateVehicle(make, model, pricePerHourWei, privateKey);
+    const resContract = await vManagerContractCalls.createVehicle(make, model, pricePerHourWei, privateKey);
     if(!resContract.success){
       return res.status(400).json({ success: false, message: resContract.message });
     }
@@ -31,57 +28,6 @@ const createVehicle = async (req, res) => {
   }catch (error) {
     console.error("Failed to create vehicle:", error);
     res.status(500).json({ success: false, message: "Failed to create vehicle" });
-  }
-};
-const rentVehicle = async (req, res) => {
-  console.log("---/rent-vehicle/:tokenId---");
-  //todo: send the private key from the app
-  const renterPrivateKey = userModelInstance.privateKey;
-  const { tokenId } = req.params;
-
-  if (!renterPrivateKey) {
-    return res.status(400).json({ success: false, message: "Missing required fields" });
-  }
-
-  try{
-    const resContract = await vManagerContractCalls.callContractRentVehicle(tokenId, renterPrivateKey);
-    if(!resContract.success){
-      return res.status(400).json({ success: false, message: resContract.message });
-    }
-
-    // Update user in db
-    userModelInstance.vehicleId = tokenId;
-    await updateUserInDB(userModelInstance);
-
-    res.json({ success: true, message: "Vehicle rented", txHash: resContract.message });
-
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-    console.log(error);
-  }
-};
-const endRental = async (req, res) => {
-  console.log("---/end-rental/:userId---");
-
-  const { userId } = req.params;
-  console.log("userId: ", userId);
-  const user = await dbQueries.getUserFromDBById(userId);
-  console.log("user: ", user);
-  const renterAccount = user.privateKey;
-  console.log("renterAccount: ", renterAccount);
-  try {
-    const KILOMETERS_DRIVEN = 50;
-    const vehicleId = (await getUserRentedVehicleData_FromContract(userId))?.vehicle?.id;
-    const receipt = await vManagerContractCalls.callContractEndRental(vehicleId, KILOMETERS_DRIVEN, renterAccount);
-
-    // Update user in db
-    userModelInstance.vehicleId = (receipt === true) ? null : userModelInstance.vehicleId;
-    console.log("       ------vehicleId ", userModelInstance.vehicleId);
-    await updateUserInDB(userModelInstance);
-
-    res.json({ success: true, message: "Rental ended", receipt });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
   }
 };
 const deleteVehicle = async (req, res) => {
@@ -96,7 +42,7 @@ const deleteVehicle = async (req, res) => {
   console.log("  Input parameters:", { tokenId, adminPrivateKey });
 
   try {
-    const resContract = await vManagerContractCalls.callContractDeleteVehicle(tokenId, adminPrivateKey);
+    const resContract = await vManagerContractCalls.deleteVehicle(tokenId, adminPrivateKey);
     if(!resContract.success){
       return res.status(400).json({ success: false, message: resContract.message });
     }
@@ -114,7 +60,7 @@ const getVehicle = async (req, res) => {
   const { tokenId } = req.params;
   console.log("  Input parameters:", { tokenId });
   try {
-    const vehicleData = await vManagerContractCalls.callContractGetAllVehicleData(tokenId);
+    const vehicleData = await vManagerContractCalls.getAllVehicleData(tokenId);
     // console.log("vehicleData:", vehicleData);
     const vehicle = {
       tokenId, make: vehicleData.make, model: vehicleData.model, pricePerHour: vehicleData.pricePerHour
@@ -127,7 +73,7 @@ const getVehicle = async (req, res) => {
 };
 // methods for getting the right data of the vehicles for user or owner screen
 const getPreparedForFrontendVehicleData = async (vehicleId) => {
-  const vehicle = await vManagerContractCalls.callContractGetAllVehicleData(vehicleId);
+  const vehicle = await vManagerContractCalls.getAllVehicleData(vehicleId);
 
   // Prepare data for frontend
   vehicle.pricePerHour = await exchange.convertWeiToUsd(vehicle.pricePerHour);
@@ -137,7 +83,7 @@ const getPreparedForFrontendVehicleData = async (vehicleId) => {
   return vehicle;
 };
 const getVehiclesDataForViewOnly = async (ownerScreen) => {
-  const totalSupply = await vManagerContractCalls.callContractGetTotalSupply();
+  const totalSupply = await vManagerContractCalls.getTotalSupply();
   const contractOwner = await vManagerContractCalls.getOwner();
   const vehicles = [];
 
@@ -215,8 +161,6 @@ const getContractOwner = async (req, res) => {
 
 module.exports = {
   deleteVehicle,
-  endRental,
-  rentVehicle,
   createVehicle,
   getVehicle,
   getVehicleDataForViewByUserId,

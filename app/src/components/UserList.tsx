@@ -6,13 +6,14 @@ import UserCard from "./UserCard";
 interface UserListProps {
   users: User[];
   onFundPoints: (user: User) => void;
+  onDelete: (user: User) => void;
 }
 
-const UserList: React.FC<UserListProps> = ({ users, onFundPoints }) => {
+const UserList: React.FC<UserListProps> = ({ users, onFundPoints, onDelete }) => {
   return (
     <ScrollView>
       {users.map((user) => (
-        <UserCard key={`${user.username}`} user={user} onFundPoints={onFundPoints} />
+        <UserCard key={`${user.username}`} user={user} onFundPoints={onFundPoints} onDelete={onDelete} />
       ))}
     </ScrollView>
   );

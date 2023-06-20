@@ -20,6 +20,12 @@ const styles = StyleSheet.create({
   actions: {
     justifyContent: 'flex-end',
   },
+  active: {
+    color: 'green',
+  },
+  inactive: {
+    color: 'red',
+  },
 });
 
 const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onButton, buttonText, owner }) => {
@@ -31,7 +37,9 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onButton, buttonText
         <Subheading>Max Rental Hours: {vehicle.maxRentalHours / 3600}</Subheading>
         {owner && <Subheading>Current Renter: {vehicle.currentRenter}</Subheading>}
         {owner && <Subheading>Start Time: {vehicle.startTime} </Subheading>}
-        {owner && <Subheading>Active: {vehicle.active ? "Yes" : "No"}</Subheading>}
+        {owner && <Subheading style={vehicle.active ? styles.active : styles.inactive}>
+          Status: {vehicle.active ? "Active" : "Inactive"}
+        </Subheading>}
       </Card.Content>
       <Card.Actions style={styles.actions}>
         <Button mode="contained" onPress={() => onButton(vehicle)}>{buttonText}</Button>

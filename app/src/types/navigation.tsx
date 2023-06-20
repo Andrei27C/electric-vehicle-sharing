@@ -9,6 +9,7 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   VehiclesOwner: undefined;
+  UsersOwner: undefined;
 };
 
 export interface Vehicle {
@@ -24,6 +25,7 @@ export interface Vehicle {
 }
 
 export interface User {
+  id: string;
   username: string;
   role: string;
   vehicle?: Vehicle;
@@ -53,3 +55,6 @@ export type OwnerScreenRouteProp = RouteProp<RootStackParamList, 'Owner'>;
 
 export type VehiclesOwnerScreenNavigationProp = StackNavigationProp<RootStackParamList, 'VehiclesOwner'>;
 export type VehiclesOwnerScreenRouteProp = RouteProp<RootStackParamList, 'VehiclesOwner'>;
+
+export type UsersOwnerScreenNavigationProp = StackNavigationProp<RootStackParamList, 'UsersOwner'>;
+export type UsersOwnerScreenRouteProp = RouteProp<RootStackParamList, 'UsersOwner'>;

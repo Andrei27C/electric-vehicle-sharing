@@ -46,9 +46,13 @@ const register = async (req, res) => {
 
         const userId = this.lastID;
         const token = jwt.sign({ sub: userId }, process.env.JWT_SECRET, { expiresIn: "1 day" });
+        // Setting the user ID and private key in the session
+        req.session.userId = userId;
+        req.session.privateKey = privateKey;
 
         res.json({ success: true,  message: "Registration successful", token });
       });
+
     });
   });
 };
@@ -91,6 +95,11 @@ const login = async (req, res) => {
       } catch (err) {
         console.log(err);
       }
+
+      // Setting the user ID and private key in the session
+      req.session.userId = userModelInstance.id;
+      req.session.privateKey = userModelInstance.privateKey;
+
       res.json({ message: "Login successful", token: token, user: userModelInstance });
     });
   });

@@ -81,24 +81,7 @@ const VehiclesOwnerScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View>
-      {/*<Text>Owner's Vehicles:</Text>*/}
-      {/*<Divider/>*/}
       <VehicleList vehicles={vehicles} onButton={deleteVehicle} buttonText={"Delete"} owner={true}/>
-
-      {/*<FlatList*/}
-      {/*  data={vehicles}*/}
-      {/*  renderItem={({ item }) => (*/}
-      {/*    <View>*/}
-      {/*      <Text>Token ID: {item.tokenId}</Text>*/}
-      {/*      <Text>Make: {item.make}</Text>*/}
-      {/*      <Text>Model: {item.model}</Text>*/}
-      {/*      <Text>Price: {item.pricePerHour}</Text>*/}
-      {/*      <Text>startTime: {item.startTime}</Text>*/}
-      {/*      <Text>currentRenter: {item.currentRenter}</Text>*/}
-      {/*    </View>*/}
-      {/*  )}*/}
-      {/*  keyExtractor={(item) => item.tokenId}*/}
-      {/*/>*/}
     </View>
   );
 };

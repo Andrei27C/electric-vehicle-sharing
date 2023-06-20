@@ -4,6 +4,9 @@ const path = require('path');
 
 const web3 = new Web3(process.env.ETHER_RPC_WSS);
 
+const gasPrice = process.env.GAS_PRICE;
+const gasLimit = process.env.GAS_LIMIT;
+
 const bankContractJSON = JSON.parse(fs.readFileSync(path.join(__dirname, "../../smart-contract/build/contracts/Bank.json"), "utf8"));
 const vehicleManagerContractJSON = JSON.parse(fs.readFileSync(path.join(__dirname, "../../smart-contract/build/contracts/VehicleManager.json"), "utf8"));
 const rentalContractJSON = JSON.parse(fs.readFileSync(path.join(__dirname, "../../smart-contract/build/contracts/Rental.json"), "utf8"));
@@ -32,8 +35,19 @@ console.log("RentalContractAddress:", rentalContractAddress);
 // console.log("ElectricVehicleAddress:", electricVehicleAddress);
 
 
-module.exports = { web3 };
-module.exports = { bankContract, bankContractABI, bankContractAddress };
-module.exports = { vehicleManagerContract, vehicleManagerContractABI, vehicleManagerContractAddress };
-module.exports = { rentalContract, rentalContractABI, rentalContractAddress };
+module.exports = {
+  web3,
+  bankContract,
+  bankContractABI,
+  bankContractAddress,
+  vehicleManagerContract,
+  vehicleManagerContractABI,
+  vehicleManagerContractAddress,
+  rentalContract,
+  rentalContractABI,
+  rentalContractAddress,
+  gasPrice,
+  gasLimit
+};
+
 // module.exports = { web3, electricVehicleContract, electricVehicleABI, electricVehicleAddress };

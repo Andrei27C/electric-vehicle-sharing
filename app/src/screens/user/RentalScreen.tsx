@@ -19,6 +19,7 @@ type Props = {
 const RentalScreen: React.FC<Props> = ({ navigation }) => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
+  // Fetch vehicles
   useFocusEffect(
     React.useCallback(() => {
       const fetchVehicles = async () => {
