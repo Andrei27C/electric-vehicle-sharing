@@ -25,8 +25,8 @@ const UsersOwnerScreen: React.FC<Props> = ({ navigation }) => {
   const fetchUsers = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const userId = await AsyncStorage.getItem('userId');
-      const response = await axios.get(`${API_URL}/get-users/${userId}`,{
+      // const userId = await AsyncStorage.getItem('userId');
+      const response = await axios.get(`${API_URL}/get-users/`,{
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(response.data.users);
@@ -51,20 +51,23 @@ const UsersOwnerScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const fundPoints = async (user: User) => {
-    console.log(`Funding user with id: ${user.id}`);
-    // try {
-    //   const token = await AsyncStorage.getItem('token');
-    //   await axios.post(`${API_URL}/fund-points/${user.id}`, {
-    //     headers: { Authorization: `Bearer ${token}` },
-    //   });
-    //   // Refresh users list after deletion
-    //   await fetchUsers();
-    //   Alert.alert('Success', 'User successfully funded.');
-    // } catch (error) {
-    //   console.error('Failed to fund user:', error);
-    //   Alert.alert('Error', 'Failed to fund user. Please try again.');
-    // }
+  const fundPoints = async (user: User, points: number) => {
+    console.log(`Funding: ` + points + ` points to user with id: ${user.id}`);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await axios.post(`${API_URL}/fund-points/${user.id}`, {points: points},{
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      //
+      console.log('Fetched funds:', response.data.points);
+      console.log(response.data.message);
+      // let totalUserFunds = parseFloat(points) + parseFloat(response.data.funds);
+      // setUserFunds(totalUserFunds.toString());
+      // setFundsToBeFunded("");
+      // fetchUserFunds().then();
+    } catch (error) {
+      console.error('Failed to fetch funds:', error);
+    }
   }
 
   return (

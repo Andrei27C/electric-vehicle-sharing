@@ -5,7 +5,7 @@ import UserCard from "./UserCard";
 
 interface UserListProps {
   users: User[];
-  onFundPoints: (user: User) => void;
+  onFundPoints: (user: User, points: number) => void;
   onDelete: (user: User) => void;
 }
 

@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const db = require("../database/db.js");
-const web3 = require("../config/web3");
+const {web3} = require("../config/web3");
 const UserModel = require("../models/user");
 let userModelInstance = new UserModel();
 

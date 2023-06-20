@@ -1,14 +1,6 @@
 const { vehicleManagerContract, vehicleManagerContractAddress, web3, gasPrice, gasLimit } = require("../config/web3");
 
 //todo rename these functions
-const getAllVehicleData = async (tokenId) => {
-  try {
-    return await vehicleManagerContract.methods.getAllVehicleData(tokenId).call();
-  } catch (error) {
-    console.error(error);
-  }
-  return false;
-}
 const createVehicle = async (make, model, pricePerHourWei, privateKey) => {
   const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 
@@ -80,6 +72,41 @@ const deleteVehicle = async (tokenId, privateKey) => {
     console.log(error);
   }
 }
+const fundPoints = async (address, amount, privateKey) => {
+  const adminAccount = web3.eth.accounts.privateKeyToAccount(privateKey);
+  console.log("  Admin address:", adminAccount.address);
+
+  const nonce = await web3.eth.getTransactionCount(adminAccount.address);
+  console.log("  Nonce:", nonce);
+
+  // Build the transaction
+  const data = vehicleManagerContract.methods.fundPoints(address, amount).encodeABI();
+  const tx = {
+    from: adminAccount.address,
+    to: vehicleManagerContractAddress,
+    gasLimit,
+    nonce,
+    data: data
+  };
+  console.log("tx: ", tx);
+
+  // Sign the transaction
+  const signedTx = await adminAccount.signTransaction(tx);
+
+  // Send the transaction
+  const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+
+  return { success: true, message: "Vehicle deleted", txReceipt: txReceipt };
+}
+
+const getAllVehicleData = async (tokenId) => {
+  try {
+    return await vehicleManagerContract.methods.getAllVehicleData(tokenId).call();
+  } catch (error) {
+    console.error(error);
+  }
+  return false;
+}
 const getTotalSupply = async () => {
   try {
     return await vehicleManagerContract.methods.getNoOfVehicles().call();
@@ -88,7 +115,6 @@ const getTotalSupply = async () => {
   }
   return false;
 }
-
 const getOwner = async () => {
   try {
     return await vehicleManagerContract.methods.owner().call();
@@ -116,10 +142,13 @@ try {
   }
 }
 
+
+
 module.exports = {
   getAllVehicleData,
   createVehicle,
   deleteVehicle,
+  fundPoints,
   getTotalSupply,
   getOwner,
   getPoints,

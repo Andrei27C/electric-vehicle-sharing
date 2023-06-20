@@ -23,18 +23,6 @@ app.use(session({
   saveUninitialized: true,
 }));
 
-//user routes
-const userRoutes = require('./routes/userRoutes');
-app.use(userRoutes); // Add user routes to middleware chain.
-
-//auth routes
-const authRoutes = require('./routes/authRoutes');
-app.use(authRoutes); // Add auth routes to middleware chain.
-
-//vehicle routes
-const vehRoutes = require('./routes/vehicleRoutes');
-app.use(vehRoutes); // Add auth routes to middleware chain.
-
 //utils
 app.use(cors());
 app.use(express.json());
@@ -46,6 +34,18 @@ const HOST = process.env.HOST || "127.0.0.1";
 // console.log("Private Key: ", privateKey);
 // const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 // console.log("Account Address: ", account.address);
+
+//user routes
+const userRoutes = require('./routes/userRoutes');
+app.use(userRoutes); // Add user routes to middleware chain.
+
+//auth routes
+const authRoutes = require('./routes/authRoutes');
+app.use(authRoutes); // Add auth routes to middleware chain.
+
+//owner routes
+const ownerRoutes = require('./routes/ownerRoutes');
+app.use(ownerRoutes); // Add auth routes to middleware chain.
 
 //start server
 app.listen(PORT, HOST, () => {

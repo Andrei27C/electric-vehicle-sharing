@@ -85,6 +85,11 @@ contract VehicleManager is Ownable {
         return requiredRentalFee;
     }
 
+    function fundPoints(address to, uint256 points) public onlyOwner {
+        require(to != address(0), "Cannot fund points to the zero address");
+        evToken.mintPoints(to, points);
+    }
+
     function deleteVehicle(uint256 tokenId) public onlyOwner {
         require(tokenId < evToken.totalVehicleSupply(), "Vehicle does not exist");
         require(vehicles[tokenId].currentRenter == owner(), "Vehicle is currently rented");

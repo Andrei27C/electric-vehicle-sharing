@@ -28,8 +28,10 @@ export interface User {
   id: string;
   username: string;
   role: string;
-  vehicle?: Vehicle;
+  address: string;
+  vehicleId?: string;
   points?: number;
+  funds?: number;
 }
 
 export type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;

@@ -3,7 +3,9 @@ const { epochSecondsToDateTime } = require("../utils/timeConverter");
 const dbQueries = require("../database/queries");
 // const { userModelInstance } = require("../models/user");
 const vManagerContractCalls = require("../contractInteractions/vehicleManagerContractController");
+const User = require("../models/user");
 
+// Vehicles methods
 const createVehicle = async (req, res) => {
   console.log("-----/create-vehicle-----");
 
@@ -54,7 +56,7 @@ const deleteVehicle = async (req, res) => {
     console.log(error);
   }
 };
-//get one vehicle by id
+// get one vehicle by id
 const getVehicle = async (req, res) => {
   console.log("Calling get vehicle endpoint...");
   const { tokenId } = req.params;
@@ -144,8 +146,56 @@ const getVehicleDataForViewByUserId = async (req, res) => {
   }
 };
 
+// Users methods
+const getUsers = async (req, res) => {
+  console.log("-----/get-users-----");
+  try {
+    const dbUsers = await dbQueries.getAllUsersFromDB();
 
-//todo resolve this, see where to put it
+    const users = dbUsers.map(user => {
+      return {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        points: user.points,
+        funds: user.funds,
+        address: user.address,
+        vehicleId: user.vehicleId,
+      }
+    });
+
+    res.json({ success: true, users });
+
+  } catch (error) {
+    console.error("Failed to get users:", error);
+    res.status(500).json({ success: false, message: "Failed to get users" });
+  }
+};
+
+const fundPoints = async (req, res) => {
+  console.log("-----/fund-points-----");
+  const { userId } = req.params;
+  const { points } = req.body;
+  console.log("  Input parameters:", { userId, points });
+  try {
+    const user = await dbQueries.getUserFromDBById(userId);
+    const resContract = await vManagerContractCalls.fundPoints(user.address, points);
+    if(!resContract.success){
+      return res.status(400).json({ success: false, message: resContract.message });
+    }
+    user.points += points;
+    await dbQueries.updateUserInDB(user);
+
+    res.json({ success: true, points: points ,message: "Points funded successfully" });
+
+  } catch (error) {
+     console.error("Failed to fund points:", error);
+      res.status(500).json({ success: false, message: "Failed to fund points" });
+  }
+};
+
+
+// Owner methods
 //get contract owner address
 const getContractOwner = async (req, res) => {
   console.log("-----/contract-owner-----");
@@ -164,5 +214,7 @@ module.exports = {
   createVehicle,
   getVehicle,
   getVehicleDataForViewByUserId,
-  getContractOwner
+  getContractOwner,
+  getUsers,
+  fundPoints
 };

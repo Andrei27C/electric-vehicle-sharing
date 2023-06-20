@@ -43,7 +43,7 @@ const rent = async (req, res) => {
     }
 
     // Update user in db
-    userModelInstance.vehicleId = tokenId;
+    userModelInstance.vehicleId = parseInt(tokenId);
     await dbQueries.updateUserInDB(userModelInstance);
 
     res.json({ success: true, message: "Vehicle rented", txHash: resContract.message });
