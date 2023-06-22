@@ -84,7 +84,7 @@ const fundPoints = async (address, amount, privateKey) => {
   const tx = {
     from: adminAccount.address,
     to: vehicleManagerContractAddress,
-    gasLimit,
+    gas: gasLimit,
     nonce,
     data: data
   };

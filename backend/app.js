@@ -4,10 +4,9 @@ const dotenv = require("dotenv");
 dotenv.config();
 const app = express();
 const session = require("express-session");
+const { syncVehiclesFromContract } = require("./utils/syncDatabasewithSmartContract");
 
 //jwt
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 const expressJwt = require("express-jwt");
@@ -29,11 +28,14 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || "127.0.0.1";
 
-//account info
-// const privateKey = process.env.TD_DEPLOYER_PRIVATE_KEY;
-// console.log("Private Key: ", privateKey);
-// const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-// console.log("Account Address: ", account.address);
+//database
+(async () => {
+  try {
+    await syncVehiclesFromContract();
+  } catch (err) {
+    console.error(err);
+  }
+})();
 
 //user routes
 const userRoutes = require('./routes/userRoutes');
@@ -56,3 +58,9 @@ app.listen(PORT, HOST, () => {
 app.get("/", (req, res) => {
   res.send("EV Sharing API");
 });
+
+//account info
+// const privateKey = process.env.TD_DEPLOYER_PRIVATE_KEY;
+// console.log("Private Key: ", privateKey);
+// const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+// console.log("Account Address: ", account.address);

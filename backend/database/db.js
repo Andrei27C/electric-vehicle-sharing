@@ -9,7 +9,7 @@ let db = new sqlite3.Database("./ev-users.sqlite", (err) => {
 
 db.serialize(() => {
   db.run(`CREATE TABLE if not exists users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY,
         username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
         role TEXT NOT NULL,
@@ -18,6 +18,20 @@ db.serialize(() => {
         address TEXT NOT NULL,
         vehicleId INTEGER DEFAULT null,
         privateKey TEXT NOT NULL
+    )`, (err) => {
+    if (err) {
+      console.error(err.message);
+    }
+  });
+  db.run(`CREATE TABLE if not exists vehicles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        make TEXT NOT NULL,
+        model TEXT NOT NULL,
+        pricePerHour INTEGER NOT NULL,
+        maxRentalHours INTEGER NOT NULL,
+        startTime INTEGER DEFAULT null,
+        currentRenter INTEGER DEFAULT null,
+        active INTEGER DEFAULT 1
     )`, (err) => {
     if (err) {
       console.error(err.message);

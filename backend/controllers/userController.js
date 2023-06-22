@@ -5,6 +5,7 @@ const { convertWeiToUsd } = require("../utils/exchangeRate");
 const bankContractCalls = require("../contractInteractions/bankContractController");
 const vManagerContractCalls = require("../contractInteractions/vehicleManagerContractController");
 const rentalContractCalls = require("../contractInteractions/rentalContractController");
+const Vehicle = require("../models/vehicle");
 
 const fundAccount = async (req, res) => {
   try {
@@ -46,6 +47,24 @@ const rent = async (req, res) => {
     userModelInstance.vehicleId = parseInt(tokenId);
     await dbQueries.updateUserInDB(userModelInstance);
 
+    // Update vehicle in db
+    const contractVehicle = await vManagerContractCalls.getAllVehicleData(tokenId);
+    Vehicle.getById(tokenId, (err, vehicle)=>{
+      if(err){
+        console.log(err);
+      } else {
+        vehicle.startTime = contractVehicle.startTime;
+        vehicle.currentRenter = contractVehicle.currentRenter;
+        vehicle.update((err)=>{
+          if(err){
+            console.log(err);
+          } else {
+            console.log("Vehicle updated in db");
+          }
+        });
+      }
+    })
+
     res.json({ success: true, message: "Vehicle rented", txHash: resContract.message });
 
   } catch (error) {
@@ -57,11 +76,8 @@ const endRental = async (req, res) => {
   console.log("---/end-rental/:userId---");
   let userModelInstance = await dbQueries.getUserFromDBById(req.session.userId);
   const { userId } = req.params;
-  console.log("userId: ", userId);
   const user = await dbQueries.getUserFromDBById(userId);
-  console.log("user: ", user);
   const renterAccount = user.privateKey;
-  console.log("renterAccount: ", renterAccount);
   try {
     const KILOMETERS_DRIVEN = 50;
     const vehicleId = (await getUserRentedVehicleData_FromContract(userId))?.vehicle?.id;
@@ -69,8 +85,25 @@ const endRental = async (req, res) => {
 
     // Update user in db
     userModelInstance.vehicleId = (receipt === true) ? null : userModelInstance.vehicleId;
-    console.log("       ------vehicleId ", userModelInstance.vehicleId);
     await dbQueries.updateUserInDB(userModelInstance);
+
+    // Update vehicle in db
+    const contractVehicle = await vManagerContractCalls.getAllVehicleData(vehicleId);
+    Vehicle.getById(vehicleId, (err, vehicle)=>{
+      if(err){
+        console.log(err);
+      } else {
+        vehicle.startTime = null;
+        vehicle.currentRenter = contractVehicle.currentRenter;
+        vehicle.update((err)=>{
+          if(err){
+            console.log(err);
+          } else {
+            console.log("Vehicle updated in db");
+          }
+        });
+      }
+    })
 
     res.json({ success: true, message: "Rental ended", receipt });
   } catch (error) {

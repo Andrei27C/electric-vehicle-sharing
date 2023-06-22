@@ -1,9 +1,9 @@
 const exchange = require("../utils/exchangeRate");
 const { epochSecondsToDateTime } = require("../utils/timeConverter");
 const dbQueries = require("../database/queries");
-// const { userModelInstance } = require("../models/user");
 const vManagerContractCalls = require("../contractInteractions/vehicleManagerContractController");
-const User = require("../models/user");
+const Vehicle = require("../models/vehicle");
+const adminPrivateKey = process.env.TD_DEPLOYER_PRIVATE_KEY;
 
 // Vehicles methods
 const createVehicle = async (req, res) => {
@@ -12,20 +12,30 @@ const createVehicle = async (req, res) => {
   const { userId, make, model, pricePerHour: pricePerHourUSD } = req.body;
 
   const dbAccount = await dbQueries.getUserFromDBById(userId);
-  const privateKey = dbAccount.privateKey;
+  const privateKey = adminPrivateKey;
   const role = dbAccount.role;
   if (role !== "admin") {
     console.log("  Forbidden! You are not the owner.");
     return res.status(403).json({ message: "Forbidden! You are not the owner." });
   }
   const pricePerHourWei = await exchange.convertUsdToWei(pricePerHourUSD);
-  console.log("  rentalFeeWeiPerHour:", pricePerHourWei);
   try{
     const resContract = await vManagerContractCalls.createVehicle(make, model, pricePerHourWei, privateKey);
     if(!resContract.success){
       return res.status(400).json({ success: false, message: resContract.message });
     }
-    //todo: save the vehicle in the db
+    // Save vehicle in database
+    const vehicleId = await vManagerContractCalls.getTotalSupply() - 1;
+    const contractVehicle = await vManagerContractCalls.getAllVehicleData(vehicleId);
+    const newVehicle = new Vehicle(vehicleId, contractVehicle.make, contractVehicle.model, contractVehicle.pricePerHour, contractVehicle.maxRentalHours, contractVehicle.startTime, contractVehicle.currentRenter, 1);
+    newVehicle.save((err, id) => {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log(`New vehicle created with ID: ${id}`);
+      }
+    });
+
     res.json({ success: true, message: "Vehicle created", txHash: resContract.txHash });
   }catch (error) {
     console.error("Failed to create vehicle:", error);
@@ -36,7 +46,6 @@ const deleteVehicle = async (req, res) => {
   console.log("---/delete-vehicle/:tokenId---");
 
   // Only the owner of the contract (admin role) can delete a vehicle
-  const adminPrivateKey = process.env.TD_DEPLOYER_PRIVATE_KEY;
   const { tokenId } = req.params;
   if (!adminPrivateKey) {
     return res.status(400).json({ success: false, message: "Missing required fields" });
@@ -48,7 +57,22 @@ const deleteVehicle = async (req, res) => {
     if(!resContract.success){
       return res.status(400).json({ success: false, message: resContract.message });
     }
-    //todo delete veh from db
+    // Delete vehicle from database
+    Vehicle.getById(tokenId, (err, vehicle) => {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log('Vehicle details:', vehicle);
+        vehicle.active = false;
+        vehicle.update((err) => {
+          if (err) {
+            console.error(err);
+          } else {
+            console.log(`Vehicle with ID ${tokenId} deleted (changed status to inactive)`);
+          }
+        });
+      }
+    });
 
     res.json({ success: true, message: "Vehicle deleted", txHash: resContract.message });
   } catch (error) {
@@ -171,7 +195,6 @@ const getUsers = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to get users" });
   }
 };
-
 const fundPoints = async (req, res) => {
   console.log("-----/fund-points-----");
   const { userId } = req.params;
@@ -179,7 +202,7 @@ const fundPoints = async (req, res) => {
   console.log("  Input parameters:", { userId, points });
   try {
     const user = await dbQueries.getUserFromDBById(userId);
-    const resContract = await vManagerContractCalls.fundPoints(user.address, points);
+    const resContract = await vManagerContractCalls.fundPoints(user.address, points, adminPrivateKey);
     if(!resContract.success){
       return res.status(400).json({ success: false, message: resContract.message });
     }
@@ -193,7 +216,7 @@ const fundPoints = async (req, res) => {
       res.status(500).json({ success: false, message: "Failed to fund points" });
   }
 };
-
+//todo delete user?
 
 // Owner methods
 //get contract owner address
