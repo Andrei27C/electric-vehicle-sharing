@@ -63,11 +63,11 @@ const endRental = async (tokenId, kilometersDriven, privateKey) => {
     const signedTx = await account.signTransaction(tx);
     const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
     console.log("    a mers:  ",receipt);
-    return true;
+    return ({ success: true, message: receipt });
   } catch (error) {
     console.error(error);
+    return ({ success: false, message: error.message });
   }
-  return false;
 };
 
 module.exports = {

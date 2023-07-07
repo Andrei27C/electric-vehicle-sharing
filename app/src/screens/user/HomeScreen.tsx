@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Alert } from "react-native";
 import axios from 'axios';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { HomeScreenRouteProp, RootStackParamList, Vehicle } from "../../types/navigation";
@@ -137,12 +137,27 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const response = await axios.post(`${API_URL}/end-rental/${userId}`, null,{
         headers: { Authorization: `Bearer ${token}` }
       });
+      if(response.status === 400) {
+        console.error('Failed to end rental: Insufficient funds', response.data.message);
+        Alert.alert('Insufficient funds');
+        return;
+      }
       console.log('Rental ended', response.data.vehicle);
       setRentedVehicle(response.data.vehicle);
       fetchUserFunds().then();
       fetchUserPoints().then();
     } catch (error) {
       console.error('Failed to end rental:', error);
+      if (error.response && error.response.data && error.response.data.message) {
+        if(error.response.data.message === "Insufficient funds"){
+          Alert.alert('Insufficient funds');
+          return;
+        } else {
+          Alert.alert('Failed to end rental');
+        }
+      } else {
+        Alert.alert('Failed to end rental');
+      }
     }
   }
 

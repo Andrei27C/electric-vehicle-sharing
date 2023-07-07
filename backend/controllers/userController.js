@@ -53,9 +53,17 @@ const rent = async (req, res) => {
       if(err){
         console.log(err);
       } else {
-        vehicle.startTime = contractVehicle.startTime;
-        vehicle.currentRenter = contractVehicle.currentRenter;
-        vehicle.update((err)=>{
+        const updatedVehicle = new Vehicle(
+          vehicle.id,
+          contractVehicle.make,
+          contractVehicle.model,
+          contractVehicle.pricePerHour,
+          contractVehicle.maxRentalHours,
+          contractVehicle.startTime,
+          contractVehicle.currentRenter,
+          contractVehicle.active
+        );
+        updatedVehicle.update((err)=>{
           if(err){
             console.log(err);
           } else {
@@ -81,10 +89,12 @@ const endRental = async (req, res) => {
   try {
     const KILOMETERS_DRIVEN = 50;
     const vehicleId = (await getUserRentedVehicleData_FromContract(userId))?.vehicle?.id;
-    const receipt = await rentalContractCalls.endRental(vehicleId, KILOMETERS_DRIVEN, renterAccount);
-
+    const resContract = await rentalContractCalls.endRental(vehicleId, KILOMETERS_DRIVEN, renterAccount);
+    if(!resContract.success){
+      return res.status(400).json({ success: false, message: "Insufficient funds" });
+    }
     // Update user in db
-    userModelInstance.vehicleId = (receipt === true) ? null : userModelInstance.vehicleId;
+    userModelInstance.vehicleId = (resContract === true) ? null : userModelInstance.vehicleId;
     await dbQueries.updateUserInDB(userModelInstance);
 
     // Update vehicle in db
@@ -93,19 +103,28 @@ const endRental = async (req, res) => {
       if(err){
         console.log(err);
       } else {
-        vehicle.startTime = null;
-        vehicle.currentRenter = contractVehicle.currentRenter;
-        vehicle.update((err)=>{
-          if(err){
-            console.log(err);
+
+        const updatedVehicle = new Vehicle(
+          vehicle.id,
+          contractVehicle.make,
+          contractVehicle.model,
+          contractVehicle.pricePerHour,
+          contractVehicle.maxRentalHours,
+          null,
+          contractVehicle.currentRenter,
+          contractVehicle.active
+        );
+        updatedVehicle.update(err => {
+          if (err) {
+            console.error(err);
           } else {
-            console.log("Vehicle updated in db");
+            console.log(`Vehicle with ID ${vehicle.id} updated`);
           }
         });
       }
     })
 
-    res.json({ success: true, message: "Rental ended", receipt });
+    res.json({ success: true, message: "Rental ended", resContract });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
