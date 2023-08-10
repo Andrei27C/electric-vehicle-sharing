@@ -37,19 +37,10 @@ The Electric Vehicle Sharing Platform is a cutting-edge decentralized applicatio
 #### VehicleManager
 - Manages the vehicles on the platform.
 - Handles vehicle addition, removal, and status updates.
-## Features
-
-### Admin Interface
-- **Add/Remove Vehicles**: Utilizing CRUD operations.
-- **Manage Users**: Including roles and permissions.
-- **View Rental History**: With detailed analytics.
-
-### User Interface
-- **Browse Available Vehicles**: With filters and search functionality.
-- **Rent Vehicles**: With secure payment options.
-- **Manage Rentals**: Including tracking and history.
 
 ## Architecture
+
+![alt text](https://github.com/Andrei27C/electric-vehicle-sharing/blob/main/general-diagram.jpeg)
 
 ### Frontend
 - **Admin**: Dashboard with full control over the platform.
