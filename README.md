@@ -4,6 +4,8 @@
 
 The Electric Vehicle Sharing Platform is a cutting-edge decentralized application that enables users to rent electric vehicles using blockchain technology. This project showcases the integration of modern web technologies with blockchain to create a seamless user experience.
 
+![](https://github.com/Andrei27C/electric-vehicle-sharing/blob/main/demo_gif_diploma_project.gif)
+
 ## Technologies Used
 
 ### Frontend
